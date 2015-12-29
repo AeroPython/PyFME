@@ -294,7 +294,7 @@ def hor2wind(hor_coords, gamma, mu, chi):
     
     
 def check_alpha_beta_range(alpha, beta):
-    """Check alpha, minus_beta values are inside the defined range. This
+    """Check alpha, beta values are inside the defined range. This
     comprobation can also detect if the value of the angle is in degrees in
     some cases.
     """
@@ -333,13 +333,15 @@ def body2wind(body_coords, alpha, beta):
     `wind2body` function.
     Notes
     -----
-    See [1] for frame of reference definition.
+    See [1] or [2] for frame of reference definition.
     Note that in order to avoid ambiguities ranges in angles are limited to:
     * -pi/2 <= alpha <= pi/2
     * -pi <= beta <= pi
     References
     ----------
-    .. [1] Gómez Tierno, M.A. et al, "Mecánica del Vuelo," Garceta, pp. 1-12,
+    .. [1] B. Etkin, "Dynamics of Atmospheric Flight," Courier Corporation,
+        pp. 104-120, 2012.
+    .. [2] Gómez Tierno, M.A. et al, "Mecánica del Vuelo," Garceta, pp. 1-12,
         2012
     """
 
@@ -388,13 +390,15 @@ def wind2body(wind_coords, alpha, beta):
     `body2wind` function.
     Notes
     -----
-    See [1] for frame of reference definition.
+    See [1] or [2] for frame of reference definition.
     Note that in order to avoid ambiguities ranges in angles are limited to:
     * -pi/2 <= alpha <= pi/2
     * -pi <= beta <= pi
     References
     ----------
-    .. [1] Gómez Tierno, M.A. et al, "Mecánica del Vuelo," Garceta, pp. 1-12,
+    .. [1] B. Etkin, "Dynamics of Atmospheric Flight," Courier Corporation,
+        pp. 104-120, 2012.
+    .. [2] Gómez Tierno, M.A. et al, "Mecánica del Vuelo," Garceta, pp. 1-12,
         2012
     """
 
