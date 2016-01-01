@@ -1,5 +1,9 @@
 # coding: utf-8
-"""ISA functions.
+"""ISA functions. Implementation based on:
+
+.. [1] U.S. Standard Atmosphere, 1976, U.S. Government Printing Office,
+        Washington, D.C., 1976
+.. [2] https://en.wikipedia.org/wiki/U.S._Standard_Atmosphere
 """
 
 from math import exp
@@ -28,6 +32,7 @@ h0 = (0, 11000, 20000, 32000, 47000, 51000, 71000, 84500)  # m
 T0_layers = (288.15, 216.65, 216.65, 228.65, 270.65, 270.65, 214.65)  # K
 p0_layers = (101325.0, 22632.1, 5474.89, 868.019, 110.906, 66.9389, 3.95642)  # Pa
 alpha_layers = (-0.0065, 0, 0.001, 0.0028, 0, -0.0028, -0.002)  # K / m
+
 
 def atm(h):
     """ISA 1976 Standard atmosphere temperature, pressure and density.
