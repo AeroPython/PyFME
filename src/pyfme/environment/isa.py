@@ -3,7 +3,23 @@
 
 .. [1] U.S. Standard Atmosphere, 1976, U.S. Government Printing Office,
         Washington, D.C., 1976
-.. [2] https://en.wikipedia.org/wiki/U.S._Standard_Atmosphere
+
+ From: https://en.wikipedia.org/wiki/U.S._Standard_Atmosphere
+
+               Geopotential
+               altitude     Static       Standard     Temperature
+    Subscript  above MSL    Pressure     Temperature  Lapse Rate
+    -------------------------------------------------------------
+                (m)	       (pascals)     (K)         (K/m)
+
+    0	           0	       101325	    288.15	     -0.0065
+    1	          11000	       22632.1	    216.65	      0
+    2	          20000	       5474.89	    216.65	      0.001
+    3	          32000	       868.019	    228.65	      0.0028
+    4	          47000	       110.906	    270.65	      0
+    5	          51000	       66.9389	    270.65	     -0.0028
+    6	          71000	       3.95642	    214.65	     -0.002
+
 """
 
 from math import exp
@@ -12,22 +28,7 @@ from math import exp
 R_a = 287.05287  # J/(Kg·K)
 g0 = 9.80665  # m/s^2
 
-# From: https://en.wikipedia.org/wiki/U.S._Standard_Atmosphere
-#
-#               Geopotential
-#               altitude     Static       Standard     Temperature
-#    Subscript  above MSL    Pressure     Temperature  Lapse Rate
-#    -------------------------------------------------------------
-#               (m)	       (pascals)    (K)         (K/m)
-#
-#    0	   0	             101325	    288.15	     -0.0065
-#    1	   11000	       22632.1	    216.65	      0
-#    2	   20000	       5474.89	    216.65	      0.001
-#    3	   32000	       868.019	    228.65	      0.0028
-#    4	   47000	       110.906	    270.65	      0
-#    5	   51000	       66.9389	    270.65	     -0.0028
-#    6	   71000	       3.95642	    214.65	     -0.002
-
+# Layer constants
 h0 = (0, 11000, 20000, 32000, 47000, 51000, 71000, 84500)  # m
 T0_layers = (288.15, 216.65, 216.65, 228.65, 270.65, 270.65, 214.65)  # K
 p0_layers = (101325.0, 22632.1, 5474.89, 868.019, 110.906, 66.9389, 3.95642)  # Pa
@@ -40,7 +41,7 @@ def atm(h):
     Parameters
     ----------
     h : float
-        Geopotential altitude (m).
+        Geopotential altitude (m). h values must range from 0 to 84500 m.
 
     Returns
     -------
@@ -55,6 +56,10 @@ def atm(h):
     ------
     ValueError
         If the value of the altitude is outside the defined layers.
+
+    Notes
+    -----
+    Check layers and reference values in [2].
 
     References
     ----------
