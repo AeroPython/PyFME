@@ -23,9 +23,9 @@ def calculate_alpha_beta_TAS(u, v, w):
     Returns
     -------
     alpha : float
-        Angle of attack.
+        Angle of attack (rad).
     betha : float
-        Angle of sideslip.
+        Angle of sideslip (rad).
     TAS : float
         True Air Speed.
 
