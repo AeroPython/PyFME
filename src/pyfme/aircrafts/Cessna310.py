@@ -66,7 +66,7 @@ def Mass_and_Inertial_Data():
 def Long_Aero_Coefficients():
     
     """Long_Aero_coefficients assigns the value of the coefficients
-    of stability and order them in a matrix.
+    of stability in cruise conditions and order them in a matrix.
     
     Coefficients
     ------------
@@ -113,16 +113,225 @@ def Long_Aero_Coefficients():
     Cmdih = 0 
     
     Long_coef_matrix = np.array([
-    [CL0, CLa, CLde, CLdih],
-    [CD0, CDa, 0, 0],
-    [Cm0, Cma, Cmde, Cmdih]
-    ])
+                                [CL0, CLa, CLde, CLdih],
+                                [CD0, CDa, 0, 0],
+                                [Cm0, Cma, Cmde, Cmdih]
+                                ])
     
     return Long_coef_matrix
     
     
+def Lat_Aero_Coefficients():
+    
+    """Long_Aero_coefficients assigns the value of the coefficients
+    of stability in cruise conditions and order them in a matrix.
+    
+    Coefficients
+    ------------
+    
+    CYb is the side force stability derivative with respect to the  
+        angle of sideslip
+    CYda is the side force stability derivative with respect to the 
+         aileron deflection
+    CYdr is the side force stability derivative with respect to the 
+         rudder deflection
+    
+    Clb is the rolling moment stability derivative with respect to 
+        angle of sideslip
+    Clda is the rolling moment stability derivative with respect to 
+        the aileron deflection
+    Cldr is the rolling moment stability derivative with respect to 
+        the rudder deflection
+    
+    Cnb is the yawing moment stability derivative with respect to the 
+        angle of sideslip
+    Cnda is the yawing moment stability derivative with respect to the 
+        aileron deflection
+    Cndr is the yawing moment stability derivative with respect to the 
+        rudder deflection
+   
+        
+    References
+    ----------
+    AIRCRAFT DYNAMICS From modelling to simulation (Marcello R. Napolitano)
+    page 590
+    """
+   
+    CYb = -0.698
+    CYda = 0
+    CYdr = 0.230
+    
+    Clb = -0.1096
+    Clda = 0.172
+    Cldr = 0.0192
+    
+    Cnb = 0.1444
+    Cnda = -0.0168
+    Cndr = -0.1152
+    
+    Lat_coef_matrix = np.array([
+                                [CYb, CYda, CYdr],
+                                [Clb, Clda, Cldr],
+                                [Cnb, Cnda, Cndr]
+                                ])
+    
+    return Lat_coef_matrix
+    
+def q (U,rho):
+    
+    """ Calculates  the dinamic pressure q = 0.5*rho*U^2
+    
+    Parameters
+    ----------
+    
+    rho : float
+          density (SI)
+    U : flota
+        velocity (SI)
+        
+    returns
+    -------
+    
+    q : float
+        dinamic pressure 
+        
+    """
+    #Aquí falta asegurarse que la densidad y la velocidad que entra son correctas    
+    
+    q = 0.5 * rho * (U ** 2)
+    
+    return q
+    
+    
+    
+def get_forces( U, rho, alpha, beta, deltae, ih, deltaail, deltar):
+    
+    
+    """ Calculates forces 
+    
+    Parameters
+    ----------
+    
+    rho = float
+          density (SI)
+    U = flota
+        velocity (SI)
+    
+    alpha : float
+            attack angle (rad).
+    beta : float
+           sideslip angle (rad).
+    deltae : float
+             elevator deflection (rad).
+    ih : float
+         stabilator deflection (rad).
+    deltaail : float
+               aileron deflection (rad).
+    deltar : float
+             rudder deflection (rad).
+    
+    
+    
+        
+    returns
+    -------
+    
+    forces : array_like
+             3 dimensional vector with (Fxs, Fys, Fzs) forces in stability axes.
+        
+    References
+    ----------
+    AIRCRAFT DYNAMICS From modelling to simulation (Marcello R. Napolitano)
+    chapter 3 and 4 
+    """
+    long_control = np.array(1, alpha, deltae, ih)
+    Long_coef_matrix = Long_Aero_Coefficients()
+    
+    lat_control = np.array(beta, deltaail, deltar)
+    Lat_coef_matrix = Lat_Aero_Coefficients()
+    
+    CLfull = np.dot(Long_coef_matrix[0,:],long_control)
+    CDfull = np.dot(Long_coef_matrix[1,:],long_control)    
+    CYfull = np.dot(Lat_coef_matrix[0,:],lat_control)
+ 
+
+    forces = q(U,rho)*Geometric_Data()[0] * np.array([-CDfull, -CLfull, CYfull])
+    
+    return forces
+             
+             
+def get_moments( U, rho, alpha, beta, deltae, ih, deltaail, deltar):
+    
+    
+    """ Calculates forces 
+    
+    Parameters
+    ----------
+    
+    rho = float
+          density (SI)
+    U = flota
+        velocity (SI)
+    
+    alpha : float
+            attack angle (rad).
+    beta : float
+           sideslip angle (rad).
+    deltae : float
+             elevator deflection (rad).
+    ih : float
+         stabilator deflection (rad).
+    deltaail : float
+               aileron deflection (rad).
+    deltar : float
+             rudder deflection (rad).
+    
+    
+    
+        
+    returns
+    -------
+    
+    moments : array_like
+             3 dimensional vector with (Mxs, Mys, Mzs) forces in stability axes.
+        
+    References
+    ----------
+    AIRCRAFT DYNAMICS From modelling to simulation (Marcello R. Napolitano)
+    chapter 3 and 4 
+    """
+    long_control = np.array(1, alpha, deltae, ih)
+    Long_coef_matrix = Long_Aero_Coefficients()
+    
+    lat_control = np.array(beta, deltaail, deltar)
+    Lat_coef_matrix = Lat_Aero_Coefficients()
+    
+    Cmfull = np.dot(Long_coef_matrix[2,:],long_control)
+    Clfull = np.dot(Lat_coef_matrix[1,:],lat_control)
+    Cnfull = np.dot(Lat_coef_matrix[2,:],lat_control)  
+
+    moments = q(U,rho)*Geometric_Data()[0] * np.array([Clfull*Geometric_Data[2],
+                                                      Cmfull*Geometric_Data[1],
+                                                      Cnfull*Geometric_Data[2]
+                                                      ])
+    
+    return moments            
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
 
 
-
+    
 
