@@ -8,7 +8,7 @@ Created on Fri Jan  1 23:07:51 2016
 import numpy as np
 import matplotlib.pyplot as plt
 
-from models.system import System
+from pyfme.models.system import System
 
 
 def forces():
@@ -76,4 +76,3 @@ plt.figure('ang velocities')
 plt.plot(time, velocities[:, 3])
 plt.plot(time, velocities[:, 4])
 plt.plot(time, velocities[:, 5])
-

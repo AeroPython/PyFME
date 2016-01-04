@@ -11,7 +11,7 @@ import numpy as np
 from scipy.integrate import ode
 
 
-from models import euler_flat_earth
+from pyfme.models import euler_flat_earth
 
 
 models = ('euler_flat_earth',)
