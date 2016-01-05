@@ -346,19 +346,21 @@ def body2wind(body_coords, alpha, beta):
     check_alpha_beta_range(alpha, beta)
 
     # Transformation matrix from body to wind
-    Lbw = np.array([
+    Lwb = np.array([
                     [cos(alpha) * cos(beta),
-                     - cos(alpha) * sin(beta),
-                     -sin(alpha)],
-                    [sin(beta),
+                     sin(beta),
+                     sin(alpha) * cos(beta)],
+                    [- cos(alpha) * sin(beta),
                      cos(beta),
-                     0],
-                    [sin(alpha) * cos(beta),
-                     -sin(alpha) * sin(beta),
+                     -sin(alpha) * sin(beta)],
+                    [-sin(alpha),
+                     0,
                      cos(alpha)]
                     ])
+       
+ 
 
-    wind_coords = Lbw.dot(body_coords)    
+    wind_coords = Lwb.dot(body_coords)    
 
     return wind_coords
 
@@ -403,18 +405,18 @@ def wind2body(wind_coords, alpha, beta):
     check_alpha_beta_range(alpha, beta)
 
     # Transformation matrix from body to wind
-    Lwb = np.array([
+    Lbw = np.array([
                     [cos(alpha) * cos(beta),
-                     sin(beta),
-                     sin(alpha) * cos(beta)],
-                    [- cos(alpha) * sin(beta),
+                     - cos(alpha) * sin(beta),
+                     -sin(alpha)],
+                    [sin(beta),
                      cos(beta),
-                     -sin(alpha) * sin(beta)],
-                    [-sin(alpha),
-                     0,
+                     0],
+                    [sin(alpha) * cos(beta),
+                     -sin(alpha) * sin(beta),
                      cos(alpha)]
                     ])
-
-    body_coords = Lwb.dot(wind_coords)    
+                    
+    body_coords = Lbw.dot(wind_coords)    
 
     return body_coords
