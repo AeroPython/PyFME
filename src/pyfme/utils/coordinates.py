@@ -216,19 +216,19 @@ def wind2hor(wind_coords, gamma, mu, chi):
     check_gamma_mu_chi_range(gamma, mu, chi)
 
     # Transformation matrix from wind to local horizon
-    Lwh = np.array([
+    Lhw = np.array([
                     [cos(gamma) * cos(chi),
-                     cos(gamma) * sin(chi),
-                     -sin(gamma)],
-                    [sin(mu) * sin(gamma) * sin(chi) - cos(mu) * sin(chi),
+                     sin(mu) * sin(gamma) * sin(chi) - cos(mu) * sin(chi),
+                     cos(mu) * sin(gamma) * cos(chi) + sin(mu) * sin(chi)],
+                    [cos(gamma) * sin(chi),
                      sin(mu) * sin(gamma) * sin(chi) + cos(mu) * cos(chi),
-                     sin(mu) * cos(gamma)],
-                    [cos(mu) * sin(gamma) * cos(chi) + sin(mu) * sin(chi),
-                     cos(mu) * sin(gamma) * sin(chi) - sin(mu) * cos(chi),
+                     cos(mu) * sin(gamma) * sin(chi) - sin(mu) * cos(chi)],
+                    [-sin(gamma),
+                     sin(mu) * cos(gamma),
                      cos(mu) * cos(gamma)]
                     ])
-
-    hor_coords = Lwh.dot(wind_coords)
+                    
+    hor_coords = Lhw.dot(wind_coords)
     
     return hor_coords
     
@@ -273,19 +273,20 @@ def hor2wind(hor_coords, gamma, mu, chi):
     check_gamma_mu_chi_range(gamma, mu, chi)
 
     # Transformation matrix from local horizon to wind
-    Lhw = np.array([
+    Lwh = np.array([
                     [cos(gamma) * cos(chi),
-                     sin(mu) * sin(gamma) * sin(chi) - cos(mu) * sin(chi),
-                     cos(mu) * sin(gamma) * cos(chi) + sin(mu) * sin(chi)],
-                    [cos(gamma) * sin(chi),
+                     cos(gamma) * sin(chi),
+                     -sin(gamma)],
+                    [sin(mu) * sin(gamma) * sin(chi) - cos(mu) * sin(chi),
                      sin(mu) * sin(gamma) * sin(chi) + cos(mu) * cos(chi),
-                     cos(mu) * sin(gamma) * sin(chi) - sin(mu) * cos(chi)],
-                    [-sin(gamma),
-                     sin(mu) * cos(gamma),
+                     sin(mu) * cos(gamma)],
+                    [cos(mu) * sin(gamma) * cos(chi) + sin(mu) * sin(chi),
+                     cos(mu) * sin(gamma) * sin(chi) - sin(mu) * cos(chi),
                      cos(mu) * cos(gamma)]
                     ])
 
-    wind_coords = Lhw.dot(hor_coords)    
+
+    wind_coords = Lwh.dot(hor_coords)    
 
     return wind_coords
     

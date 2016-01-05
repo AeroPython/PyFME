@@ -106,7 +106,7 @@ def test_check_gamma_mu_chi_range():
         for ii in range(3):
             angles[ii] = value
             with pytest.raises(ValueError):
-                check_theta_phi_psi_range(*angles)
+                check_gamma_mu_chi_range(*angles)
 
                 
 def test_wind2hor():
@@ -160,7 +160,7 @@ def test_hor2wind():
 
     vector_wind_expected = np.array([1, 1, 1])
 
-    vector_wind = hor2wind(vector_hor, gamma, mu, chi)
+    vector_wind = hor2wind(vector_wind, gamma, mu, chi)
 
     assert_array_almost_equal(vector_wind, vector_wind_expected)
 
@@ -185,3 +185,49 @@ def test_check_alpha_beta_range():
             angles[ii] = value
             with pytest.raises(ValueError):
                 check_alpha_beta_range(*angles)
+                
+   
+def test_body2wind():
+
+    # Test with an increment of the angle of attack
+    vector_body = np.array([1, 1, 1])
+    alpha, beta = np.deg2rad(45), 0
+
+    vector_wind = body2wind(vector_body, alpha, beta)
+
+    vector_wind_expected = np.array([0, 1, 0.70710678118654757])
+
+    assert_array_almost_equal(vector_wind, vector_wind_expected)
+
+    # Test with an increment of the sideslip angle.
+    vector_body = np.array([1, 1, 1])
+    alpha, beta = 0, np.deg2rad(45)
+
+    vector_wind = body2wind(vector_body, alpha, beta)
+
+    vector_wind_expected = np.array([0, 0.70710678118654757, 1])
+
+    assert_array_almost_equal(vector_wind, vector_wind_expected)
+    
+    
+def test_wind2body():
+
+    # Test with an increment of the angle of attack
+    vector_wind = np.array([0, 1, 0.70710678118654757])
+    alpha, beta = np.deg2rad(45), 0
+
+    vector_body = wind2body(vector_wind, alpha, beta)
+
+    vector_body_expected = np.array([1, 1, 1])
+
+    assert_array_almost_equal(vector_body, vector_body_expected)
+
+    # Test with an increment of the sideslip angle.
+    vector_wind = np.array([0, 0.70710678118654757, 1])
+    alpha, beta = 0, np.deg2rad(45)
+
+    vector_body = wind2body(vector_body, alpha, beta)
+
+    vector_body_expected = np.array([1, 1, 1])
+
+    assert_array_almost_equal(vector_body, vector_body_expected)
