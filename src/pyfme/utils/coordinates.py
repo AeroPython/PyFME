@@ -25,7 +25,6 @@ def check_theta_phi_psi_range(theta, phi, psi):
         raise ValueError('Psi value is not inside correct range')
 
 
-
 def body2hor(body_coords, theta, phi, psi):
     """Transforms the vector coordinates in body frame of reference to local
     horizon frame of reference.
@@ -227,15 +226,15 @@ def wind2hor(wind_coords, gamma, mu, chi):
                      sin(mu) * cos(gamma),
                      cos(mu) * cos(gamma)]
                     ])
-                    
+
     hor_coords = Lhw.dot(wind_coords)
-    
+
     return hor_coords
-    
-    
+
+
 def hor2wind(hor_coords, gamma, mu, chi):
-    """Transforms the vector coordinates in local horizon frame of reference to 
-    wind frame of reference.
+    """Transforms the vector coordinates in local horizon frame of reference
+    to wind frame of reference.
     Parameters
     ----------
     hor_coords : array_like
@@ -285,12 +284,11 @@ def hor2wind(hor_coords, gamma, mu, chi):
                      cos(mu) * cos(gamma)]
                     ])
 
-
-    wind_coords = Lwh.dot(hor_coords)    
+    wind_coords = Lwh.dot(hor_coords)
 
     return wind_coords
-    
-    
+
+
 def check_alpha_beta_range(alpha, beta):
     """Check alpha, beta values are inside the defined range. This
     comprobation can also detect if the value of the angle is in degrees in
@@ -304,10 +302,10 @@ def check_alpha_beta_range(alpha, beta):
         raise ValueError('Alpha value is not inside correct range')
     elif not (beta_min <= beta <= beta_max):
         raise ValueError('Beta value is not inside correct range')
-    
-    
+
+
 def body2wind(body_coords, alpha, beta):
-    """Transforms the vector coordinates in body frame of reference to 
+    """Transforms the vector coordinates in body frame of reference to
     wind frame of reference.
     Parameters
     ----------
@@ -357,16 +355,14 @@ def body2wind(body_coords, alpha, beta):
                      0,
                      cos(alpha)]
                     ])
-       
- 
 
-    wind_coords = Lwb.dot(body_coords)    
+    wind_coords = Lwb.dot(body_coords)
 
     return wind_coords
 
 
 def wind2body(wind_coords, alpha, beta):
-    """Transforms the vector coordinates in wind frame of reference to 
+    """Transforms the vector coordinates in wind frame of reference to
     body frame of reference.
     Parameters
     ----------
@@ -416,7 +412,7 @@ def wind2body(wind_coords, alpha, beta):
                      -sin(alpha) * sin(beta),
                      cos(alpha)]
                     ])
-                    
-    body_coords = Lbw.dot(wind_coords)    
+
+    body_coords = Lbw.dot(wind_coords)
 
     return body_coords

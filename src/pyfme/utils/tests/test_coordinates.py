@@ -5,8 +5,7 @@ Frames of Reference orientation test functions
 import pytest
 
 import numpy as np
-from numpy.testing import (assert_equal, assert_almost_equal,
-                           assert_array_equal, assert_array_almost_equal)
+from numpy.testing import (assert_array_almost_equal)
 
 
 from pyfme.utils.coordinates import (body2hor, hor2body,
@@ -106,9 +105,9 @@ def test_check_gamma_mu_chi_range():
         for ii in range(3):
             angles[ii] = value
             with pytest.raises(ValueError):
-                check_theta_phi_psi_range(*angles)
+                check_gamma_mu_chi_range(*angles)
 
-                
+
 def test_wind2hor():
 
     # Test with a pitch rotation
@@ -174,6 +173,7 @@ def test_hor2wind():
 
     assert_array_almost_equal(vector_wind, vector_wind_expected)
 
+
 def test_check_alpha_beta_range():
 
     wrong_values = (3 * np.pi, - 3 * np.pi)
@@ -185,8 +185,8 @@ def test_check_alpha_beta_range():
             angles[ii] = value
             with pytest.raises(ValueError):
                 check_alpha_beta_range(*angles)
-               
-               
+
+
 def test_wind2body():
 
     # Test with an increment of the angle of attack
@@ -208,7 +208,7 @@ def test_wind2body():
     vector_body_expected = np.array([0, 2 * 0.70710678118654757, 1])
 
     assert_array_almost_equal(vector_body, vector_body_expected)
-    
+
 
 def test_body2wind():
 
