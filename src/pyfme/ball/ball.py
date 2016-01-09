@@ -67,7 +67,6 @@ def Mass_and_Inertial_Data(r, mass=0.440):
 
     Returns
     ------
-    mass (m)
     Ixxb Moment of Inertia x-axis (Kg * m2)
     Iyyb Moment of Inertia y-axis (Kg * m2)
     Izzb Moment of Inertia z-axis (Kg * m2)
@@ -90,10 +89,10 @@ def Mass_and_Inertial_Data(r, mass=0.440):
 
     I_matrix = np.diag([Ixxb, Iyyb, Izzb])
 
-    return mass, I_matrix
+    return I_matrix
 
 
-def Ball_forces(velocity_vector, h, alpha, beta):
+def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta):
     """ Given a velocity vector (body axes) provides the forces (aerodynamic
     drag and Magnus effect) (body axes).
     Data for a soccer ball (smooth sphere).
