@@ -92,6 +92,20 @@ def Mass_and_Inertial_Data(r, mass=0.440):
     return I_matrix
 
 
+def Check_Reynolds_number(Re):
+    """ Reynolds number must be between 38e3 and 4e6
+    """
+    if not (Re_list[0] <= Re <= Re_list[-1]):
+        raise ValueError('Reynolds number is not inside correct range')
+
+
+def Check_Sn(Sn):
+    """ Effective spin number must be between 0.00 and 0.40
+    """
+    if not (Sn_list[0] <= Sn <= Sn_list[-1]):
+        raise ValueError('Effective spin number is not inside correct range')
+
+
 def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta):
     """ Given a velocity vector (body axes) provides the forces (aerodynamic
     drag and Magnus effect) (body axes).
@@ -189,18 +203,13 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta):
     radius, A_front, _, _ = Geometric_Data()
     rho = atm(h)[2]  # density
     Re = rho * V * radius / mu  # Reynolds number
+    Check_Reynolds_number(Re)
 
     # %Obtaining of Drag coefficient and Drag force
-
-    if Re < Re_list[0]:
-        raise ValueError("Reynolds number cannot be lower than 38000.")
-    elif Re > Re_list[-1]:
-        raise ValueError("Reynolds number cannot be higher than 4e6.")
-    else:
-        Cd = np.interp(Re, Re_list, Cd_list)
+    Cd = np.interp(Re, Re_list, Cd_list)
 
     D = 0.5 * rho * V ** 2 * A_front * Cd
-    D_vector_body = wind2body(([D, 0, 0]), alpha, beta)
+    D_vector_body = wind2body(([-D, 0, 0]), alpha, beta)
 
     # %Obtaining of Magnus force coefficient and Magnus force
 
@@ -211,13 +220,9 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta):
 
     Sn = wn * radius / V  # Sn is the effective sping number and must take
     # values between 0 and 0.4 [1]
+    Check_Sn(Sn)
 
-    if Sn < Sn_list[0]:
-        raise ValueError("Effective Spin number cannot be less than 0.")
-    elif Sn > Sn_list[-1]:
-        raise ValueError("Effective Spin number cannot be bigger than 0.40.")
-    else:
-        C_magnus = np.interp(Sn, Sn_list, Cl_list)
+    C_magnus = np.interp(Sn, Sn_list, Cl_list)
 
     if v * r - w * q == 0 and w * p - u * r == 0 and u * q - v * p == 0:
         F_magnus = 0
@@ -225,7 +230,8 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta):
     else:
         F_magnus = 0.5 * rho * V ** 2 * A_front * C_magnus
         dir_F_magnus = np.array([v * r - w * q, w * p - u * r,
-                                 u * q - v * p]) / wn
+                                 u * q - v * p]) / np.sqrt((v * r - w * q) ** 2
+                                 + (w * p - u * r) ** 2 + (u * q - v * p) ** 2)
 
         F_magnus_vector_body = dir_F_magnus * F_magnus
 
