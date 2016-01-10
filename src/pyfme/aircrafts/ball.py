@@ -83,9 +83,10 @@ def Check_Sn(Sn):
         raise ValueError('Effective spin number is not inside correct range')
 
 
-def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta):
-    """ Given a velocity vector (body axes) provides the forces (aerodynamic
-    drag and Magnus effect) (body axes).
+def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta,
+                            magnus_effect=True):
+    """ Given the velocity vectors vel and ang_vel (body axes) it provides the
+    forces (aerodynamic drag and Magnus effect if it exists) (body axes).
     Data for a soccer ball (smooth sphere).
 
     Parameters
@@ -98,6 +99,8 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta):
         angle of attack (rad).
     beta : float
         sideslip angle (rad).
+    magnus_effect : boolean
+        True if magnus effect is under consideration.
 
     Returns
     ------
@@ -105,23 +108,13 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta):
         Drag coefficient.
     C_magnus : float
         magnus effect coefficient force.
-
-    D : floeat
-        drag force (N).
-    D_vector_body : float
-        Drag forces vector (body axes) (N).
-    F_magnus : float
-        magnus force (N).
-    F_magnus_vector_body :
-        magnus Forces vector (body axes) (N).
+    Total_aerodynamic_forces_body :
+        Drag (+ magnus effect if exists) Forces vector (body axes) (N).
 
     Raises
     ------
     ValueError
         If the value of the Reynolds number is outside the defined layers.
-    ValueError
-        If the value of the effective spin number is outside the defined
-        layers.
 
     See Also
     --------
@@ -129,14 +122,6 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta):
     Notes
     -----
     Smooth ball selected. see[1]
-
-    Sn          C_magnus    [1]
-    --------------------
-    0           0
-    0.04        0.1
-    0.10        0.16
-    0.20        0.23
-    0.40        0.33
 
     Re          Cd    [1]
     ----------------
@@ -155,12 +140,6 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta):
     2000000     0.15
     4000000     0.18
 
-    wn : float array
-        normal projection of the angular velocity vector over the linear
-        velocity vector
-    Sn : float
-        Sn = wn * radius / V  # Sn is the effective spin number and must take
-        values between 0 and 0.4 [1]
     Re : float
         Re = rho * V * radius / mu  # Reynolds number. values between 38e3 and
         4e6.
@@ -188,8 +167,94 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta):
     D = 0.5 * rho * V ** 2 * A_front * Cd
     D_vector_body = wind2body(([-D, 0, 0]), alpha, beta)
 
-    # %Obtaining of Magnus force coefficient and Magnus force
+    if magnus_effect is True:
+        C_magnus, F_magnus_vector_body = Ball_magnus_effect_force(
+                                                    velocity_vector[:3],
+                                                    velocity_vector[3:], V,
+                                                    radius, A_front, rho,
+                                                    alpha, beta)
 
+        Total_aerodynamic_forces_body = D_vector_body + F_magnus_vector_body
+        return Cd, C_magnus, Total_aerodynamic_forces_body
+    else:
+        Total_aerodynamic_forces_body = D_vector_body
+        return Cd, Total_aerodynamic_forces_body
+
+
+def Ball_magnus_effect_force(linear_vel, ang_vel, V, radius, A_front, rho,
+                             alpha, beta):
+    """ Given the velocity vectors vel and ang_vel (body axes) it provides the
+    forces (aerodynamic drag and Magnus effect if it exists) (body axes).
+    Data for a soccer ball (smooth sphere).
+
+    Parameters
+    -----
+    linear_vel : float array
+        [u, v, w]    air velocity body-axes (m/s).
+    ang_vel : float array
+        [p, q, r]    air velocity body-axes (m/s).
+    V : float
+        norm of the linear_vel vector. Air velocity modulus body-axes (m/s)
+    radius : float
+        sphere radius (m)
+    A_front : float
+        Area of a frontal section of the sphere (m)
+    rho : float
+        Air density (ISA) (kg/m3)
+    alpha : float
+        angle of attack (rad).
+    beta : float
+        sideslip angle (rad).
+
+    Returns
+    ------
+    C_magnus : float
+        magnus effect coefficient force.
+    F_magnus : float
+        magnus force (N).
+    F_magnus_vector_body :
+        magnus Forces vector (body axes) (N).
+
+    Raises
+    ------
+    ValueError
+        If the value of the effective spin number is outside the defined
+        layers.
+
+    See Also
+    --------
+    [2]
+    Notes
+    -----
+    Smooth ball selected. see[1]
+
+    Sn          C_magnus    [1]
+    --------------------
+    0           0
+    0.04        0.1
+    0.10        0.16
+    0.20        0.23
+    0.40        0.33
+
+    wn : float array
+        normal projection of the angular velocity vector over the linear
+        velocity vector
+    Sn : float
+        Sn = wn * radius / V  # Sn is the effective spin number and must take
+        values between 0 and 0.4 [1]
+
+    References
+    ----------
+    "Aerodynamics of Sports Balls" Bruce D. Jothmann, January 2007
+    [1]
+    "Aerodynamics of Sports Balls" Annual Review of Fluid Mechanics, 1875.17:15
+    Mehta, R.D.
+    [2]
+    """
+    u, v, w = linear_vel[:]  # components of the linear velocity
+    p, q, r = ang_vel[:]  # components of the angular velocity
+
+    # %Obtaining of Magnus force coefficient and Magnus force
     wn = np.sqrt((v * r - w * q) ** 2 + (w * p - u * r) ** 2 +
                  (u * q - v * p) ** 2) / np.sqrt(u ** 2 + v ** 2 + w ** 2)
     # normal projection of the angular velocity vector over the linear velocity
@@ -215,4 +280,4 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta):
 
         F_magnus_vector_body = dir_F_magnus * F_magnus
 
-    return Cd, D, D_vector_body, C_magnus, F_magnus, F_magnus_vector_body
+    return C_magnus, F_magnus_vector_body

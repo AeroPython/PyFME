@@ -8,9 +8,10 @@ import numpy as np
 from numpy.testing import (assert_array_almost_equal, assert_almost_equal)
 
 
-from pyfme.ball.ball import (Geometric_Data, Mass_and_Inertial_Data,
-                             Ball_aerodynamic_forces, Check_Reynolds_number,
-                             Check_Sn)
+from pyfme.aircrafts.ball import (Geometric_Data, Mass_and_Inertial_Data,
+                                  Ball_aerodynamic_forces,
+                                  Check_Reynolds_number, Check_Sn,
+                                  Ball_magnus_effect_force)
 
 
 def test_Geometric_Data():
@@ -62,25 +63,53 @@ def test_Check_Sn():
 
 def test_Ball_aerodynamic_forces():
 
-    # Test with a pitch rotation
+    # Test with magnus effect
     velocity_vector = np.array([30, 0, 0, 0, 1, 1])
     h = 0
     alpha = 0
     beta = 0
-
+    magnus_effect = True
     forces = Ball_aerodynamic_forces(velocity_vector, h, alpha,
-                                     beta)
+                                     beta, magnus_effect)
     Cd_expected = 0.5077155812
-    D_expected = 10.83340379
-    D_vector_body_expected = np.array([-10.83340379, 0, 0])
     C_magnus_expected = 0.01308147545
-    F_magnus_expected = 0.2791265641399841
-    F_magnus_vector_body_expected = np.array([0., -0.1973722863,
+    Total_aerodynamic_forces_body = np.array([-10.83340379, -0.1973722863,
                                               0.1973722863])
 
     assert_array_almost_equal(forces[0], Cd_expected)
-    assert_array_almost_equal(forces[1], D_expected)
-    assert_array_almost_equal(forces[2], D_vector_body_expected)
-    assert_array_almost_equal(forces[3], C_magnus_expected)
-    assert_array_almost_equal(forces[4], F_magnus_expected)
-    assert_array_almost_equal(forces[5], F_magnus_vector_body_expected)
+    assert_array_almost_equal(forces[1], C_magnus_expected)
+    assert_array_almost_equal(forces[2], Total_aerodynamic_forces_body)
+
+    # Test without magnus effect
+    velocity_vector = np.array([30, 0, 0, 0, 1, 1])
+    h = 0
+    alpha = 0
+    beta = 0
+    magnus_effect = False
+    forces = Ball_aerodynamic_forces(velocity_vector, h, alpha,
+                                     beta, magnus_effect)
+    Cd_expected = 0.5077155812
+    Total_aerodynamic_forces_body = np.array([-10.83340379, 0,
+                                              0])
+
+    assert_array_almost_equal(forces[0], Cd_expected)
+    assert_array_almost_equal(forces[1], Total_aerodynamic_forces_body)
+
+
+def test_Ball_magnus_effect_force():
+
+    linear_vel = np.array([30, 0, 0])
+    ang_vel = np.array([0, 1, 1])
+    V = 30
+    radius = 0.111
+    A_front = 0.03870756308
+    rho = 1.225000018124288
+    alpha = 0
+    beta = 0
+
+    C_magnus_expected = 0.0130814755
+    F_magnus_vector_body_expected = np.array([0, -0.1973722863, 0.1973722863])
+    forces = Ball_magnus_effect_force(linear_vel, ang_vel, V, radius, A_front,
+                                      rho, alpha, beta)
+    assert_array_almost_equal(forces[0], C_magnus_expected)
+    assert_array_almost_equal(forces[1], F_magnus_vector_body_expected)
