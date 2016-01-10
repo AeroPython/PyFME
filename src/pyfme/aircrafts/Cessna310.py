@@ -16,7 +16,7 @@ def Geometric_Data():
     
     """ Provides the value of some geometric data.
     
-    Data
+    Returns
     ----
     
     Sw    Surface (m^2)
@@ -39,7 +39,7 @@ def Mass_and_Inertial_Data():
     
     """ Provides the value of some mass and inertial data.
     
-    Data
+    Returns
     -----
     m   mass (lb * 0.453592 = kg)
     Ixxb Moment of Inertia x-axis ( slug * ft2 * 1.3558179 = Kg * m2)
@@ -65,7 +65,7 @@ def Mass_and_Inertial_Data():
 
 def Long_Aero_Coefficients():
     
-    """Long_Aero_coefficients assigns the value of the coefficients
+    """Assigns the value of the coefficients
     of stability in cruise conditions and order them in a matrix.
     
     Coefficients
@@ -123,7 +123,7 @@ def Long_Aero_Coefficients():
     
 def Lat_Aero_Coefficients():
     
-    """Long_Aero_coefficients assigns the value of the coefficients
+    """Assigns the value of the coefficients
     of stability in cruise conditions and order them in a matrix.
     
     Coefficients
@@ -189,7 +189,7 @@ def q (U,rho):
     U : flota
         velocity (SI)
         
-    returns
+    Returns
     -------
     
     q : float
@@ -233,7 +233,7 @@ def get_forces( U, rho, alpha, beta, deltae, ih, deltaail, deltar):
     
     
         
-    returns
+    Returns
     -------
     
     forces : array_like
@@ -244,18 +244,24 @@ def get_forces( U, rho, alpha, beta, deltae, ih, deltaail, deltar):
     AIRCRAFT DYNAMICS From modelling to simulation (Marcello R. Napolitano)
     chapter 3 and 4 
     """
-    long_control = np.array(1, alpha, deltae, ih)
+ 
     Long_coef_matrix = Long_Aero_Coefficients()
-    
-    lat_control = np.array(beta, deltaail, deltar)
     Lat_coef_matrix = Lat_Aero_Coefficients()
     
-    CLfull = np.dot(Long_coef_matrix[0,:],long_control)
-    CDfull = np.dot(Long_coef_matrix[1,:],long_control)    
-    CYfull = np.dot(Lat_coef_matrix[0,:],lat_control)
+    
+    CL0, CLa, CLde, CLdih = Long_coef_matrix[0,:]
+    CD0, CDa, CDde, CDdih = Long_coef_matrix[1,:]
+    CYb, CYda, CYdr = Lat_coef_matrix[0,:]
+    
+
+    
+    
+    CLfull = CL0 + CLa * alpha + CLde * deltae + CLdih * ih
+    CDfull = CD0 + CDa * alpha + CDde * deltae + CDdih * ih  
+    CYfull = CYb * beta + CYda* deltaail + CYdr * deltar
  
 
-    forces = q(U,rho)*Geometric_Data()[0] * np.array([-CDfull, -CLfull, CYfull])
+    forces = q(U,rho) * Geometric_Data()[0] * np.array([-CDfull, -CLfull, CYfull])
     
     return forces
              
@@ -300,19 +306,23 @@ def get_moments( U, rho, alpha, beta, deltae, ih, deltaail, deltar):
     AIRCRAFT DYNAMICS From modelling to simulation (Marcello R. Napolitano)
     chapter 3 and 4 
     """
-    long_control = np.array(1, alpha, deltae, ih)
-    Long_coef_matrix = Long_Aero_Coefficients()
-    
-    lat_control = np.array(beta, deltaail, deltar)
-    Lat_coef_matrix = Lat_Aero_Coefficients()
-    
-    Cmfull = np.dot(Long_coef_matrix[2,:],long_control)
-    Clfull = np.dot(Lat_coef_matrix[1,:],lat_control)
-    Cnfull = np.dot(Lat_coef_matrix[2,:],lat_control)  
 
-    moments = q(U,rho)*Geometric_Data()[0] * np.array([Clfull*Geometric_Data[2],
-                                                      Cmfull*Geometric_Data[1],
-                                                      Cnfull*Geometric_Data[2]
+    Long_coef_matrix = Long_Aero_Coefficients()
+    Lat_coef_matrix = Lat_Aero_Coefficients()
+
+    
+    Cm0, Cma, Cmde, Cmdih = Long_coef_matrix[2,:]
+    Clb, Clda, Cldr = Lat_coef_matrix[1,:]
+    Cnb, Cnda, Cndr = Lat_coef_matrix[2,:]
+    
+    
+    Cmfull = Cm0 + Cma * alpha + Cmde * deltae + Cmdih * ih
+    Clfull = Clb * beta + Clda* deltaail + Cldr * deltar
+    Cnfull = Cnb * beta + Cnda* deltaail + Cndr * deltar 
+
+    moments = q(U,rho) * Geometric_Data()[0] * np.array([Clfull * Geometric_Data()[2],
+                                                      Cmfull * Geometric_Data()[1],
+                                                      Cnfull * Geometric_Data()[2]
                                                       ])
     
     return moments            
@@ -320,7 +330,7 @@ def get_moments( U, rho, alpha, beta, deltae, ih, deltaail, deltar):
     
     
     
-    
+a = get_moments(100, 1.225, 0, 0 , 0 ,0, 0 ,0)        
     
     
     
