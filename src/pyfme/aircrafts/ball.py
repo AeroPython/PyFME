@@ -11,14 +11,14 @@ from pyfme.utils.coordinates import wind2body
 from pyfme.environment.isa import atm
 
 # Constants
-mu = 1.983 * 10 ** -5  # kg/m/s
+mu = 1.983e-5  # kg/m/s
 # Data tables
-Re_list = [38000, 100000, 160000, 200000, 250000, 300000, 330000, 350000,
-           375000, 400000, 500000, 800000, 200000, 4000000]
-Cd_list = [0.49, 0.50, 0.51, 0.51, 0.49, 0.46, 0.39, 0.20, 0.09, 0.07,
-           0.07, 0.10, 0.15, 0.18]
-Sn_list = [0.00, 0.04, 0.10, 0.20, 0.40]
-Cl_list = [0.00, 0.10, 0.16, 0.23, 0.33]
+Re_list = np.array([38000, 100000, 160000, 200000, 250000, 300000, 330000,
+                    350000, 375000, 400000, 500000, 800000, 200000, 4000000])
+Cd_list = np.array([0.49, 0.50, 0.51, 0.51, 0.49, 0.46, 0.39, 0.20, 0.09, 0.07,
+                    0.07, 0.10, 0.15, 0.18])
+Sn_list = np.array([0.00, 0.04, 0.10, 0.20, 0.40])
+Cl_list = np.array([0.00, 0.10, 0.16, 0.23, 0.33])
 
 
 def Geometric_Data(r=0.111):
@@ -29,24 +29,12 @@ def Geometric_Data(r=0.111):
     ----
     r    radius(m)
 
-    References
-    ----------
     Returns
     ------
     r    radius(m)
     S_circle    Surface (m^2)
     S_sphere    Surface (m^2)
     Vol    Volume (m^3)
-
-    Raises
-    ------
-    See Also
-    --------
-    Notes
-    -----
-    References
-    ----------
-    .. [1]
     """
 
     S_circle = np.pi * r ** 2
@@ -70,17 +58,6 @@ def Mass_and_Inertial_Data(r, mass=0.440):
     Ixxb Moment of Inertia x-axis (Kg * m2)
     Iyyb Moment of Inertia y-axis (Kg * m2)
     Izzb Moment of Inertia z-axis (Kg * m2)
-
-    Raises
-    ------
-    See Also
-    --------
-    Notes
-    -----
-    Ball assumed as a sphere shell
-    References
-    ----------
-    .. [1]
     """
 
     Ixxb = 2 * mass * (r ** 2) / 3
@@ -224,14 +201,17 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta):
 
     C_magnus = np.interp(Sn, Sn_list, Cl_list)
 
-    if v * r - w * q == 0 and w * p - u * r == 0 and u * q - v * p == 0:
+    check_magnus = np.isclose([v * r - w * q, w * p - u * r, u * q - v * p],
+                              [0, 0, 0])
+    if check_magnus.all():
         F_magnus = 0
         F_magnus_vector_body = ([0, 0, 0])
     else:
         F_magnus = 0.5 * rho * V ** 2 * A_front * C_magnus
         dir_F_magnus = np.array([v * r - w * q, w * p - u * r,
-                                 u * q - v * p]) / np.sqrt((v * r - w * q) ** 2
-                                 + (w * p - u * r) ** 2 + (u * q - v * p) ** 2)
+                                 u * q - v * p]) / np.sqrt(
+                                 (v * r - w * q) ** 2 + (w * p - u * r) ** 2 +
+                                 (u * q - v * p) ** 2)
 
         F_magnus_vector_body = dir_F_magnus * F_magnus
 
