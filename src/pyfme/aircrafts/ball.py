@@ -39,7 +39,7 @@ def Geometric_Data(r=0.111):
 
     S_circle = np.pi * r ** 2
     S_sphere = 4 * np.pi * r ** 2
-    Vol = 4 / 3 * np.pi * r ** 3
+    Vol = 4 / 3. * np.pi * r ** 3
 
     return r, S_circle, S_sphere, Vol
 
