@@ -73,8 +73,8 @@ def test_Ball_aerodynamic_forces():
                                      beta, magnus_effect)
     Cd_expected = 0.5077155812
     C_magnus_expected = 0.01308147545
-    Total_aerodynamic_forces_body = np.array([-10.83340379, -0.1973722863,
-                                              0.1973722863])
+    Total_aerodynamic_forces_body = np.array([-10.83340379, 0.1973722863,
+                                              -0.1973722863])
 
     assert_array_almost_equal(forces[0], Cd_expected)
     assert_array_almost_equal(forces[1], C_magnus_expected)
@@ -108,7 +108,7 @@ def test_Ball_magnus_effect_force():
     beta = 0
 
     C_magnus_expected = 0.0130814755
-    F_magnus_vector_body_expected = np.array([0, -0.1973722863, 0.1973722863])
+    F_magnus_vector_body_expected = np.array([0, 0.1973722863, -0.1973722863])
     forces = Ball_magnus_effect_force(linear_vel, ang_vel, V, radius, A_front,
                                       rho, alpha, beta)
     assert_array_almost_equal(forces[0], C_magnus_expected)

@@ -273,10 +273,10 @@ def Ball_magnus_effect_force(linear_vel, ang_vel, V, radius, A_front, rho,
         F_magnus_vector_body = ([0, 0, 0])
     else:
         F_magnus = 0.5 * rho * V ** 2 * A_front * C_magnus
-        dir_F_magnus = np.array([v * r - w * q, w * p - u * r,
-                                 u * q - v * p]) / np.sqrt(
-                                 (v * r - w * q) ** 2 + (w * p - u * r) ** 2 +
-                                 (u * q - v * p) ** 2)
+        dir_F_magnus = - np.array([v * r - w * q, w * p - u * r,
+                                  u * q - v * p]) / np.sqrt(
+                                  (v * r - w * q) ** 2 + (w * p - u * r) ** 2 +
+                                  (u * q - v * p) ** 2)
 
         F_magnus_vector_body = dir_F_magnus * F_magnus
 
