@@ -27,14 +27,19 @@ def Geometric_Data(r=0.111):
 
     Parameters
     ----
-    r    radius(m)
+    r : float
+        radius(m)
 
     Returns
     ------
-    r    radius(m)
-    S_circle    Surface (m^2)
-    S_sphere    Surface (m^2)
-    Vol    Volume (m^3)
+    r : float
+        radius(m)
+    S_circle : float
+                Surface (m^2)
+    S_sphere : float
+                Surface (m^2)
+    Vol : float
+            Volume (m^3)
     """
 
     S_circle = np.pi * r ** 2
@@ -50,14 +55,19 @@ def Mass_and_Inertial_Data(r, mass=0.440):
 
     Parameters
     -----
-    r    radius (m)
-    mass   (kg)
+    r : float
+        radius (m)
+    mass : float
+        mass (kg)
 
     Returns
     ------
-    Ixxb Moment of Inertia x-axis (Kg * m2)
-    Iyyb Moment of Inertia y-axis (Kg * m2)
-    Izzb Moment of Inertia z-axis (Kg * m2)
+    I_matrix : array
+        diagonal array (3x3) wich elements are Ixxb, Iyyb, Izzb:
+            Ixxb : Moment of Inertia x-axis (Kg * m2)
+            Iyyb : Moment of Inertia y-axis (Kg * m2)
+            Izzb : Moment of Inertia z-axis (Kg * m2)
+            array([Ixxb, 0, 0], [0, Iyyb, 0], [0, 0, Izzb])
     """
 
     Ixxb = 2 * mass * (r ** 2) / 3
@@ -71,6 +81,15 @@ def Mass_and_Inertial_Data(r, mass=0.440):
 
 def Check_Reynolds_number(Re):
     """ Reynolds number must be between 38e3 and 4e6
+    Parameters
+    ----------
+    Re : float
+        Reynolds number
+
+    Raises
+    ------
+    ValueError
+        If the value of the Reynolds number is outside the defined layers.
     """
     if not (Re_list[0] <= Re <= Re_list[-1]):
         raise ValueError('Reynolds number is not inside correct range')
@@ -78,6 +97,21 @@ def Check_Reynolds_number(Re):
 
 def Check_Sn(Sn):
     """ Effective spin number must be between 0.00 and 0.40
+    Parameters
+    ----------
+    Sn : float
+        Effective spin number
+
+    See Also
+    --------
+    Ball_magnus_effect_force function
+
+    Raises
+    ------
+    ValueError
+        If the value of the effective spin number is outside the defined
+        layers.
+
     """
     if not (Sn_list[0] <= Sn <= Sn_list[-1]):
         raise ValueError('Effective spin number is not inside correct range')
@@ -111,11 +145,6 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta,
     Total_aerodynamic_forces_body :
         Drag (+ magnus effect if exists) Forces vector (body axes) (N).
 
-    Raises
-    ------
-    ValueError
-        If the value of the Reynolds number is outside the defined layers.
-
     See Also
     --------
     [2]
@@ -146,11 +175,9 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta,
 
     References
     ----------
-    "Aerodynamics of Sports Balls" Bruce D. Jothmann, January 2007
-    [1]
-    "Aerodynamics of Sports Balls" Annual Review of Fluid Mechanics, 1875.17:15
-    Mehta, R.D.
-    [2]
+    [1] "Aerodynamics of Sports Balls" Bruce D. Jothmann, January 2007
+    [2] "Aerodynamics of Sports Balls" Annual Review of Fluid Mechanics,
+            1875.17:15 Mehta, R.D.
     """
     u, v, w = velocity_vector[:3]  # components of the linear velocity
     p, q, r = velocity_vector[3:]  # components of the angular velocity
@@ -215,12 +242,6 @@ def Ball_magnus_effect_force(linear_vel, ang_vel, V, radius, A_front, rho,
     F_magnus_vector_body :
         magnus Forces vector (body axes) (N).
 
-    Raises
-    ------
-    ValueError
-        If the value of the effective spin number is outside the defined
-        layers.
-
     See Also
     --------
     [2]
@@ -245,11 +266,9 @@ def Ball_magnus_effect_force(linear_vel, ang_vel, V, radius, A_front, rho,
 
     References
     ----------
-    "Aerodynamics of Sports Balls" Bruce D. Jothmann, January 2007
-    [1]
-    "Aerodynamics of Sports Balls" Annual Review of Fluid Mechanics, 1875.17:15
-    Mehta, R.D.
-    [2]
+    [1] "Aerodynamics of Sports Balls" Bruce D. Jothmann, January 2007
+    [2] "Aerodynamics of Sports Balls" Annual Review of Fluid Mechanics,
+                                        1875.17:15 Mehta, R.D.
     """
     u, v, w = linear_vel[:]  # components of the linear velocity
     p, q, r = ang_vel[:]  # components of the angular velocity
