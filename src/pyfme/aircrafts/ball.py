@@ -26,12 +26,12 @@ def Geometric_Data(r=0.111):
     """ Provides the value of some geometric data.
 
     Parameters
-    ----
+    ----------
     r : float
         radius(m)
 
     Returns
-    ------
+    -------
     r : float
         radius(m)
     S_circle : float
@@ -54,15 +54,15 @@ def Mass_and_Inertial_Data(r, mass=0.440):
     """ Provides the value of some mass and inertial data.
 
     Parameters
-    -----
+    ----------
     r : float
         radius (m)
     mass : float
         mass (kg)
 
     Returns
-    ------
-    I_matrix : array
+    -------
+    I_matrix : float array
         diagonal array (3x3) wich elements are Ixxb, Iyyb, Izzb:
             Ixxb : Moment of Inertia x-axis (Kg * m2)
             Iyyb : Moment of Inertia y-axis (Kg * m2)
@@ -70,7 +70,7 @@ def Mass_and_Inertial_Data(r, mass=0.440):
             array([Ixxb, 0, 0], [0, Iyyb, 0], [0, 0, Izzb])
     """
 
-    Ixxb = 2 * mass * (r ** 2) / 3
+    Ixxb = 2 * mass * (r ** 2) / 3.
     Iyyb = Ixxb
     Izzb = Ixxb
 
@@ -124,7 +124,7 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta,
     Data for a soccer ball (smooth sphere).
 
     Parameters
-    -----
+    ----------
     velocity_vector : float array
         [u, v, w, p, q, r]    air velocity body-axes (m/s).
     h : float
@@ -137,7 +137,7 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta,
         True if magnus effect is under consideration.
 
     Returns
-    ------
+    -------
     Cd : float
         Drag coefficient.
     C_magnus : float
@@ -193,7 +193,8 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta,
 
     D = 0.5 * rho * V ** 2 * A_front * Cd
     D_vector_body = wind2body(([-D, 0, 0]), alpha, beta)
-
+    # %It adds or not the magnus effect, depending on the variable
+    # % magnus_effect
     if magnus_effect is True:
         C_magnus, F_magnus_vector_body = Ball_magnus_effect_force(
                                                     velocity_vector[:3],
@@ -215,7 +216,7 @@ def Ball_magnus_effect_force(linear_vel, ang_vel, V, radius, A_front, rho,
     Data for a soccer ball (smooth sphere).
 
     Parameters
-    -----
+    ----------
     linear_vel : float array
         [u, v, w]    air velocity body-axes (m/s).
     ang_vel : float array
@@ -234,7 +235,7 @@ def Ball_magnus_effect_force(linear_vel, ang_vel, V, radius, A_front, rho,
         sideslip angle (rad).
 
     Returns
-    ------
+    -------
     C_magnus : float
         magnus effect coefficient force.
     F_magnus : float
@@ -259,7 +260,7 @@ def Ball_magnus_effect_force(linear_vel, ang_vel, V, radius, A_front, rho,
 
     wn : float array
         normal projection of the angular velocity vector over the linear
-        velocity vector
+        velocity vector [1]
     Sn : float
         Sn = wn * radius / V  # Sn is the effective spin number and must take
         values between 0 and 0.4 [1]
