@@ -2,7 +2,7 @@
 """
 Created on Fri Jan  8 18:53:17 2016
 
-@author: Juan
+@author: JuanMatSa
 
 """
 
@@ -142,8 +142,8 @@ def Ball_aerodynamic_forces(velocity_vector, h, alpha, beta,
         Drag coefficient.
     C_magnus : float
         magnus effect coefficient force.
-    Total_aerodynamic_forces_body :
-        Drag (+ magnus effect if exists) Forces vector (body axes) (N).
+    Total_aerodynamic_forces_body : float array
+        Drag (+ magnus effect if exists) Forces vector (1x3) (body axes) (N).
 
     See Also
     --------
