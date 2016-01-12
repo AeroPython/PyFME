@@ -302,11 +302,9 @@ def jac_kinematic_angular_eqs(time, euler_angles, angular_vel):
     jac[1, 0] = (q * np.sin(phi) + r * np.cos(phi)) / np.cos(theta) ** 2
     jac[1, 1] = (q * np.cos(phi) - r * np.sin(phi)) * np.tan(theta)
     
-    jac[2, 0] = - (q * np.sin(phi) + r * np.cos(phi)) * (np.tan(theta) / 
-                   np.cos(theta))
+    jac[2, 0] = (q * np.sin(phi) + r * np.cos(phi)) * (np.tan(theta) / 
+                 np.cos(theta))
     jac[2, 1] = (q * np.cos(phi) - r * np.sin(phi)) / np.cos(theta)
-    
-    
     
     return jac
     
@@ -359,7 +357,7 @@ def navigation_eqs(time, linear_vel, euler_angles):
     u, v, w = linear_vel
     theta, phi, psi = euler_angles
 
-    dx_dt = np.cos(theta) * np.cos(phi) * u + (np.sin(phi) * np.sin(theta) *
+    dx_dt = np.cos(theta) * np.cos(psi) * u + (np.sin(phi) * np.sin(theta) *
             np.cos(psi) - np.cos(phi) * np.sin(psi)) * v + (np.cos(phi) * 
             np.sin(theta) * np.cos(psi) + np.sin(phi) * np.sin(psi)) * w
             
