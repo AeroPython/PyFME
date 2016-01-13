@@ -11,7 +11,7 @@ import numpy as np
 
 def quatern2euler(q_0, q_1, q_2, q_3):
 
-    check_orthogonality_lownumpy(q_0, q_1, q_2, q_3)
+    check_orthogonality_numpyv_1_6(q_0, q_1, q_2, q_3)
 
     psi = atan2(2 * (q_1 * q_2 + q_0 * q_3),
                 q_0 ** 2 + q_1 ** 2 - q_2 ** 2 - q_3 ** 2)
