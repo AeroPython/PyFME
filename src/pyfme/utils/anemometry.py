@@ -57,38 +57,6 @@ def calculate_alpha_beta_TAS(u, v, w):
     return alpha, beta, TAS
 
 
-def calculate_mach(TAS, T, gamma=1.401, R_a=287.05287):
-    """Calculates the Mach number given the True Air Speed (TAS) and the
-    temperature.
-
-    Parameters
-    ----------
-    TAS : float
-        True Air Speed (m/s).
-    T : float
-        Temperature (K).
-    gamma : float, optional
-        Adiabatic index or ratio of specific heats. Default value corresponds
-        to dry air at 20º C.
-    R_a : float, optional.
-        Ideal gas constant J/(Kg·K). Default value corresponds to idel air.
-
-    Returns
-    -------
-    mach : float
-        Mach number
-
-    Notes
-    -----
-    $$ a = \sqrt(\gamma R_g T) $$
-
-    Adiabatic index, gamma = 1.401 from -40 ºC to 21 ºC. Variations outside
-    that range are neglible, a priori.
-    """
-
-    return TAS / sqrt(gamma * R_a * T)
-
-
 def calculate_dynamic_pressure(rho, TAS):
     """Calculates the dynamic pressure.
 
