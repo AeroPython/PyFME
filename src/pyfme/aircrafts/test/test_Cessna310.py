@@ -14,7 +14,7 @@ import numpy as np
 from numpy.testing import (assert_array_almost_equal, assert_almost_equal)
 
 from pyfme.aircrafts.Cessna310 import (Mass_and_Inertial_Data,
-                                       q, get_forces, get_moments)
+                                       q, get_aerodynamic_forces, get_aerodynamic_moments)
 
 
 
@@ -39,11 +39,11 @@ def test_get_forces():
     ih = 0
     deltaail = 0
     deltar = 0
-    forces_expected = np.array([-2887.82725, -28679.112, 0])
+    aerodynamic_forces_expected = np.array([-2887.82725, -28679.112, 0])
         
-    forces = get_forces( U, rho, alpha, beta, deltae, ih, deltaail, deltar)
+    aerodynamic_forces = get_aerodynamic_forces( U, rho, alpha, beta, deltae, ih, deltaail, deltar)
     
-    assert_array_almost_equal(forces, forces_expected)
+    assert_array_almost_equal(aerodynamic_forces, aerodynamic_forces_expected)
     
 def test_get_moments():
     
@@ -55,10 +55,10 @@ def test_get_moments():
     ih = 0
     deltaail = 0
     deltar = 0
-    moments_expected = np.array([0, 3101.963823, 0])
+    aerodynamic_moments_expected = np.array([0, 3101.963823, 0])
         
-    moments = get_moments( U, rho, alpha, beta, deltae, ih, deltaail, deltar)
+    aerodynamic_moments = get_aerodynamic_moments( U, rho, alpha, beta, deltae, ih, deltaail, deltar)
     
-    assert_array_almost_equal(moments, moments_expected)
+    assert_array_almost_equal(aerodynamic_moments, aerodynamic_moments_expected)
     
    
