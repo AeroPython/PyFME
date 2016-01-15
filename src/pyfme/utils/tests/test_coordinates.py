@@ -23,7 +23,7 @@ def test_check_theta_range():
     for value in wrong_values:
         # 0 is always a correct value
         with pytest.raises(ValueError) as excinfo:
-            m = check_theta_phi_psi_range(value, 0, 0)
+            check_theta_phi_psi_range(value, 0, 0)
         assert ("ValueError: Theta value is not inside correct range"
                 in excinfo.exconly())
 
@@ -35,7 +35,7 @@ def test_check_phi_range():
     for value in wrong_values:
         # 0 is always a correct value
         with pytest.raises(ValueError) as excinfo:
-            m = check_theta_phi_psi_range(0, value, 0)
+            check_theta_phi_psi_range(0, value, 0)
         assert ("ValueError: Phi value is not inside correct range"
                 in excinfo.exconly())
 
@@ -47,7 +47,7 @@ def test_check_psi_range():
     for value in wrong_values:
         # 0 is always a correct value
         with pytest.raises(ValueError) as excinfo:
-            m = check_theta_phi_psi_range(0, 0, value)
+            check_theta_phi_psi_range(0, 0, value)
         assert ("ValueError: Psi value is not inside correct range"
                 in excinfo.exconly())
 
@@ -138,7 +138,7 @@ def test_check_gamma_range():
     for value in wrong_values:
         # 0 is always a correct value
         with pytest.raises(ValueError) as excinfo:
-            m = check_gamma_mu_chi_range(value, 0, 0)
+            check_gamma_mu_chi_range(value, 0, 0)
         assert ("ValueError: Gamma value is not inside correct range"
                 in excinfo.exconly())
 
@@ -150,7 +150,7 @@ def test_check_mu_range():
     for value in wrong_values:
         # 0 is always a correct value
         with pytest.raises(ValueError) as excinfo:
-            m = check_gamma_mu_chi_range(0, value, 0)
+            check_gamma_mu_chi_range(0, value, 0)
         assert ("ValueError: Mu value is not inside correct range"
                 in excinfo.exconly())
 
@@ -162,7 +162,7 @@ def test_check_chi_range():
     for value in wrong_values:
         # 0 is always a correct value
         with pytest.raises(ValueError) as excinfo:
-            m = check_gamma_mu_chi_range(0, 0, value)
+            check_gamma_mu_chi_range(0, 0, value)
         assert ("ValueError: Chi value is not inside correct range"
                 in excinfo.exconly())
 
@@ -233,7 +233,6 @@ def test_hor2wind():
     assert_array_almost_equal(vector_wind, vector_wind_expected)
 
 
-
 def test_check_alpha_beta_range():
 
     wrong_values = (3 * np.pi, - 3 * np.pi)
@@ -254,7 +253,7 @@ def test_check_alpha_range():
     for value in wrong_values:
         # 0 is always a correct value
         with pytest.raises(ValueError) as excinfo:
-            m = check_alpha_beta_range(value, 0)
+            check_alpha_beta_range(value, 0)
         assert ("ValueError: Alpha value is not inside correct range"
                 in excinfo.exconly())
 
@@ -266,7 +265,7 @@ def test_check_beta_range():
     for value in wrong_values:
         # 0 is always a correct value
         with pytest.raises(ValueError) as excinfo:
-            m = check_alpha_beta_range(0, value)
+            check_alpha_beta_range(0, value)
         assert ("ValueError: Beta value is not inside correct range"
                 in excinfo.exconly())
 
