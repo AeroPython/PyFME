@@ -174,7 +174,7 @@ def jac_linear_and_angular_momentum_eqs(time, vel, mass, inertia):
     return jac
 
 
-def kinematic_angular_eqs(time, euler_angles, angular_vel):
+def kinematic_angular_eqs(time, euler_angles, ang_vel):
     """ Kinematic angular equations
 
     Parameters
@@ -184,7 +184,7 @@ def kinematic_angular_eqs(time, euler_angles, angular_vel):
     euler_angles : array_like
         Current value of euler angles following z-y'-x'' convention
         (theta, phi, psi) or (pitch, roll, yaw) in (rad, rad, rad).
-    angular_vel : array_like
+    ang_vel : array_like
         Current value of absolute angular velocity, expressed in body axes
         (p, q, r) in (rad/s, rad/s rad/s).
 
@@ -210,7 +210,7 @@ def kinematic_angular_eqs(time, euler_angles, angular_vel):
     """
 
     theta, phi, psi = euler_angles
-    p, q, r = angular_vel
+    p, q, r = ang_vel
 
     dtheta_dt = q * np.cos(phi) - r * np.sin(phi)
 
@@ -221,7 +221,7 @@ def kinematic_angular_eqs(time, euler_angles, angular_vel):
     return np.array([dtheta_dt, dphi_dt, dpsi_dt])
 
 
-def jac_kinematic_angular_eqs(time, euler_angles, angular_vel):
+def jac_kinematic_angular_eqs(time, euler_angles, ang_vel):
     """Jacobian of kinematic angular equations
 
     Parameters
@@ -231,7 +231,7 @@ def jac_kinematic_angular_eqs(time, euler_angles, angular_vel):
     euler_angles : array_like
         Current value of euler angles following z-y'-x'' convention
         (theta, phi, psi) or (pitch, roll, yaw) in (rad, rad, rad).
-    angular_vel : array_like
+    ang_vel : array_like
         Current value of absolute angular velocity, expressed in body axes
         (p, q, r) in (rad/s, rad/s rad/s).
 
@@ -255,7 +255,7 @@ def jac_kinematic_angular_eqs(time, euler_angles, angular_vel):
         2012.
     """
     theta, phi, psi = euler_angles
-    p, q, r = angular_vel
+    p, q, r = ang_vel
 
     jac = np.zeros([3, 3])
 
@@ -282,7 +282,7 @@ def navigation_eqs(time, lin_vel, euler_angles):
     euler_angles : array_like
         Current value of euler angles following z-y'-x'' convention
         (theta, phi, psi) or (pitch, roll, yaw) in (rad, rad, rad).
-    linear_vel : array_like
+    lin_vel : array_like
         Current value of absolute linear velocity, expressed in body axes
         (u, v, w) in (m/s, m/s m/s).
 
