@@ -33,12 +33,12 @@ def test_geometric_data():
 def test_mass_and_inertial_data():
 
     # Test with default r=0.111 (m) and mass = 0.440 (kg)
-    I_matrix_expected = np.diag([1.0, 1.0, 1.0])
-    I_matrix_expected *= 0.00361416
+    I_array_expected = np.diag([1.0, 1.0, 1.0])
+    I_array_expected *= 0.00361416
 
-    I_matrix = mass_and_inertial_data(0.111, 0.440)
+    I_array = mass_and_inertial_data(0.111, 0.440)
 
-    assert_array_almost_equal(I_matrix, I_matrix_expected)
+    assert_array_almost_equal(I_array, I_array_expected)
 
 
 def test_check_reynolds_number():
@@ -64,13 +64,14 @@ def test_check_sn():
 def test_get_aerodynamic_forces():
 
     # Test with magnus effect
-    velocity_vector = np.array([30, 0, 0, 0, 1, 1])
+    lin_vel = np.array([30, 0, 0])
+    ang_vel = np.array([0, 1, 1])
     TAS = 30
     rho = 1.225000018124288
     alpha = 0
     beta = 0
     magnus_effect = True
-    forces = get_aerodynamic_forces(velocity_vector, TAS, rho, alpha, beta,
+    forces = get_aerodynamic_forces(lin_vel, ang_vel, TAS, rho, alpha, beta,
                                     magnus_effect)
 
     Total_aerodynamic_forces_body = np.array([-10.83340379, 0.1973722863,
@@ -79,13 +80,14 @@ def test_get_aerodynamic_forces():
     assert_array_almost_equal(forces, Total_aerodynamic_forces_body)
 
     # Test without magnus effect
-    velocity_vector = np.array([30, 0, 0, 0, 1, 1])
+    lin_vel = np.array([30, 0, 0])
+    ang_vel = np.array([0, 1, 1])
     TAS = 30
     rho = 1.225000018124288
     alpha = 0
     beta = 0
     magnus_effect = False
-    forces = get_aerodynamic_forces(velocity_vector, TAS, rho, alpha, beta,
+    forces = get_aerodynamic_forces(lin_vel, ang_vel, TAS, rho, alpha, beta,
                                     magnus_effect)
     Total_aerodynamic_forces_body = np.array([-10.83340379, 0,
                                               0])
@@ -95,7 +97,7 @@ def test_get_aerodynamic_forces():
 
 def test_get_magnus_effect_forces():
 
-    linear_vel = np.array([30, 0, 0])
+    lin_vel = np.array([30, 0, 0])
     ang_vel = np.array([0, 1, 1])
     TAS = 30
     rho = 1.225000018124288
@@ -105,6 +107,6 @@ def test_get_magnus_effect_forces():
     beta = 0
 
     F_magnus_vector_body_expected = np.array([0, 0.1973722863, -0.1973722863])
-    forces = get_magnus_effect_forces(linear_vel, ang_vel, TAS, rho, radius,
+    forces = get_magnus_effect_forces(lin_vel, ang_vel, TAS, rho, radius,
                                       A_front, alpha, beta)
     assert_array_almost_equal(forces, F_magnus_vector_body_expected)

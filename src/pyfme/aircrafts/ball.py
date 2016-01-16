@@ -14,8 +14,8 @@ mu = 1.983e-5  # kg/m/s
 # Data tables
 Re_list = np.array([38000, 100000, 160000, 200000, 250000, 300000, 330000,
                     350000, 375000, 400000, 500000, 800000, 200000, 4000000])
-Cd_list = np.array([0.49, 0.50, 0.51, 0.51, 0.49, 0.46, 0.39, 0.20, 0.09, 0.07,
-                    0.07, 0.10, 0.15, 0.18])
+C_D_list = np.array([0.49, 0.50, 0.51, 0.51, 0.49, 0.46, 0.39, 0.20, 0.09,
+                     0.07, 0.07, 0.10, 0.15, 0.18])
 Sn_list = np.array([0.00, 0.04, 0.10, 0.20, 0.40])
 Cl_list = np.array([0.00, 0.10, 0.16, 0.23, 0.33])
 
@@ -48,7 +48,7 @@ def geometric_data(r=0.111):
     return r, S_circle, S_sphere, Vol
 
 
-def mass_and_inertial_data(r, mass=0.440):
+def mass_and_inertial_data(r, m=0.440):
 
     """Provides the value of some mass and inertial data.
 
@@ -56,25 +56,28 @@ def mass_and_inertial_data(r, mass=0.440):
     ----------
     r : float
         radius (m)
-    mass : float
+    m : float
         mass (kg)
 
     Returns
     -------
-    I_matrix : float array
-        diagonal array (3x3) wich elements are Ixxb, Iyyb, Izzb:
-            Ixxb : Moment of Inertia x-axis (Kg * m2),
-            Iyyb : Moment of Inertia y-axis (Kg * m2),
-            Izzb : Moment of Inertia z-axis (Kg * m2)
+    I_array : float array
+        diagonal array (3x3) wich elements are Ixx_b, Iyy_b, Izz_b:
+    Ixx_b : float
+        Moment of Inertia x-axis (Kg * m2)
+    Iyy_b : float
+        Moment of Inertia y-axis (Kg * m2)
+    Izz_b : float
+        Moment of Inertia z-axis (Kg * m2)
     """
 
-    Ixxb = 2 * mass * (r ** 2) / 3.
-    Iyyb = Ixxb
-    Izzb = Ixxb
+    Ixx_b = 2 * m * (r ** 2) / 3.
+    Iyy_b = Ixx_b
+    Izz_b = Ixx_b
 
-    I_matrix = np.diag([Ixxb, Iyyb, Izzb])
+    I_array = np.diag([Ixx_b, Iyy_b, Izz_b])
 
-    return I_matrix
+    return I_array
 
 
 def check_reynolds_number(Re):
@@ -115,7 +118,7 @@ def check_sn(Sn):
         raise ValueError('Effective spin number is not inside correct range')
 
 
-def get_aerodynamic_forces(velocity_vector, TAS, rho, alpha, beta,
+def get_aerodynamic_forces(lin_vel, ang_vel, TAS, rho, alpha, beta,
                            magnus_effect=True):
     """Given the velocity vectors vel and ang_vel (body axes) it provides the
     forces (aerodynamic drag and Magnus effect if it exists) (body axes).
@@ -123,8 +126,10 @@ def get_aerodynamic_forces(velocity_vector, TAS, rho, alpha, beta,
 
     Parameters
     ----------
-    velocity_vector : float array
-        [u, v, w, p, q, r]    air velocity body-axes (m/s).
+    lin_vel : float array
+        [u, v, w] air linear velocity body-axes (m/s).
+    ang_vel : float array
+        [p, q, r] air angular velocity body-axes (m/s).
     TAS : float
         true air speed (m/s)
     rho : float
@@ -149,10 +154,10 @@ def get_aerodynamic_forces(velocity_vector, TAS, rho, alpha, beta,
     -----
     Smooth ball selected. see[1]
 
-    Reynolds vs Cd table:
+    Reynolds vs C_D table:
 
     +------------+------------+
-    | Re         | Cd         |
+    | Re         | C_D        |
     +============+============+
     | 3.8e4      |    0.49    |
     +------------+------------+
@@ -195,26 +200,24 @@ def get_aerodynamic_forces(velocity_vector, TAS, rho, alpha, beta,
     .. [2] "Aerodynamics of Sports Balls" Annual Review of Fluid Mechanics,
             1875.17:15 Mehta, R.D.
     """
-    u, v, w = velocity_vector[:3]  # components of the linear velocity
-    p, q, r = velocity_vector[3:]  # components of the angular velocity
+    u, v, w = lin_vel  # components of the linear velocity
+    p, q, r = ang_vel  # components of the angular velocity
 
     radius, A_front, _, _ = geometric_data()
     Re = rho * TAS * radius / mu  # Reynolds number
     check_reynolds_number(Re)
 
     # %Obtaining of Drag coefficient and Drag force
-    Cd = np.interp(Re, Re_list, Cd_list)
+    C_D = np.interp(Re, Re_list, C_D_list)
 
-    D = 0.5 * rho * TAS ** 2 * A_front * Cd
+    D = 0.5 * rho * TAS ** 2 * A_front * C_D
     D_vector_body = wind2body(([-D, 0, 0]), alpha, beta)
     # %It adds or not the magnus effect, depending on the variable
     # % magnus_effect
     if magnus_effect:
-        F_magnus_vector_body = get_magnus_effect_forces(
-                                                    velocity_vector[:3],
-                                                    velocity_vector[3:], TAS,
-                                                    rho, radius, A_front,
-                                                    alpha, beta)
+        F_magnus_vector_body = get_magnus_effect_forces(lin_vel, ang_vel, TAS,
+                                                        rho, radius, A_front,
+                                                        alpha, beta)
 
         total_aerodynamic_forces_body = D_vector_body + F_magnus_vector_body
         return total_aerodynamic_forces_body
@@ -223,7 +226,7 @@ def get_aerodynamic_forces(velocity_vector, TAS, rho, alpha, beta,
         return total_aerodynamic_forces_body
 
 
-def get_magnus_effect_forces(linear_vel, ang_vel, TAS,  rho, radius, A_front,
+def get_magnus_effect_forces(lin_vel, ang_vel, TAS,  rho, radius, A_front,
                              alpha, beta):
     """Given the velocity vectors vel and ang_vel (body axes) it provides the
     forces (aerodynamic drag and Magnus effect if it exists) (body axes).
@@ -288,8 +291,8 @@ def get_magnus_effect_forces(linear_vel, ang_vel, TAS,  rho, radius, A_front,
     .. [2] "Aerodynamics of Sports Balls" Annual Review of Fluid Mechanics,
                                         1875.17:15 Mehta, R.D.
     """
-    u, v, w = linear_vel[:]  # components of the linear velocity
-    p, q, r = ang_vel[:]  # components of the angular velocity
+    u, v, w = lin_vel  # components of the linear velocity
+    p, q, r = ang_vel  # components of the angular velocity
 
     # %Obtaining of Magnus force coefficient and Magnus force
     wn = np.sqrt((v * r - w * q) ** 2 + (w * p - u * r) ** 2 +
