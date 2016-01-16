@@ -27,7 +27,7 @@ def linear_and_angular_momentum_eqs(time, vel, mass, inertia, forces, moments):
     mass : float
         Current mass of the aircraft (kg).
     inertia : array_like
-        3x3 tensor of inertia of the aircraft (kg · m²)
+        3x3 tensor of inertia of the aircraft (kg * m2)
         Current equations assume that the aircraft has a symmetry plane
         (x_b - z_b), thus J_xy and J_yz must be null.
     forces : array_like
@@ -42,7 +42,7 @@ def linear_and_angular_momentum_eqs(time, vel, mass, inertia, forces, moments):
     accel : array_like
         Current value of absolute acceleration and angular acceleration, both
         expressed in body axes (du_dt, dv_dt, dw_dt, dp_dt, dq_dt, dr_dt) in
-        (m/s**2 , m/s**2, m/s**2, rad/s**2, rad/s**2, rad/s**2).
+        (m/s2 , m/s2, m/s2, rad/s2, rad/s2, rad/s2).
 
     See Also
     --------
@@ -105,7 +105,7 @@ def jac_linear_and_angular_momentum_eqs(time, vel, mass, inertia):
     mass : float
         Current mass of the aircraft (kg).
     inertia : array_like
-        3x3 tensor of inertia of the aircraft (kg · m²)
+        3x3 tensor of inertia of the aircraft (kg * m2)
         Current equations assume that the aircraft has a symmetry plane
         (x_b - z_b), thus J_xy and J_yz must be null.
 
@@ -272,7 +272,7 @@ def jac_kinematic_angular_eqs(time, euler_angles, angular_vel):
 
 
 
-def navigation_eqs(time, linear_vel, euler_angles):
+def navigation_eqs(time, lin_vel, euler_angles):
     """Kinematic linear equations
 
     Parameters
@@ -306,7 +306,7 @@ def navigation_eqs(time, linear_vel, euler_angles):
         2012.
     """
 
-    u, v, w = linear_vel
+    u, v, w = lin_vel
     theta, phi, psi = euler_angles
 
     dx_dt = np.cos(theta) * np.cos(psi) * u + (np.sin(phi) * np.sin(theta) *
