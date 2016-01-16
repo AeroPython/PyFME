@@ -21,7 +21,7 @@ def check_theta_phi_psi_range(theta, phi, psi):
         raise ValueError('Theta value is not inside correct range')
     elif not (phi_min <= phi <= phi_max):
         raise ValueError('Phi value is not inside correct range')
-    elif not (psi_min <= phi <= psi_max):
+    elif not (psi_min <= psi <= psi_max):
         raise ValueError('Psi value is not inside correct range')
 
 
