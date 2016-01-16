@@ -1,4 +1,4 @@
 python:
-   setup_py_install: true
+  setup_py_install: true
 conda:
-    file: environment.yml
+  file: environment.yml
