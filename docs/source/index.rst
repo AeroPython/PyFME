@@ -1,16 +1,19 @@
-.. PyFME documentation master file, created by
-   sphinx-quickstart on Sat Jan 16 17:07:20 2016.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to PyFME's documentation!
 =================================
 
-Contents:
+PyFME :rocket: :airplane: stands for Python Flight Mechanics Engine.
+
+The main idea behind a Flight Dynamics Engine is to model the physics involved in aircraft's flight. Models for the
+aircraft, atmosphere, dynamics, aerodynamics... implemented here allow us to calculate the aircraft response to the
+pilot's inputs.
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
 
+   api
 
 
 Indices and tables
