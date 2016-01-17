@@ -32,6 +32,8 @@ def quatern2euler(quaternion):
 
     q_0, q_1, q_2, q_3 = quaternion
 
+    check_unitnorm(quaternion)
+
     psi = atan2(2 * (q_1 * q_2 + q_0 * q_3),
                 q_0 ** 2 + q_1 ** 2 - q_2 ** 2 - q_3 ** 2)
 

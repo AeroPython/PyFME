@@ -60,7 +60,7 @@ def test_vel_quaternion():
 
     assert_array_almost_equal(d_quaternion, d_quaternion_expected)
 
-    # test for yaw velocity r = 1
+    # test for yaw velocity r =  1
     quaternion = np.array([0.8660254037844387, 0, 0.5, 0])
 
     ang_vel = np.array([0, 0, 1])
