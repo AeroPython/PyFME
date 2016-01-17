@@ -33,12 +33,12 @@ def test_geometric_data():
 def test_mass_and_inertial_data():
 
     # Test with default r=0.111 (m) and mass = 0.440 (kg)
-    I_array_expected = np.diag([1.0, 1.0, 1.0])
-    I_array_expected *= 0.00361416
+    inertia_expected = np.diag([1.0, 1.0, 1.0])
+    inertia_expected *= 0.00361416
 
-    I_array = mass_and_inertial_data(0.111, 0.440)
+    inertia = mass_and_inertial_data(0.111, 0.440)
 
-    assert_array_almost_equal(I_array, I_array_expected)
+    assert_array_almost_equal(inertia, inertia_expected)
 
 
 def test_check_reynolds_number():

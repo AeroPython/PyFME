@@ -14,10 +14,10 @@ mu = 1.983e-5  # kg/m/s
 # Data tables
 Re_list = np.array([38000, 100000, 160000, 200000, 250000, 300000, 330000,
                     350000, 375000, 400000, 500000, 800000, 200000, 4000000])
-C_D_list = np.array([0.49, 0.50, 0.51, 0.51, 0.49, 0.46, 0.39, 0.20, 0.09,
-                     0.07, 0.07, 0.10, 0.15, 0.18])
+CD_full_list = np.array([0.49, 0.50, 0.51, 0.51, 0.49, 0.46, 0.39, 0.20, 0.09,
+                         0.07, 0.07, 0.10, 0.15, 0.18])
 Sn_list = np.array([0.00, 0.04, 0.10, 0.20, 0.40])
-Cl_list = np.array([0.00, 0.10, 0.16, 0.23, 0.33])
+C_magnus_list = np.array([0.00, 0.10, 0.16, 0.23, 0.33])
 
 
 def geometric_data(r=0.111):
@@ -48,7 +48,7 @@ def geometric_data(r=0.111):
     return r, S_circle, S_sphere, Vol
 
 
-def mass_and_inertial_data(r, m=0.440):
+def mass_and_inertial_data(r, mass=0.440):
 
     """Provides the value of some mass and inertial data.
 
@@ -56,12 +56,12 @@ def mass_and_inertial_data(r, m=0.440):
     ----------
     r : float
         radius (m)
-    m : float
+    mass : float
         mass (kg)
 
     Returns
     -------
-    I_array : float array
+    inertia : float array
         diagonal array (3x3) wich elements are Ixx_b, Iyy_b, Izz_b:
     Ixx_b : float
         Moment of Inertia x-axis (Kg * m2)
@@ -71,13 +71,13 @@ def mass_and_inertial_data(r, m=0.440):
         Moment of Inertia z-axis (Kg * m2)
     """
 
-    Ixx_b = 2 * m * (r ** 2) / 3.
+    Ixx_b = 2 * mass * (r ** 2) / 3.
     Iyy_b = Ixx_b
     Izz_b = Ixx_b
 
-    I_array = np.diag([Ixx_b, Iyy_b, Izz_b])
+    inertia = np.diag([Ixx_b, Iyy_b, Izz_b])
 
-    return I_array
+    return inertia
 
 
 def check_reynolds_number(Re):
@@ -154,10 +154,10 @@ def get_aerodynamic_forces(lin_vel, ang_vel, TAS, rho, alpha, beta,
     -----
     Smooth ball selected. see[1]
 
-    Reynolds vs C_D table:
+    Reynolds vs CD_full table:
 
     +------------+------------+
-    | Re         | C_D        |
+    | Re         |CD_full_list|
     +============+============+
     | 3.8e4      |    0.49    |
     +------------+------------+
@@ -208,9 +208,9 @@ def get_aerodynamic_forces(lin_vel, ang_vel, TAS, rho, alpha, beta,
     check_reynolds_number(Re)
 
     # %Obtaining of Drag coefficient and Drag force
-    C_D = np.interp(Re, Re_list, C_D_list)
+    CD_full = np.interp(Re, Re_list, CD_full_list)
 
-    D = 0.5 * rho * TAS ** 2 * A_front * C_D
+    D = 0.5 * rho * TAS ** 2 * A_front * CD_full
     D_vector_body = wind2body(([-D, 0, 0]), alpha, beta)
     # %It adds or not the magnus effect, depending on the variable
     # % magnus_effect
@@ -304,7 +304,7 @@ def get_magnus_effect_forces(lin_vel, ang_vel, TAS,  rho, radius, A_front,
     # values between 0 and 0.4 [1]
     check_sn(Sn)
 
-    C_magnus = np.interp(Sn, Sn_list, Cl_list)
+    C_magnus = np.interp(Sn, Sn_list, C_magnus_list)
 
     check_magnus = np.isclose((v * r - w * q, w * p - u * r, u * q - v * p),
                               (0, 0, 0))
