@@ -9,9 +9,28 @@ from math import atan2, asin, cos, sin
 import numpy as np
 
 
-def quatern2euler(q_0, q_1, q_2, q_3):
+def quatern2euler(quaternion):
+    '''Given a quaternion, the euler_angles vector is returned.
 
-    check_orthogonality_numpyv_1_6(q_0, q_1, q_2, q_3)
+    Parameters
+    ----------
+    quaternion : array_like
+        1x4 vector with the four elements of the quaternion:
+        [q_0, q_1, q_2, q_3]
+
+    Returns
+    -------
+    euler_angles : array_like
+        1x3 array with the euler angles: [theta, phi, psi]    (rad)
+
+    References
+    ----------
+    .. [1] "Modeling and Simulation of Aerospace Vehicle Dynamics" (Aiaa\
+        Education Series) Peter H. Ziepfel
+    '''
+    check_unitnorm(quaternion)
+
+    q_0, q_1, q_2, q_3 = quaternion
 
     psi = atan2(2 * (q_1 * q_2 + q_0 * q_3),
                 q_0 ** 2 + q_1 ** 2 - q_2 ** 2 - q_3 ** 2)
@@ -20,10 +39,32 @@ def quatern2euler(q_0, q_1, q_2, q_3):
 
     phi = atan2(2 * (q_2 * q_3 + q_0 * q_1),
                 q_0 ** 2 + q_1 ** 2 - q_2 ** 2 - q_3 ** 2)
-    return psi, theta, phi
+
+    euler_angles = np.array([theta, phi, psi])
+
+    return euler_angles
 
 
-def euler2quatern(psi, theta, phi):
+def euler2quatern(euler_angles):
+    '''Given the euler_angles vector, the quaternion vector is returned.
+
+    Parameters
+    ----------
+    euler_angles : array_like
+        1x3 array with the euler angles: [theta, phi, psi]    (rad)
+
+    Returns
+    -------
+    quaternion : array_like
+        1x4 vector with the four elements of the quaternion:
+        [q_0, q_1, q_2, q_3]
+
+    References
+    ----------
+    .. [1] "Modeling and Simulation of Aerospace Vehicle Dynamics" (Aiaa\
+        Education Series) Peter H. Ziepfel
+    '''
+    theta, phi, psi = euler_angles
 
     q_0 = cos(psi / 2.) * cos(theta / 2.) * cos(phi / 2.) +\
         sin(psi / 2) * sin(theta / 2) * sin(phi / 2)
@@ -37,23 +78,29 @@ def euler2quatern(psi, theta, phi):
     q_3 = sin(psi / 2.) * cos(theta / 2.) * cos(phi / 2.) -\
         cos(psi / 2.) * sin(theta / 2.) * sin(phi / 2.)
 
-    return q_0, q_1, q_2, q_3
+    quaternion = np.array([q_0, q_1, q_2, q_3])
+
+    return quaternion
 
 
-def check_orthogonality(q_0, q_1, q_2, q_3):
+def check_unitnorm(quaternion):
+    '''Given a quaternion, it checks the modulus (it must be unit). If it is
+    not unit, it raises an error.
+
+    Parameters
+    ----------
+    quaternion : array_like
+        1x4 vector with the four elements of the quaternion:
+        [q_0, q_1, q_2, q_3]
+
+    Raises
+    ------
+    ValueError:
+        Selected quaternion norm is not unit
+    '''
+    q_0, q_1, q_2, q_3 = quaternion
 
     check_value = np.isclose([q_0 ** 2 + q_1 ** 2 + q_2 ** 2 + q_3 ** 2], [1])
+
     if not check_value:
-        raise ValueError('selected quaternion is not orthogonal')
-
-
-def check_orthogonality_numpyv_1_6(q_0, q_1, q_2, q_3):
-
-    check_value = q_0 ** 2 + q_1 ** 2 + q_2 ** 2 + q_3 ** 2
-    if not 0.999999 <= check_value <= 1.000001:
-        raise ValueError('selected quaternion is not orthogonal')
-
-
-print(quatern2euler(0.8660254037844387, 0, 0.5, 0))
-
-print(euler2quatern(0.0, 1.0471975511965976, 0.0))
+        raise ValueError('Selected quaternion norm is not unit')
