@@ -78,3 +78,39 @@ def calculate_dynamic_pressure(rho, TAS):
     """
 
     return 0.5 * rho * TAS ** 2
+
+
+def calculate_viscosity_Sutherland(T):
+    """Calculates the viscosity of the air
+
+    Parameters
+    -----------
+    T : float
+        Temperature (K)
+
+    Returns
+    -----------
+    visc : float
+        viscosity of the air (kg/(m s))
+
+    Notes
+    -----------
+    Acoording to [1] the limis for this function are:
+
+    p < p_c =36 Atm (3.65 MPa)
+    T < 2000 K
+
+    According to [2] the limits for this function are:
+
+    T < 550 K
+
+
+    """
+
+    visc_0 = 1.176*1e-5  # kg(m s)
+    T_0 = 273.1 # K
+    b = 0.4042 # nondimensional
+
+
+    return visc_0 * (T /T_0)**(3/2) * ((1 + b)/((T/T_0) + b))
+
