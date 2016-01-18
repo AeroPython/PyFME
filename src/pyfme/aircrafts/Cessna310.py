@@ -12,7 +12,7 @@ Created on Sun Jan  3 18:44:39 2016
 
 import numpy as np
 
-def Geometric_Data():
+def geometric_Data():
     
     """ Provides the value of some geometric data.
     
@@ -23,7 +23,7 @@ def Geometric_Data():
          Wing surface (ft2 * 0.3048 * 0.3048 = m2)
     c : foat
         Mean aerodynamic Chord (ft * 0.3048 = m)
-    b : float 
+    span : float 
          Wing span (ft * 0.3048 = m)
     
     References
@@ -34,27 +34,27 @@ def Geometric_Data():
     
     Sw = 175 * 0.3048 * 0.3048    # m2
     c = 4.79 * 0.3048   # m
-    b = 36.9 * 0.3048   # m
+    span = 36.9 * 0.3048   # m
     
-    return Sw, c, b
+    return Sw, c, span
 
-def Mass_and_Inertial_Data():
+def mass_and_Inertial_Data():
     
     """ Provides the value of some mass and inertial data.
     
     Returns
     ------
-    m : float
-        mass (lb * 0.453592 = kg)
-    I_xx_b : float
+    mass : float
+           mass (lb * 0.453592 = kg)
+    Ixx_b : float
              Moment of Inertia x-axis ( slug * ft2 * 1.3558179 = Kg * m2)
-    I_yy_b : float
+    Iyy_b : float
              Moment of Inertia y-axis ( slug * ft2 * 1.3558179 = Kg * m2)
-    I_zz_b : float
+    Izz_b : float
              Moment of Inertia z-axis ( slug * ft2 * 1.3558179 = Kg * m2)
-    I_xz_b : float
+    Ixz_b : float
              Product of Inertia xz-plane ( slug * ft2 * 1.3558179 = Kg * m2)
-    I_matrix : array_like
+    inertia : array_like
                I_xx_b,I_yy_b,I_zz_b]
               
     References
@@ -63,39 +63,39 @@ def Mass_and_Inertial_Data():
     page 589
     """
 
-    m = 4600 * 0.453592   # kg
-    I_xx_b = 8884 * 1.3558179   # Kg * m2
-    I_yy_b = 1939 * 1.3558179   # Kg * m2
-    I_zz_b = 11001 * 1.3558179   # Kg * m2
-    I_xz_b = 0 * 1.3558179   # Kg * m2
+    mass = 4600 * 0.453592   # kg
+    Ixx_b = 8884 * 1.3558179   # Kg * m2
+    Iyy_b = 1939 * 1.3558179   # Kg * m2
+    Izz_b = 11001 * 1.3558179   # Kg * m2
+    Ixz_b = 0 * 1.3558179   # Kg * m2
     
-    I_matrix = np.diag([I_xx_b,I_yy_b,I_zz_b])
+    inertia = np.diag([Ixx_b,Iyy_b,Izz_b])
     
-    return m, I_matrix
+    return mass, inertia
 
-def Long_Aero_Coefficients():
+def long_Aero_Coefficients():
     
     """Assigns the value of the coefficients
     of stability in cruise conditions and order them in a matrix.
 
     
-    C_L_0 is the lift coefficient evaluated at the initial condition
-    C_L_a is the lift stability derivative with respect to the angle of attack
-    C_L_de is the lift stability derivative with respect to the elevator 
+    CL_0 is the lift coefficient evaluated at the initial condition
+    CL_a is the lift stability derivative with respect to the angle of attack
+    CL_de is the lift stability derivative with respect to the elevator 
          deflection
-    C_L_dih is the lift stability derivative with respect to the stabilator 
+    CL_dih is the lift stability derivative with respect to the stabilator 
          deflection
     
-    C_D_0 is the drag coefficient evaluated at the initial condition
-    C_D_a is the drag stability derivative with respect to the angle of attack
+    CD_0 is the drag coefficient evaluated at the initial condition
+    CD_a is the drag stability derivative with respect to the angle of attack
     
-    C_m_0 is the pitching moment coefficient evaluated at the condition 
+    Cm_0 is the pitching moment coefficient evaluated at the condition 
         (alpha0 = deltaE = deltaih = 0º)
-    C_m_a is the pitching moment stability derivative with respect to the angle
+    Cm_a is the pitching moment stability derivative with respect to the angle
         of attack
-    C_m_de is the pitching moment stability derivative with respect to the 
+    Cm_de is the pitching moment stability derivative with respect to the 
         elevator deflection
-    C_m_dih is the pitching moment stability derivative with respect to the 
+    Cm_dih is the pitching moment stability derivative with respect to the 
          stabilator deflection
 
     Returns 
@@ -103,9 +103,9 @@ def Long_Aero_Coefficients():
     
     Long_coef_matrix : array_like
                                 [
-                                [C_L_0, C_L_a, C_L_de, C_L_dih],
-                                [C_D_0, C_D_a, 0, 0],
-                                [C_m_0, C_m_a, C_m_de, C_m_dih]
+                                [CL_0, CL_a, CL_de, CL_dih],
+                                [CD_0, CD_a, 0, 0],
+                                [Cm_0, Cm_a, Cm_de, Cm_dih]
                                 ]
                        
         
@@ -114,60 +114,60 @@ def Long_Aero_Coefficients():
     AIRCRAFT DYNAMICS From modelling to simulation (Marcello R. Napolitano)
     page 589
     """
-    C_L_0 = 0.288
-    C_L_a = 4.58
-    C_L_de = 0.81
-    C_L_dih = 0
+    CL_0 = 0.288
+    CL_a = 4.58
+    CL_de = 0.81
+    CL_dih = 0
     
-    C_D_0 = 0.029
-    C_D_a = 0.160
+    CD_0 = 0.029
+    CD_a = 0.160
     
-    C_m_0 = 0.07
-    C_m_a = -0.137
-    C_m_de = -2.26
-    C_m_dih = 0 
+    Cm_0 = 0.07
+    Cm_a = -0.137
+    Cm_de = -2.26
+    Cm_dih = 0 
     
-    Long_coef_matrix = np.array([
-                                [C_L_0, C_L_a, C_L_de, C_L_dih],
-                                [C_D_0, C_D_a, 0, 0],
-                                [C_m_0, C_m_a, C_m_de, C_m_dih]
+    long_coef_matrix = np.array([
+                                [CL_0, CL_a, CL_de, CL_dih],
+                                [CD_0, CD_a, 0, 0],
+                                [Cm_0, Cm_a, Cm_de, Cm_dih]
                                 ])
     
-    return Long_coef_matrix
+    return long_coef_matrix
        
-def Lat_Aero_Coefficients():
+def lat_Aero_Coefficients():
     
     """Assigns the value of the coefficients
     of stability in cruise conditions and order them in a matrix.
     
-    C_Y_b is the side force stability derivative with respect to the  
+    CY_b is the side force stability derivative with respect to the  
         angle of sideslip
-    C_Y_da is the side force stability derivative with respect to the 
+    CY_da is the side force stability derivative with respect to the 
          aileron deflection
-    C_Y_dr is the side force stability derivative with respect to the 
+    CY_dr is the side force stability derivative with respect to the 
          rudder deflection
     
-    C_l_b is the rolling moment stability derivative with respect to 
+    Cl_b is the rolling moment stability derivative with respect to 
         angle of sideslip
-    C_l_da is the rolling moment stability derivative with respect to 
+    Cl_da is the rolling moment stability derivative with respect to 
         the aileron deflection
-    C_l_dr is the rolling moment stability derivative with respect to 
+    Cl_dr is the rolling moment stability derivative with respect to 
         the rudder deflection
     
-    C_n_b is the yawing moment stability derivative with respect to the 
+    Cn_b is the yawing moment stability derivative with respect to the 
         angle of sideslip
-    C_n_da is the yawing moment stability derivative with respect to the 
+    Cn_da is the yawing moment stability derivative with respect to the 
         aileron deflection
-    C_n_dr is the yawing moment stability derivative with respect to the 
+    Cn_dr is the yawing moment stability derivative with respect to the 
         rudder deflection
         
     returns
     -------
     Long_coef_matrix : array_like
                                 [
-                                [CYb, CYda, CYdr],
-                                [Clb, Clda, Cldr],
-                                [Cnb, Cnda, Cndr]
+                                [CY_b, CY_da, CY_dr],
+                                [Cl_b, Cl_da, Cl_dr],
+                                [Cn_b, Cn_da, Cn_dr]
                                 ]
     
       
@@ -177,27 +177,27 @@ def Lat_Aero_Coefficients():
     page 590
     """
    
-    C_Y_b = -0.698
-    C_Y_da = 0
-    C_Y_dr = 0.230
+    CY_b = -0.698
+    CY_da = 0
+    CY_dr = 0.230
     
-    C_l_b = -0.1096
-    C_l_da = 0.172
-    C_l_dr = 0.0192
+    Cl_b = -0.1096
+    Cl_da = 0.172
+    Cl_dr = 0.0192
     
-    C_n_b = 0.1444
-    C_n_da = -0.0168
-    C_n_dr = -0.1152
+    Cn_b = 0.1444
+    Cn_da = -0.0168
+    Cn_dr = -0.1152
     
-    Lat_coef_matrix = np.array([
-                                [C_Y_b, C_Y_da, C_Y_dr],
-                                [C_l_b, C_l_da, C_l_dr],
-                                [C_n_b, C_n_da, C_n_dr]
+    lat_coef_matrix = np.array([
+                                [CY_b, CY_da, CY_dr],
+                                [Cl_b, Cl_da, Cl_dr],
+                                [Cn_b, Cn_da, Cn_dr]
                                 ])
     
-    return Lat_coef_matrix
+    return lat_coef_matrix
     
-def q (U,rho):
+def q (TAS,rho):
     
     """ Calculates  the dinamic pressure q = 0.5*rho*U^2
     
@@ -215,16 +215,15 @@ def q (U,rho):
     q : float
         dinamic pressure 
         
-    """
-    #Aquí falta asegurarse que la densidad y la velocidad que entra son correctas    
+    """   
     
-    q = 0.5 * rho * (U ** 2)
+    q = 0.5 * rho * (TAS ** 2)
     
     return q
     
     
     
-def get_aerodynamic_forces( U, rho, alpha, beta, delta_e, ih, delta_ail, delta_r):
+def get_aerodynamic_forces( TAS, rho, alpha, beta, delta_e, ih, delta_ail, delta_r):
     
     """ Calculates forces 
     
@@ -233,7 +232,7 @@ def get_aerodynamic_forces( U, rho, alpha, beta, delta_e, ih, delta_ail, delta_r
     
     rho : float
           density (kg/(m3))
-    U : float
+    TAS : float
         velocity (m/s)
     
     alpha : float
@@ -261,26 +260,26 @@ def get_aerodynamic_forces( U, rho, alpha, beta, delta_e, ih, delta_ail, delta_r
     chapter 3 and 4 
     """
  
-    Long_coef_matrix = Long_Aero_Coefficients()
-    Lat_coef_matrix = Lat_Aero_Coefficients()
+    long_coef_matrix = long_Aero_Coefficients()
+    lat_coef_matrix = lat_Aero_Coefficients()
       
-    C_L_0, C_L_a, C_L_de, C_L_dih = Long_coef_matrix[0,:]
-    C_D_0, C_D_a, C_D_de, C_D_dih = Long_coef_matrix[1,:]
-    C_Y_b, C_Y_da, C_Y_dr = Lat_coef_matrix[0,:]
+    CL_0, CL_a, CL_de, CL_dih = long_coef_matrix[0,:]
+    CD_0, CD_a, CD_de, CD_dih = long_coef_matrix[1,:]
+    CY_b, CY_da, CY_dr = lat_coef_matrix[0,:]
     
-    C_L_full = C_L_0 + C_L_a * alpha + C_L_de * delta_e + C_L_dih * ih
-    C_D_full = C_D_0 + C_D_a * alpha + C_D_de * delta_e + C_D_dih * ih  
-    C_Y_full = C_Y_b * beta + C_Y_da* delta_ail + C_Y_dr * delta_r
+    CL_full = CL_0 + CL_a * alpha + CL_de * delta_e + CL_dih * ih
+    CD_full = CD_0 + CD_a * alpha + CD_de * delta_e + CD_dih * ih  
+    CY_full = CY_b * beta + CY_da * delta_ail + CY_dr * delta_r
     
-    b = Geometric_Data()[2]
-    c = Geometric_Data()[1]
-    Sw = Geometric_Data()[0]
+    span = geometric_Data()[2]
+    c = geometric_Data()[1]
+    Sw = geometric_Data()[0]
  
-    aerodynamic_forces = q(U,rho) * Sw * np.array([-C_D_full, C_Y_full, -C_L_full])   #N
+    aerodynamic_forces = q(TAS,rho) * Sw * np.array([-CD_full, CY_full, -CL_full])   #N
     
     return aerodynamic_forces
                          
-def get_aerodynamic_moments( U, rho, alpha, beta, delta_e, ih, delta_ail, delta_r):
+def get_aerodynamic_moments( TAS, rho, alpha, beta, delta_e, ih, delta_ail, delta_r):
     
     """ Calculates forces 
     
@@ -289,7 +288,7 @@ def get_aerodynamic_moments( U, rho, alpha, beta, delta_e, ih, delta_ail, delta_
     
     rho : float
           density (kg/m3)
-    U : float
+    TAS : float
         velocity (m/s)
     
     alpha : float
@@ -316,26 +315,62 @@ def get_aerodynamic_moments( U, rho, alpha, beta, delta_e, ih, delta_ail, delta_
     AIRCRAFT DYNAMICS From modelling to simulation (Marcello R. Napolitano)
     chapter 3 and 4 
     """
-    Long_coef_matrix = Long_Aero_Coefficients()
-    Lat_coef_matrix = Lat_Aero_Coefficients()
+    
+    long_coef_matrix = long_Aero_Coefficients()
+    lat_coef_matrix = lat_Aero_Coefficients()
 
     
-    C_m_0, C_m_a, C_m_de, C_m_dih = Long_coef_matrix[2,:]
-    C_l_b, C_l_da, C_l_dr = Lat_coef_matrix[1,:]
-    C_n_b, C_n_da, C_n_dr = Lat_coef_matrix[2,:]
+    Cm_0, Cm_a, Cm_de, Cm_dih = long_coef_matrix[2,:]
+    Cl_b, Cl_da, Cl_dr = lat_coef_matrix[1,:]
+    Cn_b, Cn_da, Cn_dr = lat_coef_matrix[2,:]
     
     
-    C_m_full = C_m_0 + C_m_a * alpha + C_m_de * delta_e + C_m_dih * ih
-    C_l_full = C_l_b * beta + C_l_da* delta_ail + C_l_dr * delta_r
-    C_n_full = C_n_b * beta + C_n_da* delta_ail + C_n_dr * delta_r 
+    Cm_full = Cm_0 + Cm_a * alpha + Cm_de * delta_e + Cm_dih * ih
+    Cl_full = Cl_b * beta + Cl_da* delta_ail + Cl_dr * delta_r
+    Cn_full = Cn_b * beta + Cn_da* delta_ail + Cn_dr * delta_r 
     
-    b = Geometric_Data()[2]
-    c = Geometric_Data()[1]
-    Sw = Geometric_Data()[0]
+    span = geometric_Data()[2]
+    c = geometric_Data()[1]
+    Sw = geometric_Data()[0]
 
-    aerodynamic_moments = q(U,rho) * Sw * np.array([C_l_full * b,C_m_full * c,C_n_full * b]) 
+    aerodynamic_moments = q(TAS,rho) * Sw * np.array([Cl_full * span,Cm_full * c,Cn_full * span]) 
     
-    return aerodynamic_moments            
+    return aerodynamic_moments   
+
+def get_engine_force(delta_t):
+    
+    """ Calculates forces 
+    
+    Parameters
+    ----------
+    
+    delta_t : float
+             trust_lever (0 = 0 Newton, 1 = CT) 
+             
+      
+    returns
+    -------
+    
+    engine_force : float
+                  Trust (N)
+        
+    References
+    ----------
+    Airplane Flight Dyanamics and Automatic Flight Controls part I - Jan Roskam
+    """
+    
+    
+    Ct = 0.031 * delta_t
+    
+    q_cruise = 91.2 * 47.880172    #Pa
+    
+    Sw = geometric_Data()[0]
+
+    engine_force = Ct * Sw * q_cruise   # N
+    
+    return engine_force
+    
+     
     
     
     
