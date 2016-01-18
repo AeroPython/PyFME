@@ -241,7 +241,7 @@ def test_results_under_84km():
                              ])  # kg / m3
 
     expected_a = np.array([328.2055,
-                           315.3518,
+                           314.1822,
                            274.7099,
                            ])  # m/s
 
