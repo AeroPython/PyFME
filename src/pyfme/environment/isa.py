@@ -22,9 +22,10 @@
 
 """
 
-from math import exp
+from math import exp, sqrt
 
 # Constants
+gamma = 1.401  # Adiabatic index or ratio of specific heats (dry air at 20º C)
 R_a = 287.05287  # J/(Kg·K)
 g0 = 9.80665  # m/s^2
 
@@ -139,4 +140,6 @@ def atm(h):
 
     rho = p / (R_a * T)
 
-    return T, p, rho
+    a = sqrt(gamma * R_a * T)
+
+    return T, p, rho, a
