@@ -125,10 +125,10 @@ def test1_kinematic_angular_eqs():
 
     time = 0
     euler_angles = np.array([np.pi / 4, np.pi / 4, 0])
-    angular_vel = np.array([1, 1, 1], dtype=float)
+    ang_vel = np.array([1, 1, 1], dtype=float)
 
     expected_sol = np.array([0, 1 + 2 ** 0.5, 2])
-    sol = kinematic_angular_eqs(time, euler_angles, angular_vel)
+    sol = kinematic_angular_eqs(time, euler_angles, ang_vel)
 
     assert(np.allclose(expected_sol, sol))
 
@@ -137,10 +137,10 @@ def test2_kinematic_angular_eqs():
 
     time = 0
     euler_angles = np.array([0, np.pi / 2, 0])
-    angular_vel = np.array([0, 1, 0], dtype=float)
+    ang_vel = np.array([0, 1, 0], dtype=float)
 
     expected_sol = np.array([0, 0, 1], dtype=float)
-    sol = kinematic_angular_eqs(time, euler_angles, angular_vel)
+    sol = kinematic_angular_eqs(time, euler_angles, ang_vel)
 
     assert(np.allclose(expected_sol, sol))
 
@@ -149,14 +149,14 @@ def test1_jac_kinematic_angular_eqs():
 
     time = 0
     euler_angles = np.array([np.pi / 4, np.pi / 4, 0])
-    angular_vel = np.array([1, 1, 1], dtype=float)
+    ang_vel = np.array([1, 1, 1], dtype=float)
 
     expected_sol = np.zeros([3, 3])
     expected_sol[0, 1] = - 2 ** 0.5
     expected_sol[1, 0] = 2 * 2 ** 0.5
     expected_sol[2, 0] = 2
 
-    sol = jac_kinematic_angular_eqs(time, euler_angles, angular_vel)
+    sol = jac_kinematic_angular_eqs(time, euler_angles, ang_vel)
 
     assert(np.allclose(expected_sol, sol))
 
@@ -165,13 +165,13 @@ def test2_jac_kinematic_angular_eqs():
 
     time = 0
     euler_angles = np.array([0, np.pi / 2, 0])
-    angular_vel = np.array([0, 1, 0], dtype=float)
+    ang_vel = np.array([0, 1, 0], dtype=float)
 
     expected_sol = np.zeros([3, 3], dtype=float)
     expected_sol[0, 1] = - 1
     expected_sol[1, 0] = 1
 
-    sol = jac_kinematic_angular_eqs(time, euler_angles, angular_vel)
+    sol = jac_kinematic_angular_eqs(time, euler_angles, ang_vel)
 
     assert(np.allclose(expected_sol, sol))
 
@@ -179,11 +179,11 @@ def test2_jac_kinematic_angular_eqs():
 def test1_navigation_eqs():
 
     time = 0
-    linear_vel = np.array([1, 1, 1], dtype=float)
+    lin_vel = np.array([1, 1, 1], dtype=float)
     euler_angles = np.array([np.pi / 4, np.pi / 4, 0])
 
     expected_sol = np.array([1 + (2 ** 0.5) / 2, 0, 1 - (2 ** 0.5) / 2])
-    sol = navigation_eqs(time, linear_vel, euler_angles)
+    sol = navigation_eqs(time, lin_vel, euler_angles)
 
     assert(np.allclose(expected_sol, sol))
 
@@ -191,10 +191,10 @@ def test1_navigation_eqs():
 def test2_navigation_eqs():
 
     time = 0
-    linear_vel = np.array([1, 0, 1], dtype=float)
+    lin_vel = np.array([1, 0, 1], dtype=float)
     euler_angles = np.array([0, np.pi / 2, 0])
 
     expected_sol = np.array([1, - 1, 0], dtype=float)
-    sol = navigation_eqs(time, linear_vel, euler_angles)
+    sol = navigation_eqs(time, lin_vel, euler_angles)
 
     assert(np.allclose(expected_sol, sol))
