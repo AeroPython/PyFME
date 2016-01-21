@@ -29,7 +29,7 @@ def test_sea_level():
     assert_equal(T, expected_T)
     assert_equal(p, expected_p)
     assert_almost_equal(rho, expected_rho, decimal=4)
-    assert_almost_equal(a, expected_a, decimal=4)
+    assert_almost_equal(a, expected_a, decimal=2)
 
 def test_altitude_is_out_of_range(recwarn):
     wrong_h = (-1.0, 84501)  # m
@@ -75,7 +75,7 @@ def test_results_under_11km():
         T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
-        assert_almost_equal(a, expected_a[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
 def test_results_under_20km():
@@ -106,7 +106,7 @@ def test_results_under_20km():
         T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
-        assert_almost_equal(a, expected_a[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
 def test_results_under_32km():
@@ -137,7 +137,7 @@ def test_results_under_32km():
         T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
-        assert_almost_equal(a, expected_a[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
 def test_results_under_47km():
@@ -168,7 +168,7 @@ def test_results_under_47km():
         T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
-        assert_almost_equal(a, expected_a[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
 def test_results_under_51km():
@@ -195,7 +195,7 @@ def test_results_under_51km():
         T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
-        assert_almost_equal(a, expected_a[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
 def test_results_under_71km():
@@ -222,7 +222,7 @@ def test_results_under_71km():
         T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
-        assert_almost_equal(a, expected_a[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
 def test_results_under_84km():
@@ -249,4 +249,4 @@ def test_results_under_84km():
         T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
-        assert_almost_equal(a, expected_a[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
