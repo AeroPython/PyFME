@@ -1,7 +1,10 @@
 __pycache__
 .cache
 .idea
+build
 
 *.py[cod]
 
 *.egg-info
+
+.spyder*
