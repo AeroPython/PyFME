@@ -13,22 +13,9 @@ import numpy as np
 
 from numpy.testing import (assert_array_almost_equal, assert_almost_equal)
 
-from pyfme.aircrafts.Cessna310 import (mass_and_Inertial_Data,
-                                       q, get_aerodynamic_forces,
+from pyfme.aircrafts.cessna_310 import (mass_and_Inertial_Data,
+                                       get_aerodynamic_forces,
                                        get_aerodynamic_moments, get_engine_force)
-
-
-
-
-def test_q():
-    
-    TAS = 100
-    rho = 1.225
-    q_expected = 6125
-    
-    dinamyc_pressure = q(TAS, rho)
-    
-    assert_almost_equal(dinamyc_pressure, q_expected)
     
 def test_get_aerodynamic_forces():
     
@@ -71,5 +58,13 @@ def test_get_engine_force():
     trust = get_engine_force(delta_t)
     
     assert_almost_equal(trust, trust_expected, decimal = 4)
+    
+    wrong_value_0 = -0.5
+    wrong_value_1 = 2
+    
+    with pytest.raises(ValueError):
+        
+        get_engine_force(wrong_value_0)
+        get_engine_force(wrong_value_1)
     
    

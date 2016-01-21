@@ -12,6 +12,8 @@ Created on Sun Jan  3 18:44:39 2016
 
 import numpy as np
 
+from pyfme.utils.anemometry import calculate_dynamic_pressure
+
 def geometric_Data():
     
     """ Provides the value of some geometric data.
@@ -197,31 +199,6 @@ def lat_Aero_Coefficients():
     
     return lat_coef_matrix
     
-def q (TAS,rho):
-    
-    """ Calculates  the dinamic pressure q = 0.5*rho*U^2
-    
-    Parameters
-    ----------
-    
-    rho : float
-          density (SI)
-    U : flota
-        velocity (SI)
-        
-    Returns
-    -------
-    
-    q : float
-        dinamic pressure 
-        
-    """   
-    
-    q = 0.5 * rho * (TAS ** 2)
-    
-    return q
-    
-    
     
 def get_aerodynamic_forces( TAS, rho, alpha, beta, delta_e, ih, delta_ail, delta_r):
     
@@ -275,7 +252,7 @@ def get_aerodynamic_forces( TAS, rho, alpha, beta, delta_e, ih, delta_ail, delta
     c = geometric_Data()[1]
     Sw = geometric_Data()[0]
  
-    aerodynamic_forces = q(TAS,rho) * Sw * np.array([-CD_full, CY_full, -CL_full])   #N
+    aerodynamic_forces = calculate_dynamic_pressure(rho,TAS) * Sw * np.array([-CD_full, CY_full, -CL_full])   #N
     
     return aerodynamic_forces
                          
@@ -333,7 +310,8 @@ def get_aerodynamic_moments( TAS, rho, alpha, beta, delta_e, ih, delta_ail, delt
     c = geometric_Data()[1]
     Sw = geometric_Data()[0]
 
-    aerodynamic_moments = q(TAS,rho) * Sw * np.array([Cl_full * span,Cm_full * c,Cn_full * span]) 
+    aerodynamic_moments = calculate_dynamic_pressure (rho,TAS) * Sw\
+                          * np.array([Cl_full * span,Cm_full * c,Cn_full * span]) 
     
     return aerodynamic_moments   
 
@@ -358,21 +336,24 @@ def get_engine_force(delta_t):
     ----------
     Airplane Flight Dyanamics and Automatic Flight Controls part I - Jan Roskam
     """
+    if delta_t >= 0 and delta_t <= 1 :
     
+        Ct = 0.031 * delta_t
     
-    Ct = 0.031 * delta_t
+        q_cruise = 91.2 * 47.880172   #Pa
     
-    q_cruise = 91.2 * 47.880172    #Pa
-    
-    Sw = geometric_Data()[0]
+        Sw = geometric_Data()[0]
 
-    engine_force = Ct * Sw * q_cruise   # N
+        engine_force = Ct * Sw * q_cruise   #N
     
+    else:
+        raise ValueError('delta_t must be between 0 and 1')
+        
     return engine_force
     
      
     
-    
+
     
     
     
