@@ -26,7 +26,7 @@ def test_tas2eas():
     assert_almost_equal(eas, eas_expected)
 
     # Test at 11000m
-    _, _, rho = atm(11000)
+    _, _, rho, _ = atm(11000)
     tas = 275
     eas_expected = 149.88797172756003
 
@@ -46,7 +46,7 @@ def test_eas2tas():
     assert_almost_equal(tas, tas_expected)
 
     # Test at 11000m
-    _, _, rho = atm(11000)
+    _, _, rho, _ = atm(11000)
     eas = 149.88797172756003
     tas_expected = 275
 
@@ -66,7 +66,7 @@ def test_tas2cas():
     assert_almost_equal(cas, cas_expected)
 
     # Test at 11000m
-    _, p, rho = atm(11000)
+    _, p, rho, _ = atm(11000)
     tas = 275
     cas_expected = 162.03569680495048
 
@@ -86,7 +86,7 @@ def test_cas2tas():
     assert_almost_equal(tas, tas_expected)
 
     # Test at 11000m
-    _, p, rho = atm(11000)
+    _, p, rho, _ = atm(11000)
     cas = 162.03569680495048
     tas_expected = 275
 
@@ -106,7 +106,7 @@ def test_cas2eas():
     assert_almost_equal(eas, eas_expected)
 
     # Test at 11000m
-    _, p, rho = atm(11000)
+    _, p, rho, _ = atm(11000)
     cas = 162.03569680495048
     eas_expected = 149.88797172756003
 
@@ -126,7 +126,7 @@ def test_eas2cas():
     assert_almost_equal(cas, cas_expected)
 
     # Test at 11000m
-    _, p, rho = atm(11000)
+    _, p, rho, _ = atm(11000)
     eas = 149.88797172756003
     cas_expected = 162.03569680495048
 
