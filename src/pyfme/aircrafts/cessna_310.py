@@ -357,24 +357,3 @@ def get_engine_force(delta_t):
         raise ValueError('delta_t must be between 0 and 1')
 
     return engine_force
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
