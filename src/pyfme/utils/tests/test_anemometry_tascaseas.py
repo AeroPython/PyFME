@@ -1,12 +1,11 @@
 """
 TAS CAS EAS convert test functions
 """
-import numpy as np
 from numpy.testing import (assert_almost_equal)
 
 
-from pyfme.utils.tascaseas import (tas2eas, eas2tas, cas2eas, eas2cas, tas2cas,
-                                   cas2tas)
+from pyfme.utils.anemometry import (tas2eas, eas2tas, cas2eas, eas2cas,
+                                    tas2cas, cas2tas)
 from pyfme.environment.isa import atm
 
 rho_0 = 1.225  # density at sea level (kg/m3)
