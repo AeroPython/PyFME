@@ -23,18 +23,18 @@ rho_0 = 1.225  # density at sea level (kg/m3)
 p_0 = 101325  # pressure at sea level (Pa)
 a_0 = 340.293990543  # sound speed at sea level (m/s)
 gamma = 1.4  # heat capacity ratio
-var = (gamma - 1)/gamma
 
 
 def tas2eas(tas, rho):
     '''Given the True Airspeed, this function provides the Equivalent Airspeed.
-        True Airspeed (TAS): is the speed of the aircraft relative to the
-        airmass in which it is flying.
 
-        Equivalent Airspeed (EAS): is the airspeed at sea level in the
-        International Standard Atmosphere at which the dynamic pressure
-        is the same as the dynamic pressure at the true airspeed (TAS) and
-        altitude at which the aircraft is flying.
+    True Airspeed (TAS): is the speed of the aircraft relative to the
+    airmass in which it is flying.
+
+    Equivalent Airspeed (EAS): is the airspeed at sea level in the
+    International Standard Atmosphere at which the dynamic pressure
+    is the same as the dynamic pressure at the true airspeed (TAS) and
+    altitude at which the aircraft is flying.
 
     Parameters
     ----------
@@ -54,13 +54,14 @@ def tas2eas(tas, rho):
 
 def eas2tas(eas, rho):
     '''Given the Equivalent Airspeed, this function provides the True Airspeed.
-        True Airspeed (TAS): is the speed of the aircraft relative to the
-        airmass in which it is flying.
 
-        Equivalent Airspeed (EAS): is the airspeed at sea level in the
-        International Standard Atmosphere at which the dynamic pressure
-        is the same as the dynamic pressure at the true airspeed (TAS) and
-        altitude at which the aircraft is flying.
+    True Airspeed (TAS): is the speed of the aircraft relative to the
+    airmass in which it is flying.
+
+    Equivalent Airspeed (EAS): is the airspeed at sea level in the
+    International Standard Atmosphere at which the dynamic pressure
+    is the same as the dynamic pressure at the true airspeed (TAS) and
+    altitude at which the aircraft is flying.
 
     Parameters
     ----------
@@ -81,12 +82,13 @@ def eas2tas(eas, rho):
 
 def tas2cas(tas, p, rho):
     '''Given the True Airspeed, this function provides the Calibrated Airspeed.
-        True Airspeed (TAS): is the speed of the aircraft relative to the
-        airmass in which it is flying.
 
-        Calibrated airspeed (CAS) is the speed shown by a conventional
-        airspeed indicator after correction for instrument error and
-        position error.
+    True Airspeed (TAS): is the speed of the aircraft relative to the
+    airmass in which it is flying.
+
+    Calibrated airspeed (CAS) is the speed shown by a conventional
+    airspeed indicator after correction for instrument error and
+    position error.
 
     Parameters
     ----------
@@ -103,23 +105,26 @@ def tas2cas(tas, p, rho):
     '''
 
     a = sqrt(gamma * p / rho)
+    var = (gamma - 1) / gamma
 
-    cas = sqrt(2 * a_0 ** 2 / (gamma - 1) *
-               ((((tas ** 2 * (gamma - 1) /
-                  (2 * a ** 2) + 1) ** (1/var) - 1) *
-                 (p / p_0) + 1) ** (var) - 1))
+    temp = (tas**2 * (gamma - 1) / (2 * a**2) + 1) ** (1/var)
+    temp = (temp - 1) * (p / p_0)
+    temp = (temp + 1) ** var - 1
+
+    cas = sqrt(2 * a_0 ** 2 / (gamma - 1) * temp)
 
     return cas
 
 
 def cas2tas(cas, p, rho):
     '''Given the Calibrated Airspeed, this function provides the True Airspeed.
-        True Airspeed (TAS): is the speed of the aircraft relative to the
-        airmass in which it is flying.
 
-        Calibrated airspeed (CAS) is the speed shown by a conventional
-        airspeed indicator after correction for instrument error and
-        position error.
+    True Airspeed (TAS): is the speed of the aircraft relative to the
+    airmass in which it is flying.
+
+    Calibrated airspeed (CAS) is the speed shown by a conventional
+    airspeed indicator after correction for instrument error and
+    position error.
 
     Parameters
     ----------
@@ -136,25 +141,29 @@ def cas2tas(cas, p, rho):
     '''
 
     a = sqrt(gamma * p / rho)
+    var = (gamma - 1) / gamma
 
-    tas = sqrt(2 * a ** 2 / (gamma - 1) *
-               ((((cas ** 2 * (gamma - 1) /
-                  (2 * a_0 ** 2) + 1) ** (1 / var) - 1) *
-                 (p_0 / p) + 1) ** (var) - 1))
+    temp = (cas**2 * (gamma - 1) / (2 * a_0**2) + 1) ** (1/var)
+    temp = (temp - 1) * (p_0 / p)
+    temp = (temp + 1) ** var - 1
+
+    tas = sqrt(2 * a ** 2 / (gamma - 1) * temp)
 
     return tas
 
 
 def cas2eas(cas, p, rho):
-    '''Given the Calibrated Airspeed, this function provides the Equivalent Airspeed.
-        Calibrated airspeed (CAS) is the speed shown by a conventional
-        airspeed indicator after correction for instrument error and
-        position error.
+    '''Given the Calibrated Airspeed, this function provides the Equivalent
+    Airspeed.
 
-        Equivalent Airspeed (EAS): is the airspeed at sea level in the
-        International Standard Atmosphere at which the dynamic pressure
-        is the same as the dynamic pressure at the true airspeed (TAS) and
-        altitude at which the aircraft is flying.
+    Calibrated airspeed (CAS) is the speed shown by a conventional
+    airspeed indicator after correction for instrument error and
+    position error.
+
+    Equivalent Airspeed (EAS): is the airspeed at sea level in the
+    International Standard Atmosphere at which the dynamic pressure
+    is the same as the dynamic pressure at the true airspeed (TAS) and
+    altitude at which the aircraft is flying.
 
     Parameters
     ----------
@@ -178,16 +187,17 @@ def cas2eas(cas, p, rho):
 
 
 def eas2cas(eas, p, rho):
-    '''Given the Equivalent Airspeed, this function provides the Calibrated\
-        Airspeed.
-        Calibrated airspeed (CAS) is the speed shown by a conventional
-        airspeed indicator after correction for instrument error and
-        position error.
+    '''Given the Equivalent Airspeed, this function provides the Calibrated
+    Airspeed.
 
-        Equivalent Airspeed (EAS): is the airspeed at sea level in the
-        International Standard Atmosphere at which the dynamic pressure
-        is the same as the dynamic pressure at the true airspeed (TAS) and
-        altitude at which the aircraft is flying.
+    Calibrated airspeed (CAS) is the speed shown by a conventional
+    airspeed indicator after correction for instrument error and
+    position error.
+
+    Equivalent Airspeed (EAS): is the airspeed at sea level in the
+    International Standard Atmosphere at which the dynamic pressure
+    is the same as the dynamic pressure at the true airspeed (TAS) and
+    altitude at which the aircraft is flying.
 
     Parameters
     ----------
@@ -208,6 +218,3 @@ def eas2cas(eas, p, rho):
     cas = tas2cas(tas, p, rho)
 
     return cas
-
-
-print(tas2cas(275, 22632.1, 0.36391861135917014))
