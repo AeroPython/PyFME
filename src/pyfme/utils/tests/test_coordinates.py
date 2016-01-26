@@ -16,17 +16,40 @@ from pyfme.utils.coordinates import (body2hor, hor2body,
                                      check_alpha_beta_range)
 
 
-def test_check_theta_phi_psi_range():
+def test_check_theta_range():
 
     wrong_values = (3 * np.pi, - 3 * np.pi)
 
     for value in wrong_values:
         # 0 is always a correct value
-        angles = [0, 0, 0]
-        for ii in range(3):
-            angles[ii] = value
-            with pytest.raises(ValueError):
-                check_theta_phi_psi_range(*angles)
+        with pytest.raises(ValueError) as excinfo:
+            check_theta_phi_psi_range(value, 0, 0)
+        assert ("ValueError: Theta value is not inside correct range"
+                in excinfo.exconly())
+
+
+def test_check_phi_range():
+
+    wrong_values = (3 * np.pi, - 3 * np.pi)
+
+    for value in wrong_values:
+        # 0 is always a correct value
+        with pytest.raises(ValueError) as excinfo:
+            check_theta_phi_psi_range(0, value, 0)
+        assert ("ValueError: Phi value is not inside correct range"
+                in excinfo.exconly())
+
+
+def test_check_psi_range():
+
+    wrong_values = (3 * np.pi, - 3 * np.pi)
+
+    for value in wrong_values:
+        # 0 is always a correct value
+        with pytest.raises(ValueError) as excinfo:
+            check_theta_phi_psi_range(0, 0, value)
+        assert ("ValueError: Psi value is not inside correct range"
+                in excinfo.exconly())
 
 
 def test_body2hor():
@@ -108,6 +131,42 @@ def test_check_gamma_mu_chi_range():
                 check_gamma_mu_chi_range(*angles)
 
 
+def test_check_gamma_range():
+
+    wrong_values = (3 * np.pi, - 3 * np.pi)
+
+    for value in wrong_values:
+        # 0 is always a correct value
+        with pytest.raises(ValueError) as excinfo:
+            check_gamma_mu_chi_range(value, 0, 0)
+        assert ("ValueError: Gamma value is not inside correct range"
+                in excinfo.exconly())
+
+
+def test_check_mu_range():
+
+    wrong_values = (3 * np.pi, - 3 * np.pi)
+
+    for value in wrong_values:
+        # 0 is always a correct value
+        with pytest.raises(ValueError) as excinfo:
+            check_gamma_mu_chi_range(0, value, 0)
+        assert ("ValueError: Mu value is not inside correct range"
+                in excinfo.exconly())
+
+
+def test_check_chi_range():
+
+    wrong_values = (3 * np.pi, - 3 * np.pi)
+
+    for value in wrong_values:
+        # 0 is always a correct value
+        with pytest.raises(ValueError) as excinfo:
+            check_gamma_mu_chi_range(0, 0, value)
+        assert ("ValueError: Chi value is not inside correct range"
+                in excinfo.exconly())
+
+
 def test_wind2hor():
 
     # Test with a pitch rotation
@@ -185,6 +244,30 @@ def test_check_alpha_beta_range():
             angles[ii] = value
             with pytest.raises(ValueError):
                 check_alpha_beta_range(*angles)
+
+
+def test_check_alpha_range():
+
+    wrong_values = (3 * np.pi, - 3 * np.pi)
+
+    for value in wrong_values:
+        # 0 is always a correct value
+        with pytest.raises(ValueError) as excinfo:
+            check_alpha_beta_range(value, 0)
+        assert ("ValueError: Alpha value is not inside correct range"
+                in excinfo.exconly())
+
+
+def test_check_beta_range():
+
+    wrong_values = (3 * np.pi, - 3 * np.pi)
+
+    for value in wrong_values:
+        # 0 is always a correct value
+        with pytest.raises(ValueError) as excinfo:
+            check_alpha_beta_range(0, value)
+        assert ("ValueError: Beta value is not inside correct range"
+                in excinfo.exconly())
 
 
 def test_wind2body():

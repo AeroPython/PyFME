@@ -21,14 +21,15 @@ def test_sea_level():
     expected_T = 288.15  # K
     expected_p = 101325.0  # Pa
     expected_rho = 1.2250  # kg / m3
+    expected_a = 340.4155  # m / s
 
-    T, p, rho = atm(h)
+    T, p, rho, a = atm(h)
 
     # Reads: "Assert if T equals expected_T"
     assert_equal(T, expected_T)
     assert_equal(p, expected_p)
     assert_almost_equal(rho, expected_rho, decimal=4)
-
+    assert_almost_equal(a, expected_a, decimal=2)
 
 def test_altitude_is_out_of_range(recwarn):
     wrong_h = (-1.0, 84501)  # m
@@ -62,10 +63,19 @@ def test_results_under_11km():
                              0.36392
                              ])  # kg / m3
 
+    expected_a = np.array([340.4155,
+                           340.2235,
+                           338.2972,
+                           314.4700,
+                           299.5701,
+                           295.1749
+                           ])  # m / s
+
     for ii, h_ in enumerate(h):
-        T, p, rho = atm(h_)
+        T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
 def test_results_under_20km():
@@ -86,10 +96,17 @@ def test_results_under_20km():
                              0.088035
                              ])  # kg / m3
 
+    expected_a = np.array([295.1749,
+                           295.1749,
+                           295.1749,
+                           295.1749,
+                           ])
+
     for ii, h_ in enumerate(h):
-        T, p, rho = atm(h_)
+        T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
 def test_results_under_32km():
@@ -110,10 +127,17 @@ def test_results_under_32km():
                              0.013225
                              ])  # kg / m3
 
+    expected_a = np.array([296.6020,
+                           297.8873,
+                           301.1100,
+                           303.2394
+                           ])  # m/s
+
     for ii, h_ in enumerate(h):
-        T, p, rho = atm(h_)
+        T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
 def test_results_under_47km():
@@ -134,10 +158,17 @@ def test_results_under_47km():
                              0.0014275
                              ])  # kg / m3
 
+    expected_a = np.array([303.6105,
+                           310.5774,
+                           321.2704,
+                           329.9165
+                           ])  # m / s
+
     for ii, h_ in enumerate(h):
-        T, p, rho = atm(h_)
+        T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
 def test_results_under_51km():
@@ -155,10 +186,16 @@ def test_results_under_51km():
                              0.00086160
                              ])  # kg / m3
 
+    expected_a = np.array([329.9165,
+                           329.9165,
+                           329.9165
+                           ])  # m / s
+
     for ii, h_ in enumerate(h):
-        T, p, rho = atm(h_)
+        T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
 def test_results_under_71km():
@@ -176,10 +213,16 @@ def test_results_under_71km():
                              6.4211e-5
                              ])  # kg / m3
 
+    expected_a = np.array([329.0621,
+                           314.1823,
+                           293.8092
+                           ])  # m / s
+
     for ii, h_ in enumerate(h):
-        T, p, rho = atm(h_)
+        T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
 def test_results_under_84km():
@@ -197,7 +240,13 @@ def test_results_under_84km():
                              7.3914e-6
                              ])  # kg / m3
 
+    expected_a = np.array([328.2055,
+                           314.1822,
+                           274.7099,
+                           ])  # m/s
+
     for ii, h_ in enumerate(h):
-        T, p, rho = atm(h_)
+        T, p, rho, a = atm(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
+        assert_almost_equal(a, expected_a[ii], decimal=2)
