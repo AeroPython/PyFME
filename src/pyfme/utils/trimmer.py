@@ -15,6 +15,9 @@ the independent variables until some solution criterion is met.
 """
 
 from math import sqrt, sin, cos, tan, atan
+import numpy as np
+
+from pyfme.utils.coordinates import wind2body
 
 
 def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0):
@@ -71,7 +74,7 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0):
 
 
 def turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma=0):
-    """Calculates phi for coordinated turn
+    """Calculates phi for coordinated turn.
     """
 
     g0 = 9.8
@@ -97,8 +100,8 @@ def turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma=0):
 
 
 def turn_coord_cons2(turn_rate, alpha, TAS):
-    """Calculates phi for coordinated given that gamma is equal to cero and
-    beta is small (beta << 1).
+    """Calculates phi for coordinated turn given that gamma is equal to cero
+    and beta is small (beta << 1).
     """
 
     g0 = 9.8
@@ -121,3 +124,41 @@ def rate_of_climb_cons(gamma, alpha, beta, phi):
     theta = atan(theta)
 
     return theta
+
+
+def func(trimmed_params, h, TAS, gamma, turn_rate, aircraft, dynamic_eqs):
+    """Function to optimize
+    """
+
+    # Fixme: if turn_rate != 0, p, q, r must also be calculated
+
+    alpha = trimmed_params[0]
+    beta = trimmed_params[1]
+
+    delta_e = trimmed_params[2]
+    delta_ail = trimmed_params[3]
+    delta_r = trimmed_params[4]
+    delta_t = trimmed_params[5]
+
+    phi = turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma)
+    theta = rate_of_climb_cons(gamma, alpha, beta, phi)
+
+    # w = turn_rate * k_h
+    # k_h = sin(theta) i_b + sin(phi) * cos(theta) j_b + cos(theta) * sin(phi)
+    # w = p * i_b + q * j_b + r * k_b
+    p = - turn_rate * sin(theta)
+    q = turn_rate * sin(phi) * cos(theta)
+    r = turn_rate * cos(theta) * sin(phi)
+
+    ang_vel = np.array([p, q, r])
+
+    lin_vel = wind2body((TAS, 0, 0), )
+
+    # FIXME: This implies to change the aircraft model...
+    forces, moments = aircraft.get_forces_and_moments()  # Parametets...?
+    mass = aircraft.mass
+    inertia = aircraft.inertia
+
+    vel = np.concatenate(lin_vel, ang_vel)
+
+    return dynamic_eqs(0, vel, mass, inertia, forces, moments)
