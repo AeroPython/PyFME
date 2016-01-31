@@ -13,15 +13,17 @@ because of the very complex functional dependence of the erodynamic data.
 Instead, it must be done with a numerical algorithm which iteratively adjusts
 the independent variables until some solution criterion is met.
 """
-
-from math import sqrt, sin, cos, tan, atan
+from warnings import warn
 import numpy as np
+from math import sqrt, sin, cos, tan, atan
+from scipy.optimize import fmin
 
 from pyfme.utils.coordinates import wind2body
 from pyfme.environment.isa import atm
 
 
-def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0):
+def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
+                             dyn_eqs=None):
     """Finds a combination of values of the state and control variables that
     correspond to a steady-state flight condition. Steady-state aircraft flight
     can be defined as a condition in which all of the motion variables are
@@ -69,9 +71,51 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0):
         Wiley-lnterscience.
     """
 
-    pass
+    if dyn_eqs is None:
+        from pyfme.models.euler_flat_earth import linear_and_angular_momentum_eqs
+        dynamic_eqs = linear_and_angular_momentum_eqs
 
-    return
+    # TODO: try to look for a good inizialization
+    initial_guess = np.zeros([6]) + 0.01
+
+    args = (h, TAS, gamma, turn_rate, aircraft, dynamic_eqs)
+
+    results = fmin(func, x0=initial_guess, args=args, full_output=True,
+                   disp=False)
+    trimmed_params, fopt = results[0:2]
+
+    if abs(fopt) > 1e-3:
+        warn("Trim process did not converge. fopt={}".format(fopt),
+             RuntimeWarning)
+
+    alpha = trimmed_params[0]
+    beta = trimmed_params[1]
+
+    delta_e = trimmed_params[2]
+    delta_ail = trimmed_params[3]
+    delta_r = trimmed_params[4]
+    delta_t = trimmed_params[5]
+
+    # What happens if we have two engines and all that kind of things...?
+    control_vector = delta_e, delta_ail, delta_r, delta_t
+
+    if abs(turn_rate) < 1e-8:
+        phi = 0
+    else:
+        phi = turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma)
+
+    theta = rate_of_climb_cons(gamma, alpha, beta, phi)
+
+    # w = turn_rate * k_h
+    # k_h = sin(theta) i_b + sin(phi) * cos(theta) j_b + cos(theta) * sin(phi)
+    # w = p * i_b + q * j_b + r * k_b
+    p = - turn_rate * sin(theta)
+    q = turn_rate * sin(phi) * cos(theta)
+    r = turn_rate * cos(theta) * sin(phi)
+
+    ang_vel = np.array([p, q, r])
+
+    return ang_vel, theta, phi, alpha, beta, control_vector
 
 
 def turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma=0):
@@ -81,7 +125,7 @@ def turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma=0):
     g0 = 9.81
     G = turn_rate * TAS / g0
 
-    if gamma == 0:
+    if abs(gamma) < 1e-8:
         phi = G * cos(beta) / (cos(alpha) - G * sin(alpha) * sin(beta))
         phi = atan(phi)
 
@@ -130,9 +174,6 @@ def rate_of_climb_cons(gamma, alpha, beta, phi):
 def func(trimmed_params, h, TAS, gamma, turn_rate, aircraft, dynamic_eqs):
     """Function to optimize
     """
-
-    # Fixme: if turn_rate != 0, p, q, r must also be calculated
-
     alpha = trimmed_params[0]
     beta = trimmed_params[1]
 
@@ -141,7 +182,11 @@ def func(trimmed_params, h, TAS, gamma, turn_rate, aircraft, dynamic_eqs):
     delta_r = trimmed_params[4]
     delta_t = trimmed_params[5]
 
-    phi = turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma)
+    if abs(turn_rate) < 1e-8:
+        phi = 0
+    else:
+        phi = turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma)
+
     theta = rate_of_climb_cons(gamma, alpha, beta, phi)
 
     # w = turn_rate * k_h
@@ -153,19 +198,21 @@ def func(trimmed_params, h, TAS, gamma, turn_rate, aircraft, dynamic_eqs):
 
     ang_vel = np.array([p, q, r])
 
-    lin_vel = wind2body((TAS, 0, 0), )
+    lin_vel = wind2body((TAS, 0, 0), alpha, beta)
 
     # FIXME: This implied some changes in the aircraft model.
     # psi angle does not influence the attitude of the aircraft for gravity
     # force projection. So it is set to 0.
     attitude = np.array([theta, phi, 0])
-    _, _, rho = atm(h)
+    _, _, rho, _ = atm(h)
     forces, moments = aircraft.get_forces_and_moments(TAS, rho, alpha, beta,
                                                       delta_e, 0, delta_ail,
                                                       delta_r, delta_t,
                                                       attitude)
     mass, inertia = aircraft.mass_and_inertial_data()
 
-    vel = np.concatenate(lin_vel, ang_vel)
+    vel = np.concatenate((lin_vel[:], ang_vel[:]))
 
-    return dynamic_eqs(0, vel, mass, inertia, forces, moments)
+    output = dynamic_eqs(0, vel, mass, inertia, forces, moments)
+
+    return np.sum(np.dot(output, output))
