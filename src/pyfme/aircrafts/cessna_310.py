@@ -13,9 +13,10 @@ Created on Sun Jan  3 18:44:39 2016
 import numpy as np
 
 from pyfme.utils.anemometry import calculate_dynamic_pressure
+from pyfme.utils.coordinates import hor2body
 
 
-def geometric_Data():
+def geometric_data():
 
     """ Provides the value of some geometric data.
 
@@ -42,7 +43,7 @@ def geometric_Data():
     return Sw, c, span
 
 
-def mass_and_Inertial_Data():
+def mass_and_inertial_data():
 
     """ Provides the value of some mass and inertial data.
 
@@ -78,7 +79,7 @@ def mass_and_Inertial_Data():
     return mass, inertia
 
 
-def long_Aero_Coefficients():
+def long_aero_coefficients():
 
     """Assigns the value of the coefficients
     of stability in cruise conditions and order them in a matrix.
@@ -141,7 +142,7 @@ def long_Aero_Coefficients():
     return long_coef_matrix
 
 
-def lat_Aero_Coefficients():
+def lat_aero_coefficients():
 
     """Assigns the value of the coefficients
     of stability in cruise conditions and order them in a matrix.
@@ -243,8 +244,8 @@ def get_aerodynamic_forces(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
     chapter 3 and 4
     """
 
-    long_coef_matrix = long_Aero_Coefficients()
-    lat_coef_matrix = lat_Aero_Coefficients()
+    long_coef_matrix = long_aero_coefficients()
+    lat_coef_matrix = lat_aero_coefficients()
 
     CL_0, CL_a, CL_de, CL_dih = long_coef_matrix[0, :]
     CD_0, CD_a, CD_de, CD_dih = long_coef_matrix[1, :]
@@ -254,7 +255,7 @@ def get_aerodynamic_forces(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
     CD_full = CD_0 + CD_a * alpha + CD_de * delta_e + CD_dih * ih
     CY_full = CY_b * beta + CY_da * delta_ail + CY_dr * delta_r
 
-    Sw = geometric_Data()[0]
+    Sw = geometric_data()[0]
 
     aerodynamic_forces = calculate_dynamic_pressure(rho, TAS) *\
         Sw * np.array([-CD_full, CY_full, -CL_full])   # N
@@ -301,8 +302,8 @@ def get_aerodynamic_moments(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
     chapter 3 and 4
     """
 
-    long_coef_matrix = long_Aero_Coefficients()
-    lat_coef_matrix = lat_Aero_Coefficients()
+    long_coef_matrix = long_aero_coefficients()
+    lat_coef_matrix = lat_aero_coefficients()
 
     Cm_0, Cm_a, Cm_de, Cm_dih = long_coef_matrix[2, :]
     Cl_b, Cl_da, Cl_dr = lat_coef_matrix[1, :]
@@ -312,9 +313,9 @@ def get_aerodynamic_moments(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
     Cl_full = Cl_b * beta + Cl_da * delta_ail + Cl_dr * delta_r
     Cn_full = Cn_b * beta + Cn_da * delta_ail + Cn_dr * delta_r
 
-    span = geometric_Data()[2]
-    c = geometric_Data()[1]
-    Sw = geometric_Data()[0]
+    span = geometric_data()[2]
+    c = geometric_data()[1]
+    Sw = geometric_data()[0]
 
     aerodynamic_moments = calculate_dynamic_pressure(rho, TAS) * Sw\
         * np.array([Cl_full * span, Cm_full * c, Cn_full * span])
@@ -337,7 +338,7 @@ def get_engine_force(delta_t):
     -------
 
     engine_force : float
-                  Trust (N)
+                  Thrust (N)
 
     References
     ----------
@@ -349,7 +350,7 @@ def get_engine_force(delta_t):
 
         q_cruise = 91.2 * 47.880172   # Pa
 
-        Sw = geometric_Data()[0]
+        Sw = geometric_data()[0]
 
         engine_force = Ct * Sw * q_cruise   # N
 
@@ -357,3 +358,29 @@ def get_engine_force(delta_t):
         raise ValueError('delta_t must be between 0 and 1')
 
     return engine_force
+
+
+def get_forces_and_moments(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
+                           delta_r, delta_t, attitude):
+    """
+    """
+    # As stability axes are coincident with wind axes at the moment of
+    # linearization (with alpha=0 and beta=0), stability axes are parallel to
+    # body axes.
+    aero_forces = get_aerodynamic_forces(TAS, rho, alpha, beta, delta_e, 0,
+                                         delta_ail, delta_r)
+    thrust = get_engine_force(delta_t)
+    # Assuming that all the engine thrust is prodecued in the x_body direction
+    engine_force = np.array([thrust, 0, 0])
+
+    g0 = 9.81  # m/s²
+    theta, phi, psi = attitude
+    gravity_force = hor2body((0, 0, g0), theta, phi, psi)
+
+    forces = aero_forces + engine_force + gravity_force
+
+    # It is assumed that the engine moments are zero.
+    moments = get_aerodynamic_moments(TAS, rho, alpha, beta, delta_e, ih,
+                                      delta_ail, delta_r)
+
+    return forces, moments
