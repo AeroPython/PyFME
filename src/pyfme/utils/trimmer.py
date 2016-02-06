@@ -16,7 +16,7 @@ the independent variables until some solution criterion is met.
 from warnings import warn
 import numpy as np
 from math import sqrt, sin, cos, tan, atan
-from scipy.optimize import fmin
+from scipy.optimize import least_squares
 
 from pyfme.utils.coordinates import wind2body
 from pyfme.environment.isa import atm
@@ -80,13 +80,18 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
 
     args = (h, TAS, gamma, turn_rate, aircraft, dynamic_eqs)
 
-    results = fmin(func, x0=initial_guess, args=args, full_output=True,
-                   disp=False)
-    trimmed_params, fopt = results[0:2]
+    lower_bounds = (-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, 0)
+    upper_bounds = (+np.inf, +np.inf, +np.inf, +np.inf, +np.inf, 1)
 
-    if abs(fopt) > 1e-3:
-        warn("Trim process did not converge. fopt={}".format(fopt),
-             RuntimeWarning)
+    results = least_squares(func, x0=initial_guess, args=args, verbose=2,
+                            bounds=(lower_bounds, upper_bounds))
+
+    trimmed_params = results['x']
+    fun = results['fun']
+    cost = results['cost']
+
+    if cost > 1e-7 or any(abs(fun) > 1e-3):
+        warn("Trim process did not converge", RuntimeWarning)
 
     alpha = trimmed_params[0]
     beta = trimmed_params[1]
@@ -215,4 +220,4 @@ def func(trimmed_params, h, TAS, gamma, turn_rate, aircraft, dynamic_eqs):
 
     output = dynamic_eqs(0, vel, mass, inertia, forces, moments)
 
-    return np.sum(np.dot(output, output))
+    return output

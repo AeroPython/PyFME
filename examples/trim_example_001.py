@@ -7,11 +7,11 @@ Distributed under the terms of the MIT License.
 <Module name>
 <Brief description ...>
 """
-from pyfme.aircrafts import  cessna_310
+from pyfme.aircrafts import cessna_310
 from pyfme.utils.trimmer import steady_state_flight_trim
 from pyfme.utils.coordinates import wind2body
 
-TAS = 120  # m/s
+TAS = 80  # m/s
 h = 1000
 
 results = steady_state_flight_trim(cessna_310, h, TAS, gamma=0, turn_rate=0)
@@ -31,4 +31,3 @@ print("alpha = {}".format(results[3]))
 print("beta = {}".format(results[4]))
 print("control = {}".format(results[5]))
 print('')
-
