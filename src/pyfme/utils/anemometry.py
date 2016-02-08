@@ -150,9 +150,9 @@ def tas2eas(tas, rho):
     Parameters
     ----------
     tas : float
-        True Airspeed (TAS)
+        True Airspeed (TAS) (m/s)
     rho : float
-        Air density at flight level
+        Air density at flight level (kg/m3)
     Returns
     -------
     eas : float
@@ -177,9 +177,9 @@ def eas2tas(eas, rho):
     Parameters
     ----------
     eas : float
-        Equivalent Airspeed (EAS)
+        Equivalent Airspeed (EAS) (m/s)
     rho : float
-        Air density at flight level
+        Air density at flight level (kg/m3)
     Returns
     -------
     tas : float
@@ -204,11 +204,11 @@ def tas2cas(tas, p, rho):
     Parameters
     ----------
     tas : float
-        True Airspeed (TAS)
+        True Airspeed (TAS) (m/s)
     p : float
-        Air static pressure at flight level
+        Air static pressure at flight level (Pa)
     rho : float
-        Air density at flight level
+        Air density at flight level (kg/m3)
     Returns
     -------
     cas : float
@@ -240,11 +240,11 @@ def cas2tas(cas, p, rho):
     Parameters
     ----------
     cas : float
-        Calibrated Airspeed (CAS)
+        Calibrated Airspeed (CAS) (m/s)
     p : float
-        Air static pressur at flight level
+        Air static pressure at flight level (Pa)
     rho : float
-        Air density at flight level
+        Air density at flight level (kg/m3)
     Returns
     -------
     tas : float
@@ -279,11 +279,11 @@ def cas2eas(cas, p, rho):
     Parameters
     ----------
     cas : float
-        Calibrated Airspeed (CAS)
+        Calibrated Airspeed (CAS) (m/s)
     p : float
-        Air static pressur at flight level
+        Air static pressure at flight level (Pa)
     rho : float
-        Air density at flight level
+        Air density at flight level (kg/m3)
     Returns
     -------
     eas : float
@@ -313,11 +313,11 @@ def eas2cas(eas, p, rho):
     Parameters
     ----------
     eas : float
-        Equivalent Airspeed (EAS)
+        Equivalent Airspeed (EAS) (m/s)
     p : float
-        Air static pressur at flight level
+        Air static pressure at flight level (Pa)
     rho : float
-        Air density at flight level
+        Air density at flight level (kg/m3)
     Returns
     -------
     cas : float
@@ -329,3 +329,49 @@ def eas2cas(eas, p, rho):
     cas = tas2cas(tas, p, rho)
 
     return cas
+
+
+def stagnation_pressure(p, a, tas):
+    '''Given the static pressure, the sound velocity and the true air speed,
+    it returns the stagnation pressure for a compressible flow.
+
+    The stagnation pressure is the  is the static pressure a fluid retains when
+    brought to rest isentropically from Mach number M
+
+    Subsonic case: Bernouilli's equation compressible form.
+
+    Supersonic case: Due to the shock wave Bernouilli's equation is no longer
+    aplycable. Rayleigh Pitot tube formula is used.
+
+    Parameters
+    ----------
+    tas : float
+        True Airspeed (TAS) (m/s)
+    p : float
+        Air static pressure at flight level (Pa)
+    a : float
+        sound speed at flight level (m/s)
+    Returns
+    -------
+    p_stagnation : float
+        Stagnation pressure at flight level (Pa)
+    References
+    ----------
+    .. [1] http://www.dept.aoe.vt.edu/~lutze/AOE3104/airspeed.pdf
+    '''
+
+    var = (gamma - 1) / gamma
+    M = tas/a
+
+    if M < 1:
+        p_stagnation = 1 + (gamma-1) * (M**2) / 2
+        p_stagnation **= (1/var)
+        p_stagnation *= p
+    else:
+        p_stagnation = (gamma+1)**2 * M**2
+        p_stagnation /= (4*gamma*(M**2) - 2*(gamma-1))
+        p_stagnation **= (1/var)
+        p_stagnation *= (1 - gamma + 2*gamma*(M**2)) / (gamma+1)
+        p_stagnation *= p
+
+    return p_stagnation
