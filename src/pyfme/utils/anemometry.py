@@ -36,11 +36,11 @@ def calculate_alpha_beta_TAS(u, v, w):
     Parameters
     ----------
     u : float
-        x-axis component of aerodynamic velocity.
+        x-axis component of aerodynamic velocity. (m/s)
     v : float
-        y-axis component of aerodynamic velocity.
+        y-axis component of aerodynamic velocity. (m/s)
     w : float
-        z-axis component of aerodynamic velocity.
+        z-axis component of aerodynamic velocity. (m/s)
 
     Returns
     -------
@@ -49,7 +49,7 @@ def calculate_alpha_beta_TAS(u, v, w):
     betha : float
         Angle of sideslip (rad).
     TAS : float
-        True Air Speed.
+        True Air Speed. (m/s)
 
     Notes
     -----
@@ -92,7 +92,7 @@ def calculate_dynamic_pressure(rho, TAS):
     Returns
     -------
     q_inf : float
-        Dynamic pressure.
+        Dynamic pressure. (Pa)
 
     Notes
     -----
@@ -156,7 +156,7 @@ def tas2eas(tas, rho):
     Returns
     -------
     eas : float
-        Equivalent Airspeed (EAS)
+        Equivalent Airspeed (EAS) (m/s)
     '''
     eas = tas * sqrt(rho / rho_0)
 
@@ -183,7 +183,7 @@ def eas2tas(eas, rho):
     Returns
     -------
     tas : float
-        True Airspeed (TAS)
+        True Airspeed (TAS) (m/s)
     '''
 
     tas = eas / sqrt(rho / rho_0)
@@ -212,7 +212,7 @@ def tas2cas(tas, p, rho):
     Returns
     -------
     cas : float
-        Calibrated Airspeed (CAS)
+        Calibrated Airspeed (CAS) (m/s)
     '''
 
     a = sqrt(gamma * p / rho)
@@ -248,7 +248,7 @@ def cas2tas(cas, p, rho):
     Returns
     -------
     tas : float
-        True Airspeed (TAS)
+        True Airspeed (TAS) (m/s)
     '''
 
     a = sqrt(gamma * p / rho)
@@ -287,7 +287,7 @@ def cas2eas(cas, p, rho):
     Returns
     -------
     eas : float
-        Equivalent Airspeed (EAS)
+        Equivalent Airspeed (EAS) (m/s)
     '''
 
     tas = cas2tas(cas, p, rho)
@@ -321,7 +321,7 @@ def eas2cas(eas, p, rho):
     Returns
     -------
     cas : float
-        Calibrated Airspeed (CAS)
+        Calibrated Airspeed (CAS) (m/s)
     '''
 
     tas = eas2tas(eas, rho)
