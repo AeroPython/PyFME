@@ -50,17 +50,9 @@ def mass_and_inertial_data():
     Returns
     ------
     mass : float
-           mass (lb * 0.453592 = kg)
-    Ixx_b : float
-             Moment of Inertia x-axis ( slug * ft2 * 1.3558179 = Kg * m2)
-    Iyy_b : float
-             Moment of Inertia y-axis ( slug * ft2 * 1.3558179 = Kg * m2)
-    Izz_b : float
-             Moment of Inertia z-axis ( slug * ft2 * 1.3558179 = Kg * m2)
-    Ixz_b : float
-             Product of Inertia xz-plane ( slug * ft2 * 1.3558179 = Kg * m2)
+        mass (lb * 0.453592 = kg)
     inertia : array_like
-               I_xx_b,I_yy_b,I_zz_b]
+        Inertia tensor (Kg * m^2)
 
     References
     ----------

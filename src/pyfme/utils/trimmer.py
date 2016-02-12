@@ -23,7 +23,7 @@ from pyfme.environment.isa import atm
 
 
 def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
-                             dyn_eqs=None):
+                             dyn_eqs=None, verbose=0):
     """Finds a combination of values of the state and control variables that
     correspond to a steady-state flight condition. Steady-state aircraft flight
     can be defined as a condition in which all of the motion variables are
@@ -75,15 +75,28 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
         from pyfme.models.euler_flat_earth import linear_and_angular_momentum_eqs
         dynamic_eqs = linear_and_angular_momentum_eqs
 
-    # TODO: try to look for a good inizialization
-    initial_guess = np.zeros([6]) + 0.01
+    # TODO: try to look for a good inizialization method
+    alpha_0 = 0.05 * np.sign(gamma)
+    betha_0 = 0.001 * np.sign(turn_rate)
+    delta_e_0 = 0.05
+    delta_ail_0 = 0.01 * np.sign(turn_rate)
+    delta_r_0 = 0.01 * np.sign(turn_rate)
+    delta_t_0 = 0.5
+
+    initial_guess = (alpha_0,
+                     betha_0,
+                     delta_e_0,
+                     delta_ail_0,
+                     delta_r_0,
+                     delta_t_0)
+
 
     args = (h, TAS, gamma, turn_rate, aircraft, dynamic_eqs)
 
-    lower_bounds = (-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, 0)
-    upper_bounds = (+np.inf, +np.inf, +np.inf, +np.inf, +np.inf, 1)
+    lower_bounds = (-1, -0.5, -1, -1, -1, 0)
+    upper_bounds = (+1, +0.5, +1, +1, +1, 1)
 
-    results = least_squares(func, x0=initial_guess, args=args, verbose=2,
+    results = least_squares(func, x0=initial_guess, args=args, verbose=verbose,
                             bounds=(lower_bounds, upper_bounds))
 
     trimmed_params = results['x']
@@ -92,6 +105,8 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
 
     if cost > 1e-7 or any(abs(fun) > 1e-3):
         warn("Trim process did not converge", RuntimeWarning)
+        if trimmed_params[5] > 0.99:
+            warn("Probably not enough power for demanded conditions")
 
     alpha = trimmed_params[0]
     beta = trimmed_params[1]
@@ -119,8 +134,9 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
     r = turn_rate * cos(theta) * sin(phi)
 
     ang_vel = np.array([p, q, r])
+    lin_vel = wind2body((TAS, 0, 0), alpha, beta)
 
-    return ang_vel, theta, phi, alpha, beta, control_vector
+    return lin_vel, ang_vel, theta, phi, alpha, beta, control_vector
 
 
 def turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma=0):
