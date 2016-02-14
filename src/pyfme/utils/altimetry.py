@@ -5,7 +5,7 @@ vice versa.
 """
 
 
-def geometric(h):
+def geopotential2geometric(h):
     """Geometric altiude above MSL (mean sea level)
 
     This function transforms geopotential altitude into geometric altitude.
@@ -35,7 +35,7 @@ def geometric(h):
     return z
 
 
-def geopotential(z):
+def geometric2geopotential(z):
     """Geopotential altiude above MSL (mean sea level)
 
     This function transforms geometric altitude into geopotential altitude.
