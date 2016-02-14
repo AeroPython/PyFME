@@ -12,7 +12,7 @@ from pyfme.utils.altimetry import (geopotential2geometric,
 
 def test1_geopotential2geometric():
 
-    h = 11000
+    h = 11000.0
 
     z = geopotential2geometric(h)
     expected_z = 11019.025157232705
@@ -22,7 +22,7 @@ def test1_geopotential2geometric():
 
 def test2_geopotential2geometric():
 
-    h = 20000
+    h = 20000.0
 
     z = geopotential2geometric(h)
     expected_z = 20062.982207526373
@@ -42,7 +42,7 @@ def test1_geometric2geopotential():
 
 def test2_geometric2geopotential():
 
-    z = 86000
+    z = 86000.0
 
     h = geometric2geopotential(z)
     expected_h = 84854.57642868205
