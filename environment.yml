@@ -1,3 +1,4 @@
 name: pyfme
 dependencies:
   - numpy >=1.7
+  - scipy >=0.17.0
