@@ -22,13 +22,12 @@ def geometric_data():
 
     Returns
     ----
-
     Sw : float
-         Wing surface (ft2 * 0.3048 * 0.3048 = m2)
+         Wing surface (m2).
     c : foat
-        Mean aerodynamic Chord (ft * 0.3048 = m)
+        Mean aerodynamic Chord (m).
     span : float
-         Wing span (ft * 0.3048 = m)
+         Wing span (m).
 
     References
     ----------
@@ -98,7 +97,6 @@ def long_aero_coefficients():
 
     Returns
     -------
-
     Long_coef_matrix : array_like
                                 [
                                 [CL_0, CL_a, CL_de, CL_dih],
@@ -206,29 +204,27 @@ def get_aerodynamic_forces(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
     ----------
 
     rho : float
-          density (kg/(m3))
+        density (kg/(m3).
     TAS : float
-        velocity (m/s)
-
+        velocity (m/s).
     alpha : float
-            attack angle (rad).
+        attack angle (rad).
     beta : float
-           sideslip angle (rad).
+        sideslip angle (rad).
     delta_e : float
-             elevator deflection (rad).
+        elevator deflection (rad).
     ih : float
-         stabilator deflection (rad).
+        stabilator deflection (rad).
     delta_ail : float
-               aileron deflection (rad).
+        aileron deflection (rad).
     delta_r : float
-             rudder deflection (rad).
+        rudder deflection (rad).
 
     Returns
     -------
-
     forces : array_like
-             3 dimensional vector with (F_x_s, F_y_s, F_z_s) forces
-             in stability axes.
+        3 dimensional vector with (F_x_s, F_y_s, F_z_s) forces  in stability
+        axes.
 
     References
     ----------
@@ -262,31 +258,28 @@ def get_aerodynamic_moments(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
 
     Parameters
     ----------
-
     rho : float
-          density (kg/m3)
+        density (kg/m3).
     TAS : float
-        velocity (m/s)
-
+        velocity (m/s).
     alpha : float
-            attack angle (rad).
+        attack angle (rad).
     beta : float
-           sideslip angle (rad).
+        sideslip angle (rad).
     delta_e : float
-             elevator deflection (rad).
+        elevator deflection (rad).
     ih : float
-         stabilator deflection (rad).
+        stabilator deflection (rad).
     delta_ail : float
-               aileron deflection (rad).
+        aileron deflection (rad).
     delta_r : float
-             rudder deflection (rad).
+        rudder deflection (rad).
 
-    returns
+    Returns
     -------
-
     moments : array_like
-             3 dimensional vector with (Mxs, Mys, Mzs) forces
-             in stability axes.
+         3 dimensional vector with (Mxs, Mys, Mzs) forces
+         in stability axes.
 
     References
     ----------
@@ -316,21 +309,17 @@ def get_aerodynamic_moments(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
 
 
 def get_engine_force(delta_t):
-
     """ Calculates forces
 
     Parameters
     ----------
-
     delta_t : float
-             trust_lever (0 = 0 Newton, 1 = CT)
-
+        trust_lever (0 = 0 Newton, 1 = CT).
 
     returns
     -------
-
     engine_force : float
-                  Thrust (N)
+        Thrust (N).
 
     References
     ----------
@@ -354,7 +343,39 @@ def get_engine_force(delta_t):
 
 def get_forces_and_moments(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
                            delta_r, delta_t, attitude):
-    """
+    """Return the total forces and moments including aerodynamics, thrust and
+    gravity.
+
+    Parameters
+    ----------
+    TAS : float
+        velocity (m/s).
+    rho : float
+        density (kg/m3).
+    alpha : float
+        attack angle (rad).
+    beta : float
+        sideslip angle (rad).
+    delta_e : float
+        elevator deflection (rad).
+    ih : float
+        stabilator deflection (rad).
+    delta_ail : float
+        aileron deflection (rad).
+    delta_r : float
+        rudder deflection (rad).
+    delta_t : float
+        Thrust level (between 0-1).
+    attitude : array_like
+        Attitude angles: (theta, phi, psi).
+
+    Returns
+    -------
+    forces : array_like
+        3 dimensional vector with (F_x_s, F_y_s, F_z_s) forces  in body axes.
+        (N)
+    moments : array_like
+         3 dimensional vector with (Mxs, Mys, Mzs) forces in body axes. (N·m)
     """
     # As stability axes are coincident with wind axes at the moment of
     # linearization (with alpha=0 and beta=0), stability axes are parallel to

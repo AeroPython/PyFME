@@ -45,20 +45,20 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
 
     Returns
     -------
-        lin_vel :
-
-        ang_vel :
-
-        theta :
-
-        phi :
-
-        alpha :
-
-        beta :
-
-        control_vector :
-
+        lin_vel : float array
+            [u, v, w] air linear velocity body-axes (m/s).
+        ang_vel : float array
+            [p, q, r] air angular velocity body-axes (m/s).
+        theta : float
+            Pitch angle (rad).
+        phi : float
+            Bank angle (rad).
+        alpha : float
+            Angle of attack (rad).
+        beta : float
+            Sideslip angle (rad).
+        control_vector : array_like
+            [delta_e, delta_ail, delta_r, delta_t].
 
     Notes
     -----
@@ -93,6 +93,7 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
 
     args = (h, TAS, gamma, turn_rate, aircraft, dynamic_eqs)
 
+    # TODO: pass max deflection of the controls inside aircraft.
     lower_bounds = (-1, -0.5, -1, -1, -1, 0)
     upper_bounds = (+1, +0.5, +1, +1, +1, 1)
 
