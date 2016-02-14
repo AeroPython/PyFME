@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     # Trimming.
     trim_results = steady_state_flight_trim(cessna_310, h, TAS_, gamma=0.02,
-                                            turn_rate=0)
+                                            turn_rate=0.02)
 
     lin_vel, ang_vel, theta, phi, alpha_, beta_, control_vector = trim_results
 

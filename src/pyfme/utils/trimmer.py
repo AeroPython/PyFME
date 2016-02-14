@@ -157,11 +157,11 @@ def turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma=0):
         c = 1 + G**2 * cos(beta)**2
 
         sq = sqrt(c * (1 - b**2) + G**2 * sin(beta)**2)
-        var1 = b**2 * (1 + c * tan(alpha)**2)
 
-        temp = (a - b)**2 + b * tan(alpha) * sq / a**2 - b**2 * var1
+        num = (a-b**2) + b * tan(alpha) * sq
+        den = a**2 - b**2 * (1 + c * tan(alpha)**2)
 
-        phi = atan(G * cos(beta) / cos(alpha) * temp)
+        phi = atan(G * cos(beta) / cos(alpha) * num / den)
 
     return phi
 
@@ -175,6 +175,7 @@ def turn_coord_cons2(turn_rate, alpha, TAS):
     G = turn_rate * TAS / g0
 
     phi = G / cos(alpha)
+    phi = atan(phi)
 
     return phi
 
