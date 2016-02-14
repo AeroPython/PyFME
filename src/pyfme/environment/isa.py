@@ -51,9 +51,9 @@ def atm(h):
     p : float
         Pressure (Pa).
     rho : float
-        Density (kg/m³).
+        Density (kg/m³)
     a : float
-        Sound speed for given altitude (m/s).
+        Sound speed at flight level (m/s)
 
     Raises
     ------
