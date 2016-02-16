@@ -12,7 +12,7 @@ Distributed under the terms of the MIT License.
 import numpy as np
 
 
-def step(t_init, T, A, time, offset=0, var=None):
+def step(t_init, T, A, time, offset=0, var=0):
 
     """ step input
 
@@ -36,8 +36,9 @@ def step(t_init, T, A, time, offset=0, var=None):
     step_input : array_like
     """
 
-    step_input = np.zeros_like(time)
-    step_input[np.where(time > t_init and time < t_init + T)] = A + offset
+    step_input = np.zeros_like(time) + A + offset
+    step_input[np.where(time < t_init)] = 0
+    step_input[np.where(time > t_init + T)] = 0
     step_input = step_input + var
 
     return (step_input)
