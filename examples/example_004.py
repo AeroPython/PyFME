@@ -87,9 +87,9 @@ if __name__ == '__main__':
     forces_and_moments = cessna_310.get_forces_and_moments
     for ii, t in enumerate(time[1:]):
 
-        forces, moments = forces_and_moments(TAS[ii], rho, alpha[ii], beta[ii],
-                                             d_e[ii], 0, d_a[ii], d_r[ii], d_t[ii],
-                                             attitude)
+        forces, moments = forces_and_moments(
+                            TAS[ii], rho, alpha[ii], beta[ii], d_e[ii], 0,
+                            d_a[ii], d_r[ii], d_t[ii], attitude)
 
         results[ii+1, :] = equations.propagate(mass, inertia, forces, moments,
                                                dt)
@@ -102,7 +102,6 @@ if __name__ == '__main__':
         alpha[ii+1], beta[ii+1], TAS[ii+1] = calculate_alpha_beta_TAS(*lin_vel)
 
         _, _, rho, _ = atm(position[2])
-
 
     velocities = results[:, 0:6]
     attitude_angles = results[:, 6:9]

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Anemometry test functions
-"""
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
 
-import pytest
+Anemometry test functions
+-------------------------
+"""
 
 from math import sqrt, atan, asin
 from numpy.testing import assert_almost_equal

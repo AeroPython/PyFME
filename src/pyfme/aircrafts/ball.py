@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 """
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
+
+Ball
+----
+
 Created on Fri Jan  8 18:53:17 2016
 
 @author: JuanMatSa
-
 """
 
 import numpy as np
@@ -234,7 +240,7 @@ def get_magnus_effect_forces(lin_vel, ang_vel, TAS,  rho, radius, A_front,
 
     Parameters
     ----------
-    linear_vel : float array
+    lin_vel : float array
         [u, v, w]    air velocity body-axes (m/s).
     ang_vel : float array
         [p, q, r]    air velocity body-axes (m/s).

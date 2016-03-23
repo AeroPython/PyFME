@@ -90,7 +90,6 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
                      delta_r_0,
                      delta_t_0)
 
-
     args = (h, TAS, gamma, turn_rate, aircraft, dynamic_eqs)
 
     # TODO: pass max deflection of the controls inside aircraft.

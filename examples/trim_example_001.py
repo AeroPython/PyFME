@@ -21,7 +21,8 @@ alpha = results[3]
 beta = results[4]
 lin_vel = wind2body((TAS, 0, 0), alpha, beta)
 
-print("""
+print(
+"""
 Results
 -------
 Linear velocity: {lin_vel} (m/s)
@@ -29,11 +30,9 @@ Angular velocity: {ang_vel} (rad/s)
 Theta, Phi: {angles} (rad)
 Alpha, Beta: {wind_angles} (rad)
 Control: {control}
-""".format(
-        lin_vel=lin_vel,
-        ang_vel=results[1],
-        angles=results[2:4],
-        wind_angles=results[4:6],
-        control=results[6]
-            )
+""".format(lin_vel=lin_vel,
+           ang_vel=results[1],
+           angles=results[2:4],
+           wind_angles=results[4:6],
+           control=results[6])
     )

@@ -1,5 +1,11 @@
+# -*- coding: utf-8 -*-
 """
-stagnationpressure test function
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
+
+Stagnation pressure test function
+---------------------------------
 """
 from numpy.testing import (assert_almost_equal)
 

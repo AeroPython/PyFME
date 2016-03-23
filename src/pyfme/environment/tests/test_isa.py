@@ -1,12 +1,16 @@
-# coding: utf-8
-"""Tests of the ISA functions.
+# -*- coding: utf-8 -*-
+"""
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
 
+Tests of the ISA functions
+--------------------------
 All numerical results are validated against the `COESA`_ standard.
 
 .. _`COESA`: http://hdl.handle.net/2060/19770009539
 
 Based on scikit-aero (c) 2012 scikit-aero authors.
-
 """
 import numpy as np
 from numpy.testing import (assert_equal, assert_almost_equal)
@@ -31,7 +35,8 @@ def test_sea_level():
     assert_almost_equal(rho, expected_rho, decimal=4)
     assert_almost_equal(a, expected_a, decimal=2)
 
-def test_altitude_is_out_of_range(recwarn):
+
+def test_altitude_is_out_of_range():
     wrong_h = (-1.0, 84501)  # m
 
     for h in wrong_h:

@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 """
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
+
+Cessna 310
+----------
 Created on Sun Jan  3 18:44:39 2016
 
 @author:olrosales@gmail.com
@@ -325,7 +331,7 @@ def get_engine_force(delta_t):
     ----------
     Airplane Flight Dyanamics and Automatic Flight Controls part I - Jan Roskam
     """
-    if delta_t >= 0 and delta_t <= 1:
+    if 0 <= delta_t <= 1:
 
         Ct = 0.031 * delta_t
 

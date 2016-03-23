@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Flight Dynamic Equations of Motion
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
 
+Flight Dynamic Equations of Motion
+----------------------------------
 These are the equations to be integrated, thus they have the following order
 for the arguments:
 func(time, y, ...) where dy/dt = func(y, ...)
@@ -82,15 +86,15 @@ def linear_and_angular_momentum_eqs(time, vel, mass, inertia, forces, moments):
 
     # Angular momentum equations
     dp_dt = (L * Iz + N * Jxz - q * r * (Iz ** 2 - Iz * Iy + Jxz ** 2) +
-            p * q * Jxz * (Ix + Iz - Iy)) / (Ix * Iz - Jxz ** 2)
+             p * q * Jxz * (Ix + Iz - Iy)) / (Ix * Iz - Jxz ** 2)
 
     dq_dt = (M + (Iz - Ix) * p * r - Jxz * (p ** 2 - r ** 2)) / Iy
 
     dr_dt = (L * Jxz + N * Ix + p * q * (Ix ** 2 - Ix * Iy + Jxz ** 2) -
-            q * r * Jxz * (Iz + Ix - Iy)) / (Ix * Iz - Jxz ** 2)
-
+             q * r * Jxz * (Iz + Ix - Iy)) / (Ix * Iz - Jxz ** 2)
 
     return np.array([du_dt, dv_dt, dw_dt, dp_dt, dq_dt, dr_dt])
+
 
 def jac_linear_and_angular_momentum_eqs(time, vel, mass, inertia):
     """ Jacobian of linear and angular momentum equations
@@ -159,7 +163,7 @@ def jac_linear_and_angular_momentum_eqs(time, vel, mass, inertia):
     jac[2, 4] = u
 
     jac[3, 3] = Jxz * q * (Ix + Iz - Iy) / (Ix * Iz - Jxz ** 2)
-    jac[3, 4] = (p * Jxz * (Ix + Iz - Iy) - r * (Iz ** 2 - Iz * Iy + Jxz ** 2))\
+    jac[3, 4] = (p * Jxz * (Ix + Iz - Iy) - r * (Iz ** 2 - Iz * Iy + Jxz ** 2)) \
                 / (Ix * Iz - Jxz ** 2)
     jac[3, 5] = - q * (Iz ** 2 - Iz * Iy + Jxz ** 2) / (Ix * Iz - Jxz ** 2)
 
@@ -167,7 +171,7 @@ def jac_linear_and_angular_momentum_eqs(time, vel, mass, inertia):
     jac[4, 5] = ((Iz - Ix) * p + 2 * Jxz * r) / Iy
 
     jac[5, 3] = q * (Ix ** 2 - Ix * Iy + Jxz ** 2) / (Ix * Iz - Jxz ** 2)
-    jac[5, 4] = (p * (Ix ** 2 - Ix * Iy + Jxz ** 2) - r * Jxz * (Ix + Iz - Iy))\
+    jac[5, 4] = (p * (Ix ** 2 - Ix * Iy + Jxz ** 2) - r * Jxz * (Ix + Iz - Iy)) \
                 / (Ix * Iz - Jxz ** 2)
     jac[5, 5] = - q * Jxz * (Iz + Ix - Iy) / (Ix * Iz - Jxz ** 2)
 
@@ -238,7 +242,7 @@ def jac_kinematic_angular_eqs(time, euler_angles, ang_vel):
     Returns
     -------
      jac : array_like
-        Current value of jacobian of kinematic angular equationes. It is a 3x3
+        Current value of jacobian of kinematic angular equations. It is a 3x3
         matrix.
 
     See Also
@@ -265,11 +269,10 @@ def jac_kinematic_angular_eqs(time, euler_angles, ang_vel):
     jac[1, 1] = (q * np.cos(phi) - r * np.sin(phi)) * np.tan(theta)
 
     jac[2, 0] = (q * np.sin(phi) + r * np.cos(phi)) * (np.tan(theta) /
-                 np.cos(theta))
+                                                       np.cos(theta))
     jac[2, 1] = (q * np.cos(phi) - r * np.sin(phi)) / np.cos(theta)
 
     return jac
-
 
 
 def navigation_eqs(time, lin_vel, euler_angles):
@@ -302,7 +305,7 @@ def navigation_eqs(time, lin_vel, euler_angles):
         p. 149 (5.8 The Flat-Earth Approximation), 2012.
 
     .. [2] M. A. Gómez Tierno y M. Pérez Cortés, "Mecánica del Vuelo", Garceta
-        Grupo Editorial, pp.18-25 (Tema 2: Ecuaciones Generales del Moviemiento),
+        Grupo Editorial, pp.18-25 (Tema 2: Ecuaciones Generales del Movimiento),
         2012.
     """
 
@@ -310,12 +313,16 @@ def navigation_eqs(time, lin_vel, euler_angles):
     theta, phi, psi = euler_angles
 
     dx_dt = np.cos(theta) * np.cos(psi) * u + (np.sin(phi) * np.sin(theta) *
-            np.cos(psi) - np.cos(phi) * np.sin(psi)) * v + (np.cos(phi) *
-            np.sin(theta) * np.cos(psi) + np.sin(phi) * np.sin(psi)) * w
+                                               np.cos(psi) - np.cos(
+        phi) * np.sin(psi)) * v + (np.cos(phi) *
+                                   np.sin(theta) * np.cos(psi) + np.sin(
+        phi) * np.sin(psi)) * w
 
     dy_dt = np.cos(theta) * np.sin(psi) * u + (np.sin(phi) * np.sin(theta) *
-            np.sin(psi) +  np.cos(phi) * np.cos(psi)) * v + (np.cos(phi) *
-            np.sin(theta) * np.sin(psi) - np.sin(phi) * np.cos(psi)) * w
+                                               np.sin(psi) + np.cos(
+        phi) * np.cos(psi)) * v + (np.cos(phi) *
+                                   np.sin(theta) * np.sin(psi) - np.sin(
+        phi) * np.cos(psi)) * w
 
     dz_dt = - np.sin(theta) * u + np.sin(phi) * np.cos(theta) * v + \
             np.cos(phi) * np.cos(theta) * w
