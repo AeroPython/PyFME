@@ -32,33 +32,33 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
 
     Parameters
     ----------
-        aircraft : aircraft class
-            Aircraft class with methods get_forces, get_moments
-        h : float
-            Geopotential altitude for ISA (m).
-        TAS : float
-            True Air Speed (m/s).
-        gamma : float, optional
-            Flight path angle (rad).
-        turn_rate : float, optional
-            Turn rate, d(psi)/dt (rad/s).
+    aircraft : aircraft class
+        Aircraft class with methods get_forces, get_moments
+    h : float
+        Geopotential altitude for ISA (m).
+    TAS : float
+        True Air Speed (m/s).
+    gamma : float, optional
+        Flight path angle (rad).
+    turn_rate : float, optional
+        Turn rate, d(psi)/dt (rad/s).
 
     Returns
     -------
-        lin_vel : float array
-            [u, v, w] air linear velocity body-axes (m/s).
-        ang_vel : float array
-            [p, q, r] air angular velocity body-axes (m/s).
-        theta : float
-            Pitch angle (rad).
-        phi : float
-            Bank angle (rad).
-        alpha : float
-            Angle of attack (rad).
-        beta : float
-            Sideslip angle (rad).
-        control_vector : array_like
-            [delta_e, delta_ail, delta_r, delta_t].
+    lin_vel : float array
+        [u, v, w] air linear velocity body-axes (m/s).
+    ang_vel : float array
+        [p, q, r] air angular velocity body-axes (m/s).
+    theta : float
+        Pitch angle (rad).
+    phi : float
+        Bank angle (rad).
+    alpha : float
+        Angle of attack (rad).
+    beta : float
+        Sideslip angle (rad).
+    control_vector : array_like
+        [delta_e, delta_ail, delta_r, delta_t].
 
     Notes
     -----
@@ -123,7 +123,7 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
     if abs(turn_rate) < 1e-8:
         phi = 0
     else:
-        phi = turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma)
+        phi = turn_coord_cons(turn_rate, alpha, beta, TAS, gamma)
 
     theta = rate_of_climb_cons(gamma, alpha, beta, phi)
 
@@ -140,7 +140,7 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
     return lin_vel, ang_vel, theta, phi, alpha, beta, control_vector
 
 
-def turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma=0):
+def turn_coord_cons(turn_rate, alpha, beta, TAS, gamma=0):
     """Calculates phi for coordinated turn.
     """
 
@@ -166,7 +166,7 @@ def turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma=0):
     return phi
 
 
-def turn_coord_cons2(turn_rate, alpha, TAS):
+def turn_coord_cons_horizontal_and_small_beta(turn_rate, alpha, TAS):
     """Calculates phi for coordinated turn given that gamma is equal to cero
     and beta is small (beta << 1).
     """
@@ -181,7 +181,7 @@ def turn_coord_cons2(turn_rate, alpha, TAS):
 
 
 def rate_of_climb_cons(gamma, alpha, beta, phi):
-    """
+    """Calculates theta for the given ROC, wind angles, and roll angle.
     """
     a = cos(alpha) * cos(beta)
     b = sin(phi) * sin(beta) + cos(phi) * sin(alpha) * cos(beta)
@@ -208,7 +208,7 @@ def func(trimmed_params, h, TAS, gamma, turn_rate, aircraft, dynamic_eqs):
     if abs(turn_rate) < 1e-8:
         phi = 0
     else:
-        phi = turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma)
+        phi = turn_coord_cons(turn_rate, alpha, beta, TAS, gamma)
 
     theta = rate_of_climb_cons(gamma, alpha, beta, phi)
 

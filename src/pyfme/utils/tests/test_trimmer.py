@@ -9,8 +9,8 @@ Test functions for trimmer.
 
 from numpy.testing import assert_almost_equal
 
-from pyfme.utils.trimmer import (rate_of_climb_cons, turn_coord_cons1,
-                                 turn_coord_cons2)
+from pyfme.utils.trimmer import (rate_of_climb_cons, turn_coord_cons,
+                                 turn_coord_cons_horizontal_and_small_beta)
 
 
 def test_rate_of_climb_cons():
@@ -27,7 +27,7 @@ def test_rate_of_climb_cons():
     assert_almost_equal(theta, expected_theta)
 
 
-def test_turn_coord_cons2():
+def test_turn_coord_cons_horizontal_and_small_beta():
 
     turn_rate = 0.05
     alpha = 0.05
@@ -35,7 +35,7 @@ def test_turn_coord_cons2():
 
     expected_phi = 0.4718708835828995
 
-    phi = turn_coord_cons2(turn_rate, alpha, TAS)
+    phi = turn_coord_cons_horizontal_and_small_beta(turn_rate, alpha, TAS)
 
     assert_almost_equal(phi, expected_phi)
 
@@ -48,13 +48,15 @@ def test_turn_coord_cons1_against_2():
     beta = 0
     gamma = 0
 
-    expected_phi = turn_coord_cons2(turn_rate, alpha, TAS)
-    phi = turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma)
+    expected_phi = turn_coord_cons_horizontal_and_small_beta(turn_rate,
+                                                             alpha,
+                                                             TAS)
+    phi = turn_coord_cons(turn_rate, alpha, beta, TAS, gamma)
 
     assert_almost_equal(phi, expected_phi)
 
 
-def test_turn_coord_cons1_small_gamma():
+def test_turn_coord_cons_small_gamma():
 
     turn_rate = 0.05
     alpha = 0.05
@@ -64,12 +66,12 @@ def test_turn_coord_cons1_small_gamma():
 
     expected_phi = 0.4719539221164456
 
-    phi = turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma)
+    phi = turn_coord_cons(turn_rate, alpha, beta, TAS, gamma)
 
     assert_almost_equal(phi, expected_phi)
 
 
-def test_turn_coord_cons1_big_gamma():
+def test_turn_coord_cons_big_gamma():
 
     turn_rate = 0.05
     alpha = 0.05
@@ -79,6 +81,6 @@ def test_turn_coord_cons1_big_gamma():
 
     expected_phi = 0.4766120129721381
 
-    phi = turn_coord_cons1(turn_rate, alpha, beta, TAS, gamma)
+    phi = turn_coord_cons(turn_rate, alpha, beta, TAS, gamma)
 
     assert_almost_equal(phi, expected_phi)
