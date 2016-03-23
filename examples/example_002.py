@@ -7,7 +7,7 @@ Distributed under the terms of the MIT License.
 Example with trimmed aircraft.
 The main purpose of this example is to check if the aircraft trimmed in a given
 state maintains the trimmed flight condition.
-Trimmed in stationary, horizontal, symmetric, wings level flight.
+Trimmed in stationary descent, symmetric, wings level flight.
 """
 
 import numpy as np
@@ -32,14 +32,14 @@ if __name__ == '__main__':
     x_0, y_0 = 0, 0  # m
 
     # Trimming.
-    trim_results = steady_state_flight_trim(cessna_310, h, TAS_, gamma=0,
+    trim_results = steady_state_flight_trim(cessna_310, h, TAS_, gamma=0.20,
                                             turn_rate=0)
 
     lin_vel, ang_vel, theta, phi, alpha_, beta_, control_vector = trim_results
 
     # Time.
     t0 = 0  # s
-    tf = 30  # s
+    tf = 120  # s
     dt = 1e-2  # s
 
     time = np.arange(t0, tf, dt)

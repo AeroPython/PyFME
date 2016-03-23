@@ -22,7 +22,7 @@ before_install:
   - source activate test-environment
 
 install:
-  - conda install numpy pytest
+  - conda install numpy pytest scipy
   - pip install -e .
 
 script:

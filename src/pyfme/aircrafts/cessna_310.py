@@ -13,21 +13,21 @@ Created on Sun Jan  3 18:44:39 2016
 import numpy as np
 
 from pyfme.utils.anemometry import calculate_dynamic_pressure
+from pyfme.utils.coordinates import hor2body
 
 
-def geometric_Data():
+def geometric_data():
 
     """ Provides the value of some geometric data.
 
     Returns
     ----
-
     Sw : float
-         Wing surface (ft2 * 0.3048 * 0.3048 = m2)
+         Wing surface (m2).
     c : foat
-        Mean aerodynamic Chord (ft * 0.3048 = m)
+        Mean aerodynamic Chord (m).
     span : float
-         Wing span (ft * 0.3048 = m)
+         Wing span (m).
 
     References
     ----------
@@ -42,24 +42,16 @@ def geometric_Data():
     return Sw, c, span
 
 
-def mass_and_Inertial_Data():
+def mass_and_inertial_data():
 
     """ Provides the value of some mass and inertial data.
 
     Returns
     ------
     mass : float
-           mass (lb * 0.453592 = kg)
-    Ixx_b : float
-             Moment of Inertia x-axis ( slug * ft2 * 1.3558179 = Kg * m2)
-    Iyy_b : float
-             Moment of Inertia y-axis ( slug * ft2 * 1.3558179 = Kg * m2)
-    Izz_b : float
-             Moment of Inertia z-axis ( slug * ft2 * 1.3558179 = Kg * m2)
-    Ixz_b : float
-             Product of Inertia xz-plane ( slug * ft2 * 1.3558179 = Kg * m2)
+        mass (lb * 0.453592 = kg)
     inertia : array_like
-               I_xx_b,I_yy_b,I_zz_b]
+        Inertia tensor (Kg * m^2)
 
     References
     ----------
@@ -78,7 +70,7 @@ def mass_and_Inertial_Data():
     return mass, inertia
 
 
-def long_Aero_Coefficients():
+def long_aero_coefficients():
 
     """Assigns the value of the coefficients
     of stability in cruise conditions and order them in a matrix.
@@ -105,7 +97,6 @@ def long_Aero_Coefficients():
 
     Returns
     -------
-
     Long_coef_matrix : array_like
                                 [
                                 [CL_0, CL_a, CL_de, CL_dih],
@@ -141,7 +132,7 @@ def long_Aero_Coefficients():
     return long_coef_matrix
 
 
-def lat_Aero_Coefficients():
+def lat_aero_coefficients():
 
     """Assigns the value of the coefficients
     of stability in cruise conditions and order them in a matrix.
@@ -213,29 +204,27 @@ def get_aerodynamic_forces(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
     ----------
 
     rho : float
-          density (kg/(m3))
+        density (kg/(m3).
     TAS : float
-        velocity (m/s)
-
+        velocity (m/s).
     alpha : float
-            attack angle (rad).
+        attack angle (rad).
     beta : float
-           sideslip angle (rad).
+        sideslip angle (rad).
     delta_e : float
-             elevator deflection (rad).
+        elevator deflection (rad).
     ih : float
-         stabilator deflection (rad).
+        stabilator deflection (rad).
     delta_ail : float
-               aileron deflection (rad).
+        aileron deflection (rad).
     delta_r : float
-             rudder deflection (rad).
+        rudder deflection (rad).
 
     Returns
     -------
-
     forces : array_like
-             3 dimensional vector with (F_x_s, F_y_s, F_z_s) forces
-             in stability axes.
+        3 dimensional vector with (F_x_s, F_y_s, F_z_s) forces  in stability
+        axes.
 
     References
     ----------
@@ -243,8 +232,8 @@ def get_aerodynamic_forces(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
     chapter 3 and 4
     """
 
-    long_coef_matrix = long_Aero_Coefficients()
-    lat_coef_matrix = lat_Aero_Coefficients()
+    long_coef_matrix = long_aero_coefficients()
+    lat_coef_matrix = lat_aero_coefficients()
 
     CL_0, CL_a, CL_de, CL_dih = long_coef_matrix[0, :]
     CD_0, CD_a, CD_de, CD_dih = long_coef_matrix[1, :]
@@ -254,7 +243,7 @@ def get_aerodynamic_forces(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
     CD_full = CD_0 + CD_a * alpha + CD_de * delta_e + CD_dih * ih
     CY_full = CY_b * beta + CY_da * delta_ail + CY_dr * delta_r
 
-    Sw = geometric_Data()[0]
+    Sw = geometric_data()[0]
 
     aerodynamic_forces = calculate_dynamic_pressure(rho, TAS) *\
         Sw * np.array([-CD_full, CY_full, -CL_full])   # N
@@ -269,31 +258,28 @@ def get_aerodynamic_moments(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
 
     Parameters
     ----------
-
     rho : float
-          density (kg/m3)
+        density (kg/m3).
     TAS : float
-        velocity (m/s)
-
+        velocity (m/s).
     alpha : float
-            attack angle (rad).
+        attack angle (rad).
     beta : float
-           sideslip angle (rad).
+        sideslip angle (rad).
     delta_e : float
-             elevator deflection (rad).
+        elevator deflection (rad).
     ih : float
-         stabilator deflection (rad).
+        stabilator deflection (rad).
     delta_ail : float
-               aileron deflection (rad).
+        aileron deflection (rad).
     delta_r : float
-             rudder deflection (rad).
+        rudder deflection (rad).
 
-    returns
+    Returns
     -------
-
     moments : array_like
-             3 dimensional vector with (Mxs, Mys, Mzs) forces
-             in stability axes.
+         3 dimensional vector with (Mxs, Mys, Mzs) forces
+         in stability axes.
 
     References
     ----------
@@ -301,8 +287,8 @@ def get_aerodynamic_moments(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
     chapter 3 and 4
     """
 
-    long_coef_matrix = long_Aero_Coefficients()
-    lat_coef_matrix = lat_Aero_Coefficients()
+    long_coef_matrix = long_aero_coefficients()
+    lat_coef_matrix = lat_aero_coefficients()
 
     Cm_0, Cm_a, Cm_de, Cm_dih = long_coef_matrix[2, :]
     Cl_b, Cl_da, Cl_dr = lat_coef_matrix[1, :]
@@ -312,9 +298,9 @@ def get_aerodynamic_moments(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
     Cl_full = Cl_b * beta + Cl_da * delta_ail + Cl_dr * delta_r
     Cn_full = Cn_b * beta + Cn_da * delta_ail + Cn_dr * delta_r
 
-    span = geometric_Data()[2]
-    c = geometric_Data()[1]
-    Sw = geometric_Data()[0]
+    span = geometric_data()[2]
+    c = geometric_data()[1]
+    Sw = geometric_data()[0]
 
     aerodynamic_moments = calculate_dynamic_pressure(rho, TAS) * Sw\
         * np.array([Cl_full * span, Cm_full * c, Cn_full * span])
@@ -323,21 +309,17 @@ def get_aerodynamic_moments(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
 
 
 def get_engine_force(delta_t):
-
     """ Calculates forces
 
     Parameters
     ----------
-
     delta_t : float
-             trust_lever (0 = 0 Newton, 1 = CT)
-
+        trust_lever (0 = 0 Newton, 1 = CT).
 
     returns
     -------
-
     engine_force : float
-                  Trust (N)
+        Thrust (N).
 
     References
     ----------
@@ -349,7 +331,7 @@ def get_engine_force(delta_t):
 
         q_cruise = 91.2 * 47.880172   # Pa
 
-        Sw = geometric_Data()[0]
+        Sw = geometric_data()[0]
 
         engine_force = Ct * Sw * q_cruise   # N
 
@@ -357,3 +339,61 @@ def get_engine_force(delta_t):
         raise ValueError('delta_t must be between 0 and 1')
 
     return engine_force
+
+
+def get_forces_and_moments(TAS, rho, alpha, beta, delta_e, ih, delta_ail,
+                           delta_r, delta_t, attitude):
+    """Return the total forces and moments including aerodynamics, thrust and
+    gravity.
+
+    Parameters
+    ----------
+    TAS : float
+        velocity (m/s).
+    rho : float
+        density (kg/m3).
+    alpha : float
+        attack angle (rad).
+    beta : float
+        sideslip angle (rad).
+    delta_e : float
+        elevator deflection (rad).
+    ih : float
+        stabilator deflection (rad).
+    delta_ail : float
+        aileron deflection (rad).
+    delta_r : float
+        rudder deflection (rad).
+    delta_t : float
+        Thrust level (between 0-1).
+    attitude : array_like
+        Attitude angles: (theta, phi, psi).
+
+    Returns
+    -------
+    forces : array_like
+        3 dimensional vector with (F_x_s, F_y_s, F_z_s) forces  in body axes.
+        (N)
+    moments : array_like
+         3 dimensional vector with (Mxs, Mys, Mzs) forces in body axes. (N·m)
+    """
+    # As stability axes are coincident with wind axes at the moment of
+    # linearization (with alpha=0 and beta=0), stability axes are parallel to
+    # body axes.
+    aero_forces = get_aerodynamic_forces(TAS, rho, alpha, beta, delta_e, 0,
+                                         delta_ail, delta_r)
+    thrust = get_engine_force(delta_t)
+    # Assuming that all the engine thrust is prodecued in the x_body direction
+    engine_force = np.array([thrust, 0, 0])
+
+    g0 = 9.81  # m/s²
+    theta, phi, psi = attitude
+    gravity_force = hor2body((0, 0, g0), theta, phi, psi)
+
+    forces = aero_forces + engine_force + gravity_force
+
+    # It is assumed that the engine moments are zero.
+    moments = get_aerodynamic_moments(TAS, rho, alpha, beta, delta_e, ih,
+                                      delta_ail, delta_r)
+
+    return forces, moments

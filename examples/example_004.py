@@ -5,8 +5,8 @@ Copyright (c) AeroPython Development Team.
 Distributed under the terms of the MIT License.
 
 Example with trimmed aircraft.
-The main purpose of this example is to check if the aircraft trimmed in a given
-state maintains the trimmed flight condition.
+The main purpose of this example is to see the evolution of the aircraft after
+a longitudinal perturbation (delta doublet).
 Trimmed in stationary, horizontal, symmetric, wings level flight.
 """
 
@@ -73,7 +73,13 @@ if __name__ == '__main__':
     _, _, rho, _ = atm(h)
 
     # Define control vectors.
-    d_e, d_a, d_r, d_t = control_vector
+    delta_e, delta_ail, delta_r, delta_t = control_vector
+    d_e = np.ones_like(time) * delta_e
+    d_e[np.where(time<2)] = delta_e * 1.30
+    d_e[np.where(time<1)] = delta_e * 0.70
+    d_a = np.ones_like(time) * delta_ail
+    d_r = np.ones_like(time) * delta_r
+    d_t = np.ones_like(time) * delta_t
 
     attitude = theta, phi, psi_0
 
@@ -82,7 +88,8 @@ if __name__ == '__main__':
     for ii, t in enumerate(time[1:]):
 
         forces, moments = forces_and_moments(TAS[ii], rho, alpha[ii], beta[ii],
-                                             d_e, 0, d_a, d_r, d_t, attitude)
+                                             d_e[ii], 0, d_a[ii], d_r[ii], d_t[ii],
+                                             attitude)
 
         results[ii+1, :] = equations.propagate(mass, inertia, forces, moments,
                                                dt)
@@ -95,6 +102,7 @@ if __name__ == '__main__':
         alpha[ii+1], beta[ii+1], TAS[ii+1] = calculate_alpha_beta_TAS(*lin_vel)
 
         _, _, rho, _ = atm(position[2])
+
 
     velocities = results[:, 0:6]
     attitude_angles = results[:, 6:9]
@@ -148,4 +156,11 @@ if __name__ == '__main__':
     plt.plot(position[:, 0], position[:, 1])
     plt.xlabel('X (m)')
     plt.ylabel('Y (m)')
+    plt.legend()
+
+    plt.figure()
+    plt.plot(time, alpha, label='alpha')
+    plt.plot(time, attitude_angles[:, 0], label='theta')
+    plt.plot(time, d_e, label='delta_e')
+    plt.plot(time, velocities[:, 4], label='q')
     plt.legend()
