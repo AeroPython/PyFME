@@ -12,19 +12,17 @@ import numpy as np
 
 
 def step(t_init, T, A, time, offset=0, var=None):
-
-    """ step input
+    """ Step input
 
     Parameters
     ----------
-
     t_init : float
-             time initial to start (s)
+        time initial to start (s)
     T : float
         time while input is running (s)
     A : float
         peak to peak amplitude
-    t : array_like
+    time : array_like
         time simulation vector (s)
     offset : float
     var : array_like
@@ -35,21 +33,18 @@ def step(t_init, T, A, time, offset=0, var=None):
     step_input : array_like
     """
     if var is None:
-
-        step_input = np.ones_like(time) * offset
-        step_input[(time >= t_init) & (time <= t_init + T)] = A
+        step_input = np.ones_like(time) * float(offset)
+        step_input[(time >= t_init) & (time <= t_init + T)] += A
 
     else:
-
         if np.size(var) == np.size(time):
-            step_input = offset + var
-            step_input[(time >= t_init) & (time <= t_init + T)] = A
+            step_input = float(offset) + var
+            step_input[(time >= t_init) & (time <= t_init + T)] += A
 
         else:
-
             raise ValueError('var and time must have the same size')
 
-    return (step_input)
+    return step_input
 
 
 def doublet(t_init, T, A, time, offset=0, var=None):
