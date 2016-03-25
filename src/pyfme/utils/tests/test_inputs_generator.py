@@ -32,6 +32,19 @@ def test_step():
 
     assert_almost_equal(input, expected_input)
 
+def test_step_bounds_not_included():
+    t_init = 0.1
+    T = 4.8
+    A = 1.5
+    time = np.linspace(0, 10, 11)
+
+    expected_input = np.zeros([11])
+    expected_input[1:5] = A
+
+    input = step(t_init, T, A, time, offset=0, var=None)
+
+    assert_almost_equal(input, expected_input)
+
 
 def test_step_offset():
     t_init = 0
