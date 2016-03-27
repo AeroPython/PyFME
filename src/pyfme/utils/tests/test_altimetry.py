@@ -1,10 +1,14 @@
-
+# -*- coding: utf-8 -*-
 """
-Tests of altimetry.
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
+
+Tests of altimetry
+------------------
 """
 
 from numpy.testing import (assert_almost_equal)
-import pytest
 
 from pyfme.utils.altimetry import (geopotential2geometric,
                                    geometric2geopotential)

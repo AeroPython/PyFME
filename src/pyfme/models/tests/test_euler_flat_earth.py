@@ -3,8 +3,6 @@
 Tests of equations of euler flat earth model.
 """
 
-
-import pytest
 import numpy as np
 
 from pyfme.models.euler_flat_earth import (linear_and_angular_momentum_eqs,

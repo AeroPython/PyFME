@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 """
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
+
 Created on Sat Jan  9 23:56:51 2016
 
 @author:olrosales@gmail.com
@@ -15,7 +19,7 @@ from numpy.testing import (assert_array_almost_equal, assert_almost_equal)
 
 from pyfme.aircrafts.cessna_310 import (get_aerodynamic_forces,
                                         get_aerodynamic_moments,
-                                       get_engine_force)
+                                        get_engine_force)
 
 
 def test_get_aerodynamic_forces():

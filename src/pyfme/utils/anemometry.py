@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Anemometry related functions (to be completed)
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
 
+Anemometry related functions (to be completed)
+----------------------------
 Set of functions which allows to obtain the True Airspeed (TAS), the
 Equivalent airspeed (EAS) or the Calibrated Airspeed (CAS) known one of the
 others.
@@ -137,7 +141,7 @@ def calculate_viscosity_Sutherland(T):
 
 
 def tas2eas(tas, rho):
-    '''Given the True Airspeed, this function provides the Equivalent Airspeed.
+    """Given the True Airspeed, this function provides the Equivalent Airspeed.
 
     True Airspeed (TAS): is the speed of the aircraft relative to the
     airmass in which it is flying.
@@ -157,14 +161,14 @@ def tas2eas(tas, rho):
     -------
     eas : float
         Equivalent Airspeed (EAS) (m/s)
-    '''
+    """
     eas = tas * sqrt(rho / rho_0)
 
     return eas
 
 
 def eas2tas(eas, rho):
-    '''Given the Equivalent Airspeed, this function provides the True Airspeed.
+    """Given the Equivalent Airspeed, this function provides the True Airspeed.
 
     True Airspeed (TAS): is the speed of the aircraft relative to the
     airmass in which it is flying.
@@ -184,7 +188,7 @@ def eas2tas(eas, rho):
     -------
     tas : float
         True Airspeed (TAS) (m/s)
-    '''
+    """
 
     tas = eas / sqrt(rho / rho_0)
 
@@ -192,7 +196,7 @@ def eas2tas(eas, rho):
 
 
 def tas2cas(tas, p, rho):
-    '''Given the True Airspeed, this function provides the Calibrated Airspeed.
+    """Given the True Airspeed, this function provides the Calibrated Airspeed.
 
     True Airspeed (TAS): is the speed of the aircraft relative to the
     airmass in which it is flying.
@@ -213,7 +217,7 @@ def tas2cas(tas, p, rho):
     -------
     cas : float
         Calibrated Airspeed (CAS) (m/s)
-    '''
+    """
 
     a = sqrt(gamma * p / rho)
     var = (gamma - 1) / gamma
@@ -228,7 +232,7 @@ def tas2cas(tas, p, rho):
 
 
 def cas2tas(cas, p, rho):
-    '''Given the Calibrated Airspeed, this function provides the True Airspeed.
+    """Given the Calibrated Airspeed, this function provides the True Airspeed.
 
     True Airspeed (TAS): is the speed of the aircraft relative to the
     airmass in which it is flying.
@@ -249,7 +253,7 @@ def cas2tas(cas, p, rho):
     -------
     tas : float
         True Airspeed (TAS) (m/s)
-    '''
+    """
 
     a = sqrt(gamma * p / rho)
     var = (gamma - 1) / gamma
@@ -264,7 +268,7 @@ def cas2tas(cas, p, rho):
 
 
 def cas2eas(cas, p, rho):
-    '''Given the Calibrated Airspeed, this function provides the Equivalent
+    """Given the Calibrated Airspeed, this function provides the Equivalent
     Airspeed.
 
     Calibrated airspeed (CAS) is the speed shown by a conventional
@@ -288,7 +292,7 @@ def cas2eas(cas, p, rho):
     -------
     eas : float
         Equivalent Airspeed (EAS) (m/s)
-    '''
+    """
 
     tas = cas2tas(cas, p, rho)
 
@@ -298,7 +302,7 @@ def cas2eas(cas, p, rho):
 
 
 def eas2cas(eas, p, rho):
-    '''Given the Equivalent Airspeed, this function provides the Calibrated
+    """Given the Equivalent Airspeed, this function provides the Calibrated
     Airspeed.
 
     Calibrated airspeed (CAS) is the speed shown by a conventional
@@ -322,7 +326,7 @@ def eas2cas(eas, p, rho):
     -------
     cas : float
         Calibrated Airspeed (CAS) (m/s)
-    '''
+    """
 
     tas = eas2tas(eas, rho)
 
@@ -332,16 +336,16 @@ def eas2cas(eas, p, rho):
 
 
 def stagnation_pressure(p, a, tas):
-    '''Given the static pressure, the sound velocity and the true air speed,
+    """Given the static pressure, the sound velocity and the true air speed,
     it returns the stagnation pressure for a compressible flow.
 
     The stagnation pressure is the  is the static pressure a fluid retains when
-    brought to rest isentropically from Mach number M
+    brought to rest isoentropically from Mach number M
 
     Subsonic case: Bernouilli's equation compressible form.
 
     Supersonic case: Due to the shock wave Bernouilli's equation is no longer
-    aplycable. Rayleigh Pitot tube formula is used.
+    applicable. Rayleigh Pitot tube formula is used.
 
     Parameters
     ----------
@@ -358,7 +362,7 @@ def stagnation_pressure(p, a, tas):
     References
     ----------
     .. [1] http://www.dept.aoe.vt.edu/~lutze/AOE3104/airspeed.pdf
-    '''
+    """
 
     var = (gamma - 1) / gamma
     M = tas/a

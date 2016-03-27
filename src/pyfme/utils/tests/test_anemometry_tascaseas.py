@@ -1,5 +1,11 @@
+# -*- coding: utf-8 -*-
 """
-TAS CAS EAS convert test functions
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
+
+TAS CAS EAS conversion test functions
+-------------------------------------
 """
 from numpy.testing import (assert_almost_equal)
 

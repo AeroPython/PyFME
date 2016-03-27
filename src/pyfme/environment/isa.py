@@ -1,5 +1,12 @@
-# coding: utf-8
-"""ISA functions. Implementation based on:
+# -*- coding: utf-8 -*-
+"""
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
+
+ISA functions
+-------------
+ Implementation based on:
 
 .. [1] U.S. Standard Atmosphere, 1976, U.S. Government Printing Office,
         Washington, D.C., 1976
@@ -86,7 +93,7 @@ def atm(h):
     elif h0[1] <= h < h0[2]:  # Tropopause
         T0 = T0_layers[1]
         p0 = p0_layers[1]
-        alpha = alpha_layers[1]
+        # alpha = alpha_layers[1]
         h_diff = h - h0[1]
 
         T = T0
@@ -113,7 +120,7 @@ def atm(h):
     elif h0[4] <= h < h0[5]:  # Stratopause
         T0 = T0_layers[4]
         p0 = p0_layers[4]
-        alpha = alpha_layers[4]
+        # alpha = alpha_layers[4]
         h_diff = h - h0[4]
 
         T = T0

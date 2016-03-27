@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 """
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
+
+System Class
+------------
 The long-term objective is to a generic class System which can handle all the
 models (ie. euler_flat_earth, quaternions_rotating_earth,
-quaternions_rorating_earth_variable_mass...)
+quaternions_rotating_earth_variable_mass...)
 
 Meanwhile, this class can perform the propagation for the euler_flat_earth eqs
 """

@@ -1,7 +1,13 @@
+# -*- coding: utf-8 -*-
 """
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
+
+Altimetry
+---------
 Functions which transform geometric altitude into geopotential altitude, and
 vice versa.
-
 """
 
 
