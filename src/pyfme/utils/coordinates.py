@@ -183,6 +183,7 @@ def check_gamma_mu_chi_range(gamma, mu, chi):
 def wind2hor(wind_coords, gamma, mu, chi):
     """Transforms the vector coordinates in wind frame of reference to local
     horizon frame of reference.
+
     Parameters
     ----------
     wind_coords : array_like
@@ -193,28 +194,35 @@ def wind2hor(wind_coords, gamma, mu, chi):
         Velocity bank angle (rad).
     chi : float
         Velocity yaw (or azimuth) angle (rad)
+
     Returns
     -------
     hor_coords : array_like
         3 dimensional vector with (x,y,z) coordinates in local horizon axes.
+
     Raises
     ------
     ValueError
         If the values of the wind-horizon angles are outside the proper ranges.
+
     See Also
     --------
     `hor2wind` function.
+
     Notes
     -----
     See [1] for frame of reference definition.
     Note that in order to avoid ambiguities ranges in angles are limited to:
+
     * -pi/2 <= gamma <= pi/2
     * -pi <= mu <= pi
     * 0 <= chi <= 2*pi
+
     References
     ----------
     .. [1] Gómez Tierno, M.A. et al, "Mecánica del Vuelo," Garceta, pp. 1-12,
         2012
+
     """
 
     check_gamma_mu_chi_range(gamma, mu, chi)
@@ -240,6 +248,7 @@ def wind2hor(wind_coords, gamma, mu, chi):
 def hor2wind(hor_coords, gamma, mu, chi):
     """Transforms the vector coordinates in local horizon frame of reference
     to wind frame of reference.
+
     Parameters
     ----------
     hor_coords : array_like
@@ -250,17 +259,21 @@ def hor2wind(hor_coords, gamma, mu, chi):
         Velocity bank angle (rad).
     chi : float
         Velocity yaw (or azimuth) angle (rad)
+
     Returns
     -------
     wind_coords : array_like
         3 dimensional vector with (x,y,z) coordinates in wind axes.
+
     Raises
     ------
     ValueError
         If the values of the wind-horizon angles are outside the proper ranges.
+
     See Also
     --------
     `wind2hor` function.
+
     Notes
     -----
     See [1] for frame of reference definition.
@@ -268,10 +281,12 @@ def hor2wind(hor_coords, gamma, mu, chi):
     * -pi/2 <= gamma <= pi/2
     * -pi <= mu <= pi
     * 0 <= chi <= 2*pi
+
     References
     ----------
     .. [1] Gómez Tierno, M.A. et al, "Mecánica del Vuelo," Garceta, pp. 1-12,
         2012
+
     """
 
     check_gamma_mu_chi_range(gamma, mu, chi)
@@ -312,6 +327,7 @@ def check_alpha_beta_range(alpha, beta):
 def body2wind(body_coords, alpha, beta):
     """Transforms the vector coordinates in body frame of reference to
     wind frame of reference.
+
     Parameters
     ----------
     body_coords : array_like
@@ -325,25 +341,30 @@ def body2wind(body_coords, alpha, beta):
     -------
     wind_coords : array_like
         3 dimensional vector with (x,y,z) coordinates in wind axes.
+
     Raises
     ------
     ValueError
         If the values of the wind-body angles are outside the proper ranges.
+
     See Also
     --------
     `wind2body` function.
+
     Notes
     -----
     See [1] or [2] for frame of reference definition.
     Note that in order to avoid ambiguities ranges in angles are limited to:
     * -pi/2 <= alpha <= pi/2
     * -pi <= beta <= pi
+
     References
     ----------
     .. [1] B. Etkin, "Dynamics of Atmospheric Flight," Courier Corporation,
         pp. 104-120, 2012.
     .. [2] Gómez Tierno, M.A. et al, "Mecánica del Vuelo," Garceta, pp. 1-12,
         2012
+
     """
 
     check_alpha_beta_range(alpha, beta)
@@ -369,6 +390,7 @@ def body2wind(body_coords, alpha, beta):
 def wind2body(wind_coords, alpha, beta):
     """Transforms the vector coordinates in wind frame of reference to
     body frame of reference.
+
     Parameters
     ----------
     wind_coords : array_like
@@ -382,25 +404,30 @@ def wind2body(wind_coords, alpha, beta):
     -------
     body_coords : array_like
         3 dimensional vector with (x,y,z) coordinates in wind axes.
+
     Raises
     ------
     ValueError
         If the values of the wind-body angles are outside the proper ranges.
+
     See Also
     --------
     `body2wind` function.
+
     Notes
     -----
     See [1] or [2] for frame of reference definition.
     Note that in order to avoid ambiguities ranges in angles are limited to:
     * -pi/2 <= alpha <= pi/2
     * -pi <= beta <= pi
+
     References
     ----------
     .. [1] B. Etkin, "Dynamics of Atmospheric Flight," Courier Corporation,
         pp. 104-120, 2012.
     .. [2] Gómez Tierno, M.A. et al, "Mecánica del Vuelo," Garceta, pp. 1-12,
         2012
+
     """
 
     check_alpha_beta_range(alpha, beta)

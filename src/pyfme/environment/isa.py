@@ -6,26 +6,28 @@ Distributed under the terms of the MIT License.
 
 ISA functions
 -------------
- Implementation based on:
+
+Implementation based on:
 
 .. [1] U.S. Standard Atmosphere, 1976, U.S. Government Printing Office,
         Washington, D.C., 1976
 
- From: https://en.wikipedia.org/wiki/U.S._Standard_Atmosphere
+From: https://en.wikipedia.org/wiki/U.S._Standard_Atmosphere
 
-               Geopotential
-               altitude     Static       Standard     Temperature
-    Subscript  above MSL    Pressure     Temperature  Lapse Rate
-    -------------------------------------------------------------
-                (m)	       (pascals)     (K)         (K/m)
-
-    0	           0	       101325	    288.15	     -0.0065
-    1	          11000	       22632.1	    216.65	      0
-    2	          20000	       5474.89	    216.65	      0.001
-    3	          32000	       868.019	    228.65	      0.0028
-    4	          47000	       110.906	    270.65	      0
-    5	          51000	       66.9389	    270.65	     -0.0028
-    6	          71000	       3.95642	    214.65	     -0.002
+=========  ============  =========  ===========  =============
+Subscript  Geopotential  Static     Standard     Temperature 
+           altitude      Pressure   Temperature  Lapse Rate  
+           above MSL     (pascals)  (K)          (K/m)       
+           (m)                                               
+=========  ============  =========  ===========  =============
+0          0             101325     288.15       -0.0065
+1          11000         22632.1    216.65        0
+2          20000         5474.89    216.65        0.001
+3          32000         868.019    228.65        0.0028
+4          47000         110.906    270.65        0
+5          51000         66.9389    270.65       -0.0028
+6          71000         3.95642    214.65       -0.002
+=========  ============  =========  ===========  =============
 
 """
 
