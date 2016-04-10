@@ -194,7 +194,7 @@ def test_doublet_var_and_offset():
 
     expected_input = var + offset
     expected_input[0:3] += A/2
-    expected_input[0:3] += -A/2
+    expected_input[3:6] += -A/2
 
     doublet_input = doublet(t_init, T, A, time, offset=offset, var=var)
 
@@ -242,7 +242,7 @@ def test_ramp():
 
 def test_ramp_offset():
     t_init = 0
-    T = 5
+    T = 4
     A = 3
     time = np.linspace(0, 10, 11)
     offset = 1
@@ -281,7 +281,7 @@ def test_ramp_var_and_offset():
     var[0::2] = -1
 
     expected_input = var + offset
-    expected_input += np.array([0, A/4, A/2, 3*A/4, A])
+    expected_input[0:5] += np.array([0, A/4, A/2, 3*A/4, A])
 
     ramp_input = ramp(t_init, T, A, time, offset=offset, var=var)
 
