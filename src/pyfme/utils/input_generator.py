@@ -60,7 +60,7 @@ def doublet(t_init, T, A, time, offset=0, var=None):
         time while input is running (s)
     A : float
         peak to peak amplitude
-    t : array_like
+    time : array_like
         time simulation vector (s)
     offset : float
     var : array_like
@@ -72,16 +72,16 @@ def doublet(t_init, T, A, time, offset=0, var=None):
     """
     if var is None:
 
-        doublet_input = np.ones_like(time)*offset
-        doublet_input[(time >= t_init) & (time <= t_init + T/2)] = A/2
-        doublet_input[(time > t_init + T/2) & (time <= t_init + T)] = - A/2
+        doublet_input = np.ones_like(time) * float(offset)
+        doublet_input[(time >= t_init) & (time <= t_init + T/2)] += A/2
+        doublet_input[(time > t_init + T/2) & (time <= t_init + T)] += - A/2
 
     else:
 
         if np.size(var) == np.size(time):
-            doublet_input = offset + var
-            doublet_input[(time >= t_init) & (time <= t_init + T/2)] = A/2
-            doublet_input[(time > t_init + T/2) & (time <= t_init + T)] = - A/2
+            doublet_input = float(offset) + var
+            doublet_input[(time >= t_init) & (time <= t_init + T/2)] += A/2
+            doublet_input[(time > t_init + T/2) & (time <= t_init + T)] += - A/2
 
         else:
 
@@ -103,7 +103,7 @@ def sinusoide(t_init, T, A, time, phase=0, offset=0, var=None):
         time while input is running (s)
     A : float
         peak to peak amplitude (rad)
-    t : array_like
+    time : array_like
         time simulation vector (s)
     phase : float
         sinusoidal phase (rad)
@@ -120,16 +120,16 @@ def sinusoide(t_init, T, A, time, phase=0, offset=0, var=None):
 
     if var is None:
 
-        sinusoide_input = np.ones_like(time) * offset
-        sinusoide_input[(time >= t_init) & (time <= t_init + T)] = A/2 *\
+        sinusoide_input = np.ones_like(time) * float(offset)
+        sinusoide_input[(time >= t_init) & (time <= t_init + T)] += A/2 *\
         np.sin(2 * np.pi * (time_input - t_init) / T + phase)
 
     else:
 
         if np.size(var) == np.size(time):
 
-            sinusoide_input = var + offset
-            sinusoide_input[(time >= t_init) & (time <= t_init + T)] = A/2 *\
+            sinusoide_input = var + float(offset)
+            sinusoide_input[(time >= t_init) & (time <= t_init + T)] += A/2 *\
             np.sin(2 * np.pi * (time_input - t_init) / T + phase)
 
         else:
@@ -152,7 +152,7 @@ def ramp(t_init, T, A, time, offset=0, var=None):
         time while input is running (s)
     A : float
         peak to peak amplitude (rad)
-    t : array_like
+    time : array_like
         time simulation vector (s)
     offset : float
     var : array_like
@@ -167,8 +167,8 @@ def ramp(t_init, T, A, time, offset=0, var=None):
 
     if var is None:
 
-        ramp_input = np.ones_like(time) * offset
-        ramp_input[(time >= t_init) & (time <= t_init + T)] = (A / T) *\
+        ramp_input = np.ones_like(time) * float(offset)
+        ramp_input[(time >= t_init) & (time <= t_init + T)] += (A / T) *\
         (time_input - t_init)
 
     else:
@@ -176,7 +176,7 @@ def ramp(t_init, T, A, time, offset=0, var=None):
         if np.size(var) == np.size(time):
 
             ramp_input = var + offset
-            ramp_input[(time >= t_init) & (time <= t_init + T)] = (A / T) *\
+            ramp_input[(time >= t_init) & (time <= t_init + T)] += (A / T) *\
             (time_input - t_init)
 
         else:
@@ -199,7 +199,7 @@ def harmonic(t_init, T, A, time, f, phase=0, offset=0, var=None):
         time while input is running (s)
     A : float
         peak to peak amplitude (rad)
-    t : array_like
+    time : array_like
         time simulation vector (s)
     f : float
         sinusoidal frequency (s)
@@ -217,16 +217,16 @@ def harmonic(t_init, T, A, time, f, phase=0, offset=0, var=None):
 
     if var is None:
 
-        harmonic_input = np.ones_like(time) * offset
-        harmonic_input[(time >= t_init) & (time <= t_init + T)] = A/2 *\
+        harmonic_input = np.ones_like(time) * float(offset)
+        harmonic_input[(time >= t_init) & (time <= t_init + T)] += A/2 *\
         np.sin(2 * np.pi * f * (time_input - t_init) + phase)
 
     else:
 
         if np.size(var) == np.size(time):
 
-            harmonic_input = var + offset
-            harmonic_input[(time >= t_init) & (time <= t_init + T)] = A/2 *\
+            harmonic_input = var + float(offset)
+            harmonic_input[(time >= t_init) & (time <= t_init + T)] += A/2 *\
             np.sin(2 * np.pi * f * (time_input - t_init) + phase)
         else:
 
