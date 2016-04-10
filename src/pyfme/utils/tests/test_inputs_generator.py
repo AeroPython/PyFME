@@ -311,3 +311,214 @@ def test_ramp_wrong_not_scalar_offset():
 
     with pytest.raises(TypeError) as excinfo:
         ramp(t_init, T, A, time, offset=offset)
+
+
+def test_sinusoide():
+    t_init = 0
+    T = 4
+    A = 3
+    time = np.linspace(0, 10, 11)
+
+    expected_input = np.zeros([11])
+    expected_input[0:5] = np.array([0, A/2, 0, -A/2, 0])
+
+    sinusoide_input = sinusoide(t_init, T, A, time)
+
+    assert_almost_equal(sinusoide_input, expected_input)
+
+
+def test_sinusoide_offset():
+    t_init = 0
+    T = 4
+    A = 3
+    time = np.linspace(0, 10, 11)
+    offset = 1
+
+    expected_input = np.zeros([11]) + offset
+    expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0])
+
+    sinusoide_input = sinusoide(t_init, T, A, time, offset=offset)
+
+    assert_almost_equal(sinusoide_input, expected_input)
+
+
+def test_sinusoide_phase():
+    t_init = 0
+    T = 4
+    A = 3
+    time = np.linspace(0, 10, 11)
+    phase= np.pi/2
+
+    expected_input = np.zeros([11])
+    expected_input[0:5] += np.array([A/2, 0, -A/2, 0, A/2])
+
+    sinusoide_input = sinusoide(t_init, T, A, time, phase=phase)
+
+    assert_almost_equal(sinusoide_input, expected_input)
+
+
+def test_sinusoide_var():
+    t_init = 0
+    T = 4
+    A = 3
+    time = np.linspace(0, 10, 11)
+    var = np.ones_like(time)
+    var[0::2] = -1
+
+    expected_input = var.copy()
+    expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0])
+
+    sinusoide_input = sinusoide(t_init, T, A, time, offset=0, var=var)
+
+    assert_almost_equal(sinusoide_input, expected_input)
+
+
+def test_sinusoide_var_and_offset():
+    t_init = 0
+    T = 4
+    A = 3
+    time = np.linspace(0, 10, 11)
+    offset = 2
+    var = np.ones_like(time)
+    var[0::2] = -1
+
+    expected_input = var + offset
+    expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0])
+
+    sinusoide_input = sinusoide(t_init, T, A, time, offset=offset, var=var)
+
+    assert_almost_equal(sinusoide_input, expected_input)
+
+
+def test_sinusoide_wrong_size_var():
+    t_init = 0
+    T = 5
+    A = 1.5
+    time = np.linspace(0, 10, 11)
+    var = np.ones([10])
+
+    with pytest.raises(ValueError) as excinfo:
+        sinusoide(t_init, T, A, time, offset=0, var=var)
+    assert ("ValueError: var and time must have the same size"
+                in excinfo.exconly())
+
+
+def test_sinusoide_wrong_not_scalar_offset():
+    t_init = 0
+    T = 5
+    A = 1.5
+    time = np.linspace(0, 10, 11)
+    var = np.ones_like(time)
+    offset = var
+
+    with pytest.raises(TypeError) as excinfo:
+        sinusoide(t_init, T, A, time, offset=offset)
+
+
+def test_harmonic():
+    t_init = 0
+    T = 4
+    A = 3
+    time = np.linspace(0, 10, 11)
+    f = 0.25
+
+    expected_input = np.zeros([11])
+    expected_input[0:5] = np.array([0, A/2, 0, -A/2, 0])
+
+    harmonic_input =  harmonic(t_init, T, A, time, f, phase=0, offset=0, var=None)
+
+    assert_almost_equal(harmonic_input, expected_input)
+
+
+def test_harmonic_offset():
+    t_init = 0
+    T = 4
+    A = 3
+    time = np.linspace(0, 10, 11)
+    offset = 1
+    f = 0.25
+
+    expected_input = np.zeros([11]) + offset
+    expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0])
+
+    harmonic_input = harmonic(t_init, T, A, time, f, offset=offset)
+
+    assert_almost_equal(harmonic_input, expected_input)
+
+
+def test_harmonic_phase():
+    t_init = 0
+    T = 4
+    A = 3
+    time = np.linspace(0, 10, 11)
+    phase= np.pi/2
+    f = 0.25
+
+    expected_input = np.zeros([11])
+    expected_input[0:5] += np.array([A/2, 0, -A/2, 0, A/2])
+
+    harmonic_input = harmonic(t_init, T, A, time, f, phase=phase)
+
+    assert_almost_equal(harmonic_input, expected_input)
+
+
+def test_harmonic_var():
+    t_init = 0
+    T = 4
+    A = 3
+    time = np.linspace(0, 10, 11)
+    var = np.ones_like(time)
+    var[0::2] = -1
+    f = 0.25
+
+    expected_input = var.copy()
+    expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0])
+
+    harmonic_input = harmonic(t_init, T, A, time, f, offset=0, var=var)
+
+    assert_almost_equal(harmonic_input, expected_input)
+
+
+def test_harmonic_var_and_offset():
+    t_init = 0
+    T = 4
+    A = 3
+    time = np.linspace(0, 10, 11)
+    offset = 2
+    var = np.ones_like(time)
+    var[0::2] = -1
+    f = 0.25
+
+    expected_input = var + offset
+    expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0])
+
+    harmonic_input = harmonic(t_init, T, A, time, f, offset=offset, var=var)
+
+    assert_almost_equal(harmonic_input, expected_input)
+
+
+def test_harmonic_wrong_size_var():
+    t_init = 0
+    T = 5
+    A = 1.5
+    time = np.linspace(0, 10, 11)
+    var = np.ones([10])
+    f = 0.25
+
+    with pytest.raises(ValueError) as excinfo:
+        harmonic(t_init, T, A, time, f, offset=0, var=var)
+    assert ("ValueError: var and time must have the same size"
+                in excinfo.exconly())
+
+
+def test_harmonic_wrong_not_scalar_offset():
+    t_init = 0
+    T = 5
+    A = 1.5
+    time = np.linspace(0, 10, 11)
+    var = np.ones_like(time)
+    offset = var
+    f = 0.25
+
+    with pytest.raises(TypeError) as excinfo:
+        harmonic(t_init, T, A, time, f, offset=offset)
