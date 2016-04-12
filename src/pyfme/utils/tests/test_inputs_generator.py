@@ -122,8 +122,8 @@ def test_step_wrong_not_scalar_offset():
 
 def test_doublet():
     t_init = 0
-    T = 5
-    A = 3
+    T = 5.
+    A = 3.
     time = np.linspace(0, 10, 11)
 
     expected_input = np.zeros([11])
@@ -138,7 +138,7 @@ def test_doublet():
 def test_doublet_bounds_not_included():
     t_init = 0.1
     T = 4.8
-    A = 3
+    A = 3.
     time = np.linspace(0, 10, 11)
 
     expected_input = np.zeros([11])
@@ -168,7 +168,7 @@ def test_doublet_offset():
 
 def test_doublet_var():
     t_init = 0
-    T = 5
+    T = 5.
     A = 1.5
     time = np.linspace(0, 10, 11)
     var = np.ones_like(time)
@@ -185,7 +185,7 @@ def test_doublet_var():
 
 def test_doublet_var_and_offset():
     t_init = 0
-    T = 5
+    T = 5.
     A = 1.5
     time = np.linspace(0, 10, 11)
     offset = 2.6
@@ -203,7 +203,7 @@ def test_doublet_var_and_offset():
 
 def test_doublet_wrong_size_var():
     t_init = 0
-    T = 5
+    T = 5.
     A = 1.5
     time = np.linspace(0, 10, 11)
     var = np.ones([10])
@@ -216,7 +216,7 @@ def test_doublet_wrong_size_var():
 
 def test_doublet_wrong_not_scalar_offset():
     t_init = 0
-    T = 5
+    T = 5.
     A = 1.5
     time = np.linspace(0, 10, 11)
     var = np.ones_like(time)
@@ -228,8 +228,8 @@ def test_doublet_wrong_not_scalar_offset():
 
 def test_ramp():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.
     time = np.linspace(0, 10, 11)
 
     expected_input = np.zeros([11])
@@ -242,8 +242,8 @@ def test_ramp():
 
 def test_ramp_offset():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.
     time = np.linspace(0, 10, 11)
     offset = 1
 
@@ -257,8 +257,8 @@ def test_ramp_offset():
 
 def test_ramp_var():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.
     time = np.linspace(0, 10, 11)
     var = np.ones_like(time)
     var[0::2] = -1
@@ -273,8 +273,8 @@ def test_ramp_var():
 
 def test_ramp_var_and_offset():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.
     time = np.linspace(0, 10, 11)
     offset = 2
     var = np.ones_like(time)
@@ -290,7 +290,7 @@ def test_ramp_var_and_offset():
 
 def test_ramp_wrong_size_var():
     t_init = 0
-    T = 5
+    T = 5.
     A = 1.5
     time = np.linspace(0, 10, 11)
     var = np.ones([10])
@@ -303,7 +303,7 @@ def test_ramp_wrong_size_var():
 
 def test_ramp_wrong_not_scalar_offset():
     t_init = 0
-    T = 5
+    T = 5.
     A = 1.5
     time = np.linspace(0, 10, 11)
     var = np.ones_like(time)
@@ -315,8 +315,8 @@ def test_ramp_wrong_not_scalar_offset():
 
 def test_sinusoide():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.
     time = np.linspace(0, 10, 11)
 
     expected_input = np.zeros([11])
@@ -329,8 +329,8 @@ def test_sinusoide():
 
 def test_sinusoide_offset():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.
     time = np.linspace(0, 10, 11)
     offset = 1
 
@@ -344,8 +344,8 @@ def test_sinusoide_offset():
 
 def test_sinusoide_phase():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.
     time = np.linspace(0, 10, 11)
     phase= np.pi/2
 
@@ -359,8 +359,8 @@ def test_sinusoide_phase():
 
 def test_sinusoide_var():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.
     time = np.linspace(0, 10, 11)
     var = np.ones_like(time)
     var[0::2] = -1
@@ -375,8 +375,8 @@ def test_sinusoide_var():
 
 def test_sinusoide_var_and_offset():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.
     time = np.linspace(0, 10, 11)
     offset = 2
     var = np.ones_like(time)
@@ -392,7 +392,7 @@ def test_sinusoide_var_and_offset():
 
 def test_sinusoide_wrong_size_var():
     t_init = 0
-    T = 5
+    T = 5.
     A = 1.5
     time = np.linspace(0, 10, 11)
     var = np.ones([10])
@@ -405,7 +405,7 @@ def test_sinusoide_wrong_size_var():
 
 def test_sinusoide_wrong_not_scalar_offset():
     t_init = 0
-    T = 5
+    T = 5.
     A = 1.5
     time = np.linspace(0, 10, 11)
     var = np.ones_like(time)
@@ -417,8 +417,8 @@ def test_sinusoide_wrong_not_scalar_offset():
 
 def test_harmonic():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.0
     time = np.linspace(0, 10, 11)
     f = 0.25
 
@@ -432,8 +432,8 @@ def test_harmonic():
 
 def test_harmonic_offset():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.
     time = np.linspace(0, 10, 11)
     offset = 1
     f = 0.25
@@ -448,8 +448,8 @@ def test_harmonic_offset():
 
 def test_harmonic_phase():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.
     time = np.linspace(0, 10, 11)
     phase= np.pi/2
     f = 0.25
@@ -464,8 +464,8 @@ def test_harmonic_phase():
 
 def test_harmonic_var():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.
     time = np.linspace(0, 10, 11)
     var = np.ones_like(time)
     var[0::2] = -1
@@ -481,8 +481,8 @@ def test_harmonic_var():
 
 def test_harmonic_var_and_offset():
     t_init = 0
-    T = 4
-    A = 3
+    T = 4.
+    A = 3.
     time = np.linspace(0, 10, 11)
     offset = 2
     var = np.ones_like(time)
@@ -490,7 +490,7 @@ def test_harmonic_var_and_offset():
     f = 0.25
 
     expected_input = var + offset
-    expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0])
+    expected_input[0:5] += np.array([0, A/2.0, 0, -A/2, 0])
 
     harmonic_input = harmonic(t_init, T, A, time, f, offset=offset, var=var)
 
@@ -499,7 +499,7 @@ def test_harmonic_var_and_offset():
 
 def test_harmonic_wrong_size_var():
     t_init = 0
-    T = 5
+    T = 5.
     A = 1.5
     time = np.linspace(0, 10, 11)
     var = np.ones([10])
@@ -513,7 +513,7 @@ def test_harmonic_wrong_size_var():
 
 def test_harmonic_wrong_not_scalar_offset():
     t_init = 0
-    T = 5
+    T = 5.
     A = 1.5
     time = np.linspace(0, 10, 11)
     var = np.ones_like(time)
