@@ -10,8 +10,11 @@ Atmosphere
 """
 
 from math import exp, sqrt
+from abc import abstractmethod
 
 from pyfme.models.constants import GAMMA_AIR, R_AIR, GRAVITY
+from pyfme.models.systems import GeneralSystem
+
 
 class Atmosphere(object):
 
@@ -21,11 +24,55 @@ class Atmosphere(object):
         self._R_a = R_AIR
         self._g0 = GRAVITY
 
-        self.h = None  # Current height (m).
+        self._h = None  # Current geopotential height (m).
         self.T = None  # Temperature (K).
         self.p = None  # Pressure (atm).
         self.rho = None  # Density (kg/m³).
         self.a = None  # Speed of sound (m/s).
+
+    def update(self, system: GeneralSystem):
+        """Update atmosphere state for the given system state.
+
+        Parameters
+        ----------
+        system : GeneralSystem object
+            GeneralSystem object with attribute alt_geop (geopotential
+            altitude.
+
+        Returns
+        -------
+        T : float
+            Temperature (K).
+        p : float
+            Pressure (Pa).
+        rho : float
+            Density (kg/m³)
+        a : float
+            Sound speed at flight level (m/s)
+
+        Raises
+        ------
+        ValueError
+            If the value of the altitude is outside the defined layers.
+
+        Notes
+        -----
+        Check layers and reference values in [2].
+
+        References
+        ----------
+        .. [1] U.S. Standard Atmosphere, 1976, U.S. Government Printing Office,
+            Washington, D.C., 1976
+        .. [2] https://en.wikipedia.org/wiki/U.S._Standard_Atmosphere
+
+        """
+        h = system.alt_geop  # Geopotential altitude
+        self._h = h
+        self.T, self.p, self.rho, self.a = self._atm(h)
+
+    @abstractmethod
+    def _atm(self, h):
+        return
 
 # FIXME: TESTS to be modified
 class ISA1976(Atmosphere):
@@ -65,8 +112,14 @@ class ISA1976(Atmosphere):
         self._alpha_layers = (-0.0065, 0, 0.001, 0.0028, 0, -0.0028,
                               -0.002)  # K / m
 
-    def __call__(self, h):
-        # Fixme: check documentation & class documentation
+        # Initialize at h=0
+        self.h = 0  # Current height (m).
+        self.T = self._T0_layers[0]  # Temperature (K).
+        self.p = self._p0_layers[0]  # Pressure (atm).
+        self.rho = self.p / (self.R_a * self.T)
+        self.a = sqrt(self.gamma * self.R_a * self.T)
+
+    def _atm(self, h):
         """ISA 1976 Standard atmosphere temperature, pressure and density.
 
         Parameters
@@ -92,6 +145,11 @@ class ISA1976(Atmosphere):
 
         Notes
         -----
+        Note that this method will calculate the atmosphere `T, p, rho,
+        a`  values corresponding to the given geopotential altitude, but the
+        atmosphere object will not be updated. Use update instead to
+        update the atmosphere.
+
         Check layers and reference values in [2].
 
         References
@@ -101,7 +159,6 @@ class ISA1976(Atmosphere):
         .. [2] https://en.wikipedia.org/wiki/U.S._Standard_Atmosphere
 
         """
-
         g0 = self._g0
         R_a = self.R_a
         gamma = self._gamma
@@ -114,8 +171,8 @@ class ISA1976(Atmosphere):
             p0 = self._p0_layers[0]
             alpha = self._alpha_layers[0]
 
-            self.T = T0 + alpha * h
-            self.p = p0 * (T0 / (T0 + alpha * h)) ** (g0 / (R_a * alpha))
+            T = T0 + alpha * h
+            p = p0 * (T0 / (T0 + alpha * h)) ** (g0 / (R_a * alpha))
 
         elif self._h0[1] <= h < self._h0[2]:  # Tropopause
             T0 = self._T0_layers[1]
@@ -123,8 +180,8 @@ class ISA1976(Atmosphere):
             # alpha = self._alpha_layers[1]
             h_diff = h - self._h0[1]
 
-            self.T = T0
-            self.p = p0 * exp(-g0 * h_diff / (R_a * T0))
+            T = T0
+            p = p0 * exp(-g0 * h_diff / (R_a * T0))
 
         elif self._h0[2] <= h < self._h0[3]:  # Stratosphere 1
             T0 = self._T0_layers[2]
@@ -132,8 +189,8 @@ class ISA1976(Atmosphere):
             alpha = self._alpha_layers[2]
             h_diff = h - self._h0[2]
 
-            self.T = T0 + alpha * h_diff
-            self.p = p0 * (T0 / (T0 + alpha * h_diff)) ** (g0 / (R_a * alpha))
+            T = T0 + alpha * h_diff
+            p = p0 * (T0 / (T0 + alpha * h_diff)) ** (g0 / (R_a * alpha))
 
         elif self._h0[3] <= h < self._h0[4]:  # Stratosphere 2
             T0 = self._T0_layers[3]
@@ -141,8 +198,8 @@ class ISA1976(Atmosphere):
             alpha = self._alpha_layers[3]
             h_diff = h - self._h0[3]
 
-            self.T = T0 + alpha * h_diff
-            self.p = p0 * (T0 / (T0 + alpha * h_diff)) ** (g0 / (R_a * alpha))
+            T = T0 + alpha * h_diff
+            p = p0 * (T0 / (T0 + alpha * h_diff)) ** (g0 / (R_a * alpha))
 
         elif self._h0[4] <= h < self._h0[5]:  # Stratopause
             T0 = self._T0_layers[4]
@@ -150,8 +207,8 @@ class ISA1976(Atmosphere):
             # alpha = self._alpha_layers[4]
             h_diff = h - self._h0[4]
 
-            self.T = T0
-            self.p = p0 * exp(-g0 * h_diff / (R_a * T0))
+            T = T0
+            p = p0 * exp(-g0 * h_diff / (R_a * T0))
 
         elif self._h0[5] <= h < self._h0[6]:  # Mesosphere 1
             T0 = self._T0_layers[5]
@@ -159,8 +216,8 @@ class ISA1976(Atmosphere):
             alpha = self._alpha_layers[5]
             h_diff = h - self._h0[5]
 
-            self.T = T0 + alpha * h_diff
-            self.p = p0 * (T0 / (T0 + alpha * h_diff)) ** (g0 / (R_a * alpha))
+            T = T0 + alpha * h_diff
+            p = p0 * (T0 / (T0 + alpha * h_diff)) ** (g0 / (R_a * alpha))
 
         elif self._h0[6] <= h <= self._h0[7]:  # Mesosphere 2
             T0 = self._T0_layers[6]
@@ -168,14 +225,14 @@ class ISA1976(Atmosphere):
             alpha = self._alpha_layers[6]
             h_diff = h - self._h0[6]
 
-            self.T = T0 + alpha * h_diff
-            self.p = p0 * (T0 / (T0 + alpha * h_diff)) ** (g0 / (R_a * alpha))
+            T = T0 + alpha * h_diff
+            p = p0 * (T0 / (T0 + alpha * h_diff)) ** (g0 / (R_a * alpha))
 
         else:
             raise ValueError(
                 "Altitude cannot be greater than {} m.".format(self._h0[7]))
-        self.h = h
-        self.rho = self.p / (R_a * self.T)
-        self.a = sqrt(gamma * R_a * self.T)
-        return self.T, self.p, self.rho, self.a
+
+        rho = p / (R_a * T)
+        a = sqrt(gamma * R_a * T)
+        return T, p, rho, a
 
