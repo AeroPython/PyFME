@@ -19,3 +19,9 @@ GRAVITY = 9.80665  # m/s^2
 STD_GRAVITATIONAL_PARAMETER = 3.986004418e14  # m³/s²
 EARTH_MASS = 5.9722e24  # kg
 GRAVITATIONAL_CONSTANT = 6.67384e11 # N·m²/kg²
+
+# Conversions
+lbs2kg = 0.453592
+ft2m = 0.3048
+slug2kg = 14.5939
+slugft2_2_kgm2 = 1.35581795
