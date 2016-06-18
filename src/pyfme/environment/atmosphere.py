@@ -13,7 +13,7 @@ from math import exp, sqrt
 from abc import abstractmethod
 
 from pyfme.models.constants import GAMMA_AIR, R_AIR, GRAVITY
-from pyfme.models.systems import GeneralSystem
+from pyfme.models.systems import System
 
 
 class Atmosphere(object):
@@ -30,13 +30,13 @@ class Atmosphere(object):
         self.rho = None  # Density (kg/m³).
         self.a = None  # Speed of sound (m/s).
 
-    def update(self, system: GeneralSystem):
+    def update(self, system: System):
         """Update atmosphere state for the given system state.
 
         Parameters
         ----------
-        system : GeneralSystem object
-            GeneralSystem object with attribute alt_geop (geopotential
+        system : System object
+            System object with attribute alt_geop (geopotential
             altitude.
 
         Returns
