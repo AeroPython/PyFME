@@ -1,7 +1,17 @@
+"""
+Python Flight Mechanics Engine (PyFME).
+Copyright (c) AeroPython Development Team.
+Distributed under the terms of the MIT License.
+
+Dynamic Systems
+---------------
+
+"""
+
 import numpy as np
 from scipy.integrate import ode
 
-class GeneralSystem(object):
+class System(object):
 
     def __init__(self):
 
@@ -19,7 +29,7 @@ class GeneralSystem(object):
         self.coord_earth = np.zeros_like([3], dtype=float)
         # Altitude
         self.alt_pre = None  # Pressure altitude.
-        self.alt_geo = None  # Geopotential altitude.
+        self.alt_geop = None  # Geopotential altitude.
         # ANEMOMETRY
         self.TAS = None  # True Air Speed.
         self.CAS = None  # Calibrated Air Speed.
@@ -29,16 +39,8 @@ class GeneralSystem(object):
         self.q_inf = None  # Dynamic pressure.
         self.alpha = None  # Angle of attack.
         self.beta = None  # Angle of sideslip.
-        # Wind
-        # TODO: check this when wind is implemented.
-        # ( Wind velocity FROM North to South, Wind velocity FROM East to
-        # West, Wind velocity in the UPSIDE direction)
-        self.wind = np.zeros_like([3], dtype=float)
-        # Atmosphere
-        self.temp = None  # Temperature (K)
-        self.rho = None  # Density (kg/m³)
-        self.pre = None  # Pressure (atm)
-        self.sound_speed = None  # Speed of sound (m/s)
+        self.Dalpha_Dt = None  # d(alpha)/dt
+        self.Dbeta_Dt = None  # d(beta)/dt
         # ATTITUDE (psi, theta, phi).
         self.euler_angles = np.zeros_like([3], dtype=float)
         self.quaternions = np.zeros_like([4], dtype=float)
@@ -56,7 +58,7 @@ class GeneralSystem(object):
         self.forces_body = np.zeros_like([3], dtype=float)
         self.moments_body = np.zeros_like([3], dtype=float)
 
-        self.force_gravity = 9.81  # m/s²
+        self.force_gravity = np.zeros_like([3], dtype=float)
 
     @property
     def lat(self):
@@ -180,12 +182,11 @@ class GeneralSystem(object):
         # self.coord_geocentric = np.zeros_like([3], dtype=float)
         # self.coord_earth = np.zeros_like([3], dtype=float)
         # self.alt_pre = None  # Pressure altitude.
-        # self.alt_geo = None  # Geopotential altitude.
+        # self.alt_geop = None  # Geopotential altitude.
 
     # TODO: implement rest of inizialization (take trimmer into account).
 
-
-class EulerFlatEarth(GeneralSystem):
+class EulerFlatEarth(System):
 
     def __init__(self, integrator='dopri5', use_jac=False, **integrator_params):
         """
@@ -196,33 +197,30 @@ class EulerFlatEarth(GeneralSystem):
         integration.
         """
         super(EulerFlatEarth, self).__init__()
-        # State vector must be initialized with set_initial_values() method
+        # State vector must be initialized with set_initial_state_vector() method
         self.state_vector = None
 
-        from pyfme.models.euler_flat_earth import (
-            linear_and_angular_momentum_eqs, kinematic_angular_eqs,
-            navigation_eqs, jac_linear_and_angular_momentum_eqs,
-            jac_kinematic_angular_eqs)
+        from pyfme.models.euler_flat_earth import lamceq, kaeq, kleq
 
         if use_jac:
-            jac_LM_and_AM = jac_linear_and_angular_momentum_eqs
-            jac_att = jac_kinematic_angular_eqs
+            from pyfme.models.euler_flat_earth import lamceq_jac, kaeq_jac
+            jac_LM_and_AM = lamceq_jac
+            jac_att = kaeq_jac
             jac_nav = None  # not implemented
         else:
             jac_LM_and_AM = None
             jac_att = None
             jac_nav = None
 
-        self._LM_and_AM_eqs = ode(linear_and_angular_momentum_eqs,
-                                  jac=jac_LM_and_AM)
-        self._attitude_eqs = ode(kinematic_angular_eqs, jac=jac_att)
-        self._navigation_eqs = ode(navigation_eqs, jac=jac_nav)
+        self._LM_and_AM_eqs = ode(lamceq, jac=jac_LM_and_AM)
+        self._attitude_eqs = ode(kaeq, jac=jac_att)
+        self._navigation_eqs = ode(kleq, jac=jac_nav)
 
         self._LM_and_AM_eqs.set_integrator(integrator, **integrator_params)
         self._attitude_eqs.set_integrator(integrator, **integrator_params)
         self._navigation_eqs.set_integrator(integrator, **integrator_params)
 
-    def set_initial_values(self, t0=0.0):
+    def set_initial_state_vector(self, t0=0.0):
         """
         Set the initial values of the required variables
         """
@@ -231,11 +229,11 @@ class EulerFlatEarth(GeneralSystem):
             self.p, self.q, self.r,
             self.theta, self.phi, self.psi,
             self.x_earth, self.y_earth, self.z_earth
-                                    ])
+        ])
 
-        self._LM_and_AM_eqs.set_initial_value(y=(self.state_vector[0:6]), t=t0)
-        self._attitude_eqs.set_initial_value(y=(self.state_vector[6:9]), t=t0)
-        self._navigation_eqs.set_initial_value(y=(self.state_vector[9:12]), t=t0)
+        self._LM_and_AM_eqs.set_initial_value(y=self.state_vector[0:6], t=t0)
+        self._attitude_eqs.set_initial_value(y=self.state_vector[6:9], t=t0)
+        self._navigation_eqs.set_initial_value(y=self.state_vector[9:12], t=t0)
 
     def _propagate_state_vector(self, aircraft, dt):
         """
@@ -277,6 +275,7 @@ class EulerFlatEarth(GeneralSystem):
         return self.state_vector
 
     def propagate(self, aircraft, dt=0.01):
+        """Propagate the state vector and update the rest of variables."""
         self._propagate_state_vector(aircraft, dt)
         # TODO: update the rest of variables.
 
