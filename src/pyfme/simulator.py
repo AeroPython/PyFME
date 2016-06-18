@@ -9,9 +9,14 @@ Simulation class
 """
 from abc import abstractmethod
 
+from pyfme.environment.atmosphere import Atmosphere
+from pyfme.environment.gravity import Gravity
+from pyfme.models.systems import System
+
 class Simulation(object):
 
-    def __init__(self, aircraft, system, atmosphere, gravity):
+    def __init__(self, aircraft, system: System, atmosphere: Atmosphere,
+                 gravity:Gravity):
         self.aircraft = aircraft
         self.system = system
         self.atmosphere = atmosphere
