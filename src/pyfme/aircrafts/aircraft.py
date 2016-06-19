@@ -13,7 +13,7 @@ from scipy.optimize import least_squares
 
 from pyfme.environment.environment import Environment
 from pyfme.models.euler_flat_earth import lamceq
-from pyfme.models.system import System
+from pyfme.models.systems import System
 
 
 class Aircraft(object):

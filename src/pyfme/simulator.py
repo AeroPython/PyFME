@@ -9,36 +9,31 @@ Simulation class
 """
 from abc import abstractmethod
 
-from pyfme.environment.atmosphere import Atmosphere
-from pyfme.environment.gravity import Gravity
+from pyfme.aircrafts.aircraft import Aircraft
+from pyfme.environment.environment import Environment
 from pyfme.models.systems import System
 
 class Simulation(object):
 
-    def __init__(self, aircraft, system: System, atmosphere: Atmosphere,
-                 gravity:Gravity):
+    def __init__(self, aircraft: Aircraft, system: System, environment:
+    Environment):
         self.aircraft = aircraft
         self.system = system
-        self.atmosphere = atmosphere
-        self.gravity = gravity
+        self.environment = environment
         self._time_step = 0
 
     def time_step(self, dt):
 
         self._time_step += 1
         self.system.propagate(self.aircraft, dt)
-        self.atmosphere(self.system)
-        self.system.set_atmosphere()  # TODO: set API
-        gravity_accel = self.gravity.get_gravity(self.system)
-        gravity_force = gravity_accel * self.aircraft.mass
-        controls = self.get_current_aircraft_controls()
-        self.aircraft.set_controls(controls)
-        forces, moments = self.aircraft.get_forces_and_moments(self.system)
-        forces += gravity_force
-        self.system.set_forces_and_moments(forces, moments)
+        self.environment.update(self.system)
+        controls = self._get_current_aircraft_controls()
+        self.aircraft.get_forces_and_moments(system=self.system,
+                                             controls=controls,
+                                             env=self.environment)
 
     @abstractmethod
-    def get_current_aircraft_controls(self, ii):
+    def _get_current_aircraft_controls(self, ii):
         return
 
 
@@ -75,7 +70,7 @@ class BatchSimulation(Simulation):
         self.time = time
         self.aircraft_controls = controls
 
-    def get_current_aircraft_controls(self, ii):
+    def _get_current_aircraft_controls(self, ii):
         """Returns controls at time step ii.
 
         Parameters
@@ -104,6 +99,6 @@ class RealTimeSimulation(Simulation):
                                                  gravity)
         # TODO:...
 
-    def get_current_aircraft_controls(self, ii):
+    def _get_current_aircraft_controls(self, ii):
         # Joystick reading
         raise NotImplementedError

@@ -7,11 +7,12 @@ Dynamic Systems
 ---------------
 
 """
+from abc import abstractmethod
 
 import numpy as np
 from scipy.integrate import ode
 
-from pyfme.aircrafts.aircraft import Aircraft
+# from pyfme.aircrafts.aircraft import Aircraft
 from pyfme.environment.environment import Environment
 from pyfme.utils.altimetry import geometric2geopotential
 from pyfme.utils.anemometry import tas2cas, tas2eas
@@ -61,11 +62,6 @@ class System(object):
         self.turn_rate = None  # d(psi)/dt
         # ANGULAR VELOCITY: (p, q, r)
         self.vel_ang = np.zeros_like([3], dtype=float)
-        # TOTAL FORCES & MOMENTS (Body Axis)
-        self.forces_body = np.zeros_like([3], dtype=float)
-        self.moments_body = np.zeros_like([3], dtype=float)
-
-        self.force_gravity = np.zeros_like([3], dtype=float)
 
     @property
     def lat(self):
@@ -181,6 +177,17 @@ class System(object):
         self.gamma = gamma
         self.turn_rate = turn_rate
 
+    @abstractmethod
+    def set_initial_state_vector(self, t0):
+        pass
+
+    @abstractmethod
+    def _propagate_state_vector(self, aircraft, dt):
+        pass
+
+    def propagate(self, aircraft, dt=0.01):
+        pass
+
 class EulerFlatEarth(System):
 
     def __init__(self, integrator='dopri5', use_jac=False, **integrator_params):
@@ -216,7 +223,7 @@ class EulerFlatEarth(System):
         self._ode_kaqeq.set_integrator(integrator, **integrator_params)
         self._ode_kleq.set_integrator(integrator, **integrator_params)
 
-    def set_initial_state_vector(self, t0=0.0):
+    def set_initial_state_vector(self):
         """
         Set the initial values of the required variables
         """
@@ -227,9 +234,9 @@ class EulerFlatEarth(System):
             self.x_earth, self.y_earth, self.z_earth
         ])
 
-        self._ode_lamceq.set_initial_value(y=self.state_vector[0:6], t=t0)
-        self._ode_kaqeq.set_initial_value(y=self.state_vector[6:9], t=t0)
-        self._ode_kleq.set_initial_value(y=self.state_vector[9:12], t=t0)
+        self._ode_lamceq.set_initial_value(y=self.state_vector[0:6])
+        self._ode_kaqeq.set_initial_value(y=self.state_vector[6:9])
+        self._ode_kleq.set_initial_value(y=self.state_vector[9:12])
 
     def _propagate_state_vector(self, aircraft, dt):
         """
@@ -238,8 +245,8 @@ class EulerFlatEarth(System):
         """
         mass = aircraft.mass
         inertia = aircraft.inertia
-        forces = self.forces_body
-        moments = self.moments_body
+        forces = aircraft.forces
+        moments = aircraft.moments
 
         t = self._ode_lamceq.t + dt
 

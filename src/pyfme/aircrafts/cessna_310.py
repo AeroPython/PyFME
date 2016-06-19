@@ -70,6 +70,8 @@ class Cessna310(Aircraft):
         self.control_names = ['delta_elevator', 'hor_tail_incidence',
                               'delta_aileron', 'delta_rudder', 'delta_t']
 
+        self.forces = np.zeros(3)
+        self.moments = np.zeros(3)
         """
     CY_b is the side force stability derivative with respect to the
         angle of sideslip
@@ -153,6 +155,6 @@ class Cessna310(Aircraft):
         Fg = self.mass * env.gravity_vector
         Fa = np.array([-D, Y, -L])
 
-        forces = Ft + Fg + Fa
-        moments = np.array([l, m, n])
-        return forces, moments
+        self.forces = Ft + Fg + Fa
+        self.moments = np.array([l, m, n])
+        return self.forces, self.moments
