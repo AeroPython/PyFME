@@ -8,6 +8,12 @@ Generic Aircraft
 
 """
 from abc import abstractmethod
+import numpy as np
+from scipy.optimize import least_squares
+
+from pyfme.environment.environment import Environment
+from pyfme.models.euler_flat_earth import lamceq
+from pyfme.models.system import System
 
 
 class Aircraft(object):
@@ -28,9 +34,16 @@ class Aircraft(object):
         return self.inertia[2, 2]
 
     @abstractmethod
-    def get_forces_and_moments(self):
+    def get_forces_and_moments(self, system: System, controls: dict,
+                               env: Environment):
         pass
 
     @abstractmethod
     def check_control_limits(self):
         pass
+
+    def steady_state_flight_trim(self, system: System, env: Environment,
+                             controls: dict, trim_controls_names: list,
+                             verbose=0):
+        # TODO: wrap steady_state_flight_trim from utils/trimmer.py
+        raise NotImplementedError

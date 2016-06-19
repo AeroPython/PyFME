@@ -11,6 +11,12 @@ Dynamic Systems
 import numpy as np
 from scipy.integrate import ode
 
+from pyfme.aircrafts.aircraft import Aircraft
+from pyfme.environment.environment import Environment
+from pyfme.utils.altimetry import geometric2geopotential
+from pyfme.utils.anemometry import tas2cas, tas2eas
+
+
 class System(object):
 
     def __init__(self):
@@ -52,6 +58,7 @@ class System(object):
         # Absolute local horizon (NED) velocity
         self.vel_NED = np.zeros_like([3], dtype=float)
         self.gamma = None  # Flight path angle.
+        self.turn_rate = None  # d(psi)/dt
         # ANGULAR VELOCITY: (p, q, r)
         self.vel_ang = np.zeros_like([3], dtype=float)
         # TOTAL FORCES & MOMENTS (Body Axis)
@@ -144,47 +151,35 @@ class System(object):
     def r(self):
         return self.vel_ang[2]
 
-    def set_initial_position(self, coordinates, mode='earth'):
-        """
-        Set the initial position of the aircraft.
+    def set_initial_flight_conditions(self, lat, lon, h, TAS,
+                                      environment: Environment,
+                                      gamma=0, turn_rate=0):
 
-        Parameters
-        ----------
-        coordinates: array_like, size=3
-            Depending on the chosen mode the three coordinates are:
-            * 'earth': (x_earth, y_earth, z_earth).
-            * 'geographic': (lat, lon, h).
-            * 'geocentric': (x_geo, y_geo, z_geo)
-        mode: str, opt
-            Kind of coordinates specified in `coordinates`.
-            * 'earth': Earth axis are parallel to local horizon (NED) at the
-             initial position but at h=0. Initial latitude and longitude
-             will  be set to zero if this mode is chosen.
-            * 'geographic': Latitude (geodetic), longitude and height above the
-             reference ellipsoid (WGS84). Initial x_earth and y_earth will be
-             set to zero if this mode is chosen.
-            * 'geocentric': Geocentric reference frame rotates attached to
-             Earth. Z is the Earth's rotation axis (pointing to north
-             hemisphere and X is contained in the equatorial plane with
-             longitude equal to zero. Initial x_earth and y_earth will be
-             set to zero if this mode is chosen.
-        """
+        self.coord_geographic[0] = lat
+        self.coord_geographic[1] = lon
+        self.coord_geographic[2] = h
+        # TODO: Conversion to geocentric coordinates
+        # self.coord_geocentric =
 
-        mode = mode.lower()
-        # TODO: implement
-        if mode == 'earth':
-            pass
-        elif mode == 'geographic':
-            pass
-        elif mode == 'geocentric':
-            pass
-        # self.coord_geographic = np.zeros([3], dtype=float)
-        # self.coord_geocentric = np.zeros_like([3], dtype=float)
-        # self.coord_earth = np.zeros_like([3], dtype=float)
-        # self.alt_pre = None  # Pressure altitude.
-        # self.alt_geop = None  # Geopotential altitude.
+        self.alt_pre = h
+        self.alt_geop = geometric2geopotential(h)
 
-    # TODO: implement rest of inizialization (take trimmer into account).
+        environment.update(self)
+        rho = environment.rho
+        a = environment.a
+        p = environment.p
+        self.Mach = TAS / a
+        self.q_inf = 0.5 * rho * TAS**2
+        self.TAS = TAS
+        self.CAS = tas2cas(TAS, p, rho)
+        self.EAS = tas2eas(TAS, rho)
+        # self.IAS =
+
+        self.Dalpha_Dt = 0  # d(alpha)/dt
+        self.Dbeta_Dt = 0  # d(beta)/dt
+
+        self.gamma = gamma
+        self.turn_rate = turn_rate
 
 class EulerFlatEarth(System):
 
@@ -201,6 +196,7 @@ class EulerFlatEarth(System):
         self.state_vector = None
 
         from pyfme.models.euler_flat_earth import lamceq, kaeq, kleq
+        self.lamceq = lamceq
 
         if use_jac:
             from pyfme.models.euler_flat_earth import lamceq_jac, kaeq_jac
@@ -212,13 +208,13 @@ class EulerFlatEarth(System):
             jac_att = None
             jac_nav = None
 
-        self._LM_and_AM_eqs = ode(lamceq, jac=jac_LM_and_AM)
-        self._attitude_eqs = ode(kaeq, jac=jac_att)
-        self._navigation_eqs = ode(kleq, jac=jac_nav)
+        self._ode_lamceq = ode(lamceq, jac=jac_LM_and_AM)
+        self._ode_kaqeq = ode(kaeq, jac=jac_att)
+        self._ode_kleq = ode(kleq, jac=jac_nav)
 
-        self._LM_and_AM_eqs.set_integrator(integrator, **integrator_params)
-        self._attitude_eqs.set_integrator(integrator, **integrator_params)
-        self._navigation_eqs.set_integrator(integrator, **integrator_params)
+        self._ode_lamceq.set_integrator(integrator, **integrator_params)
+        self._ode_kaqeq.set_integrator(integrator, **integrator_params)
+        self._ode_kleq.set_integrator(integrator, **integrator_params)
 
     def set_initial_state_vector(self, t0=0.0):
         """
@@ -231,9 +227,9 @@ class EulerFlatEarth(System):
             self.x_earth, self.y_earth, self.z_earth
         ])
 
-        self._LM_and_AM_eqs.set_initial_value(y=self.state_vector[0:6], t=t0)
-        self._attitude_eqs.set_initial_value(y=self.state_vector[6:9], t=t0)
-        self._navigation_eqs.set_initial_value(y=self.state_vector[9:12], t=t0)
+        self._ode_lamceq.set_initial_value(y=self.state_vector[0:6], t=t0)
+        self._ode_kaqeq.set_initial_value(y=self.state_vector[6:9], t=t0)
+        self._ode_kleq.set_initial_value(y=self.state_vector[9:12], t=t0)
 
     def _propagate_state_vector(self, aircraft, dt):
         """
@@ -245,26 +241,26 @@ class EulerFlatEarth(System):
         forces = self.forces_body
         moments = self.moments_body
 
-        t = self._LM_and_AM_eqs.t + dt
+        t = self._ode_lamceq.t + dt
 
-        self._LM_and_AM_eqs.set_f_params(mass, inertia, forces, moments)
-        velocities = self._LM_and_AM_eqs.integrate(t)
+        self._ode_lamceq.set_f_params(mass, inertia, forces, moments)
+        velocities = self._ode_lamceq.integrate(t)
 
-        if self._LM_and_AM_eqs.successful():
-            self._attitude_eqs.set_f_params(velocities[3:])
-            attitude_angles = self._attitude_eqs.integrate(t)
+        if self._ode_lamceq.successful():
+            self._ode_kaqeq.set_f_params(velocities[3:])
+            attitude_angles = self._ode_kaqeq.integrate(t)
         else:
             raise RuntimeError('Integration of Linear and angular momentum \
                                 equations was not successful')
 
-        if self._attitude_eqs.successful():
-            self._navigation_eqs.set_f_params(velocities[0:3], attitude_angles)
-            position = self._navigation_eqs.integrate(t)
+        if self._ode_kaqeq.successful():
+            self._ode_kleq.set_f_params(velocities[0:3], attitude_angles)
+            position = self._ode_kleq.integrate(t)
         else:
             raise RuntimeError('Integration of attitude equations was not \
                                 successful')
 
-        if self._navigation_eqs.successful():
+        if self._ode_kleq.successful():
             self.state_vector[0:6] = velocities[:]
             self.state_vector[6:9] = attitude_angles[:]
             self.state_vector[9:12] = position[:]

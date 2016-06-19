@@ -14,16 +14,21 @@ Instead, it must be done with a numerical algorithm which iteratively adjusts
 the independent variables until some solution criterion is met.
 """
 from warnings import warn
+from copy import deepcopy
 import numpy as np
 from math import sqrt, sin, cos, tan, atan
 from scipy.optimize import least_squares
 
+from pyfme.aircrafts.aircraft import Aircraft
+from pyfme.environment.environment import Environment
+from pyfme.models.systems import System
 from pyfme.utils.coordinates import wind2body
-from pyfme.environment.isa import atm
 
 
-def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
-                             dyn_eqs=None, verbose=0):
+def steady_state_flight_trim(ac: Aircraft, system: System, env: Environment,
+                             controls: dict, trim_controls_names: list,
+                             verbose=0):
+    # TODO: write docstring again
     """Finds a combination of values of the state and control variables that
     correspond to a steady-state flight condition. Steady-state aircraft flight
     can be defined as a condition in which all of the motion variables are
@@ -70,34 +75,24 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
     .. [1] Stevens, BL and Lewis, FL, "Aircraft Control and Simulation",
         Wiley-lnterscience.
     """
-
-    if dyn_eqs is None:
-        from pyfme.models.euler_flat_earth import linear_and_angular_momentum_eqs
-        dynamic_eqs = linear_and_angular_momentum_eqs
+    # Copy of system and controls is performed in order to not overwrite the
+    # the original attributes.
+    trimmmed_system = deepcopy(system)
+    trimmed_controls = deepcopy(controls)
 
     # TODO: try to look for a good inizialization method
-    alpha_0 = 0.05 * np.sign(gamma)
-    betha_0 = 0.001 * np.sign(turn_rate)
-    delta_e_0 = 0.05
-    delta_ail_0 = 0.01 * np.sign(turn_rate)
-    delta_r_0 = 0.01 * np.sign(turn_rate)
-    delta_t_0 = 0.5
-
-    initial_guess = (alpha_0,
-                     betha_0,
-                     delta_e_0,
-                     delta_ail_0,
-                     delta_r_0,
-                     delta_t_0)
-
-    args = (h, TAS, gamma, turn_rate, aircraft, dynamic_eqs)
+    initial_guess = [0.05 * np.sign(system.gamma),  # alpha
+                     0.001 * np.sign(system.turn_rate)]  # beta
+    for control in trim_controls_names:
+        initial_guess.append(controls[control])
+    args = (trimmmed_system, ac, env, trim_controls_names, trimmed_controls)
 
     # TODO: pass max deflection of the controls inside aircraft.
-    lower_bounds = (-1, -0.5, -1, -1, -1, 0)
-    upper_bounds = (+1, +0.5, +1, +1, +1, 1)
+    # lower_bounds = (-1, -0.5, -1, -1, -1, 0)
+    # upper_bounds = (+1, +0.5, +1, +1, +1, 1)
 
-    results = least_squares(func, x0=initial_guess, args=args, verbose=verbose,
-                            bounds=(lower_bounds, upper_bounds))
+    results = least_squares(trimming_cost_func, x0=initial_guess, args=args,
+                            verbose=verbose, bounds=(-np.inf, np.inf))
 
     trimmed_params = results['x']
     fun = results['fun']
@@ -105,38 +100,39 @@ def steady_state_flight_trim(aircraft, h, TAS, gamma=0, turn_rate=0,
 
     if cost > 1e-7 or any(abs(fun) > 1e-3):
         warn("Trim process did not converge", RuntimeWarning)
-        if trimmed_params[5] > 0.99:
-            warn("Probably not enough power for demanded conditions")
+        # TODO: check power settings
 
     alpha = trimmed_params[0]
     beta = trimmed_params[1]
 
-    delta_e = trimmed_params[2]
-    delta_ail = trimmed_params[3]
-    delta_r = trimmed_params[4]
-    delta_t = trimmed_params[5]
+    for ii, control in enumerate(trim_controls_names):
+        # TODO: check if this is necessary. Trimmed controls is probably set
+        # inside trimming_cost_func
+        trimmed_controls[control] = trimmed_params[ii+2]
 
-    # What happens if we have two engines and all that kind of things...?
-    control_vector = delta_e, delta_ail, delta_r, delta_t
-
-    if abs(turn_rate) < 1e-8:
+    if abs(system.turn_rate) < 1e-8:
         phi = 0
     else:
-        phi = turn_coord_cons(turn_rate, alpha, beta, TAS, gamma)
+        phi = turn_coord_cons(system.turn_rate, alpha, beta, system.TAS,
+                              system.gamma)
 
-    theta = rate_of_climb_cons(gamma, alpha, beta, phi)
+    theta = rate_of_climb_cons(system.gamma, alpha, beta, phi)
 
     # w = turn_rate * k_h
     # k_h = sin(theta) i_b + sin(phi) * cos(theta) j_b + cos(theta) * sin(phi)
     # w = p * i_b + q * j_b + r * k_b
-    p = - turn_rate * sin(theta)
-    q = turn_rate * sin(phi) * cos(theta)
-    r = turn_rate * cos(theta) * sin(phi)
+    p = - system.turn_rate * sin(theta)
+    q = system.turn_rate * sin(phi) * cos(theta)
+    r = system.turn_rate * cos(theta) * sin(phi)
 
     ang_vel = np.array([p, q, r])
-    lin_vel = wind2body((TAS, 0, 0), alpha, beta)
+    lin_vel = wind2body((system.TAS, 0, 0), alpha, beta)
 
-    return lin_vel, ang_vel, theta, phi, alpha, beta, control_vector
+    # Just for comprobations
+    trimming_results = [lin_vel, ang_vel, theta, phi, alpha, beta,
+                          trimmed_controls]
+    # TODO: check also that trimmed_system is set inside trimming_cost_func
+    return trimmmed_system, trimmed_controls, trimming_results
 
 
 def turn_coord_cons(turn_rate, alpha, beta, TAS, gamma=0):
@@ -149,7 +145,6 @@ def turn_coord_cons(turn_rate, alpha, beta, TAS, gamma=0):
     if abs(gamma) < 1e-8:
         phi = G * cos(beta) / (cos(alpha) - G * sin(alpha) * sin(beta))
         phi = atan(phi)
-
     else:
         a = 1 - G * tan(alpha) * sin(beta)
         b = sin(gamma) / cos(beta)
@@ -161,7 +156,6 @@ def turn_coord_cons(turn_rate, alpha, beta, TAS, gamma=0):
         den = a**2 - b**2 * (1 + c * tan(alpha)**2)
 
         phi = atan(G * cos(beta) / cos(alpha) * num / den)
-
     return phi
 
 
@@ -172,10 +166,8 @@ def turn_coord_cons_horizontal_and_small_beta(turn_rate, alpha, TAS):
 
     g0 = 9.81
     G = turn_rate * TAS / g0
-
     phi = G / cos(alpha)
     phi = atan(phi)
-
     return phi
 
 
@@ -184,32 +176,37 @@ def rate_of_climb_cons(gamma, alpha, beta, phi):
     """
     a = cos(alpha) * cos(beta)
     b = sin(phi) * sin(beta) + cos(phi) * sin(alpha) * cos(beta)
-
     sq = sqrt(a**2 - sin(gamma)**2 + b**2)
-
     theta = (a * b + sin(gamma) * sq) / (a**2 - sin(gamma)**2)
     theta = atan(theta)
-
     return theta
 
 
-def func(trimmed_params, h, TAS, gamma, turn_rate, aircraft, dynamic_eqs):
+def trimming_cost_func(trimmed_params, system: System, ac: Aircraft,
+                       env: Environment, trim_controls_names, controls):
     """Function to optimize
     """
+    TAS = system.TAS
+    gamma = system.gamma
+
     alpha = trimmed_params[0]
     beta = trimmed_params[1]
 
-    delta_e = trimmed_params[2]
-    delta_ail = trimmed_params[3]
-    delta_r = trimmed_params[4]
-    delta_t = trimmed_params[5]
+    for ii, control in enumerate(trim_controls_names):
+        controls[control] = trimmed_params[ii+2]
 
+    turn_rate = system.turn_rate
+    # Choose coordinated turn constrain equation:
     if abs(turn_rate) < 1e-8:
         phi = 0
     else:
         phi = turn_coord_cons(turn_rate, alpha, beta, TAS, gamma)
 
+    system.euler_angles[2] = phi
+
+    # Rate of climb constrain
     theta = rate_of_climb_cons(gamma, alpha, beta, phi)
+    system.euler_angles[1] = theta
 
     # w = turn_rate * k_h
     # k_h = sin(theta) i_b + sin(phi) * cos(theta) j_b + cos(theta) * sin(phi)
@@ -217,24 +214,11 @@ def func(trimmed_params, h, TAS, gamma, turn_rate, aircraft, dynamic_eqs):
     p = - turn_rate * sin(theta)
     q = turn_rate * sin(phi) * cos(theta)
     r = turn_rate * cos(theta) * sin(phi)
+    system.vel_ang = np.array([p, q, r])
 
-    ang_vel = np.array([p, q, r])
+    system.vel_body = wind2body((TAS, 0, 0), alpha, beta)
 
-    lin_vel = wind2body((TAS, 0, 0), alpha, beta)
-
-    # FIXME: This implied some changes in the aircraft model.
-    # psi angle does not influence the attitude of the aircraft for gravity
-    # force projection. So it is set to 0.
-    attitude = np.array([theta, phi, 0])
-    _, _, rho, _ = atm(h)
-    forces, moments = aircraft.get_forces_and_moments(TAS, rho, alpha, beta,
-                                                      delta_e, 0, delta_ail,
-                                                      delta_r, delta_t,
-                                                      attitude)
-    mass, inertia = aircraft.mass_and_inertial_data()
-
-    vel = np.concatenate((lin_vel[:], ang_vel[:]))
-
-    output = dynamic_eqs(0, vel, mass, inertia, forces, moments)
-
+    forces, moments = ac.get_forces_and_moments(system, controls, env)
+    vel = np.concatenate((system.vel_body[:], system.vel_ang[:]))
+    output = system.lamceq(0, vel, ac.mass, ac.inertia, forces, moments)
     return output

@@ -11,6 +11,10 @@ Constant variables
 GAMMA_AIR = 1.401  # Adiabatic index or ratio of specific heats (dry air at
                    # 20º C)
 R_AIR = 287.05287  # J/(Kg·K)
+# Sea level conditions
+RHO_0 = 1.225  # density at sea level (kg/m3)
+P_0 = 101325  # pressure at sea level (Pa)
+SOUND_VEL_0 = 340.293990543  # sound speed at sea level (m/s)
 
 # GRAVITY of EARTH
 GRAVITY = 9.80665  # m/s^2

@@ -67,6 +67,9 @@ class Cessna310(Aircraft):
         self.Cl = 0
         self.Cn = 0
 
+        self.control_names = ['delta_elevator', 'hor_tail_incidence',
+                              'delta_aileron', 'delta_rudder', 'delta_t']
+
         """
     CY_b is the side force stability derivative with respect to the
         angle of sideslip
