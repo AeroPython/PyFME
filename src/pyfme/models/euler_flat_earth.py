@@ -8,7 +8,7 @@ Flight Dynamic Equations of Motion
 ----------------------------------
 These are the equations to be integrated, thus they have the following order
 for the arguments:
-trimming_cost_func(time, y, ...) where dy/dt = trimming_cost_func(y, ...)
+func(time, y, ...) where dy/dt = func(y, ...)
 
 Assumptions:
 
