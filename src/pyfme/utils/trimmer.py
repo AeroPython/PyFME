@@ -19,14 +19,10 @@ import numpy as np
 from math import sqrt, sin, cos, tan, atan
 from scipy.optimize import least_squares
 
-from pyfme.aircrafts.aircraft import Aircraft
-from pyfme.environment.environment import Environment
-from pyfme.models.systems import System
 from pyfme.utils.coordinates import wind2body
 
 
-def steady_state_flight_trim(ac: Aircraft, system: System, env: Environment,
-                             controls: dict, trim_controls_names: list,
+def steady_state_flight_trim(ac, system, env, controls, trim_controls_names,
                              verbose=0):
     # TODO: write docstring again
     """Finds a combination of values of the state and control variables that
@@ -81,7 +77,7 @@ def steady_state_flight_trim(ac: Aircraft, system: System, env: Environment,
     trimmed_controls = deepcopy(controls)
 
     # TODO: try to look for a good inizialization method
-    initial_guess = [0.05 * np.sign(system.gamma),  # alpha
+    initial_guess = [0.05,  # alpha
                      0.001 * np.sign(system.turn_rate)]  # beta
     for control in trim_controls_names:
         initial_guess.append(controls[control])
@@ -102,37 +98,7 @@ def steady_state_flight_trim(ac: Aircraft, system: System, env: Environment,
         warn("Trim process did not converge", RuntimeWarning)
         # TODO: check power settings
 
-    alpha = trimmed_params[0]
-    beta = trimmed_params[1]
-
-    for ii, control in enumerate(trim_controls_names):
-        # TODO: check if this is necessary. Trimmed controls is probably set
-        # inside trimming_cost_func
-        trimmed_controls[control] = trimmed_params[ii+2]
-
-    if abs(system.turn_rate) < 1e-8:
-        phi = 0
-    else:
-        phi = turn_coord_cons(system.turn_rate, alpha, beta, system.TAS,
-                              system.gamma)
-
-    theta = rate_of_climb_cons(system.gamma, alpha, beta, phi)
-
-    # w = turn_rate * k_h
-    # k_h = sin(theta) i_b + sin(phi) * cos(theta) j_b + cos(theta) * sin(phi)
-    # w = p * i_b + q * j_b + r * k_b
-    p = - system.turn_rate * sin(theta)
-    q = system.turn_rate * sin(phi) * cos(theta)
-    r = system.turn_rate * cos(theta) * sin(phi)
-
-    ang_vel = np.array([p, q, r])
-    lin_vel = wind2body((system.TAS, 0, 0), alpha, beta)
-
-    # Just for comprobations
-    trimming_results = [lin_vel, ang_vel, theta, phi, alpha, beta,
-                          trimmed_controls]
-    # TODO: check also that trimmed_system is set inside trimming_cost_func
-    return trimmmed_system, trimmed_controls, trimming_results
+    return trimmmed_system, trimmed_controls
 
 
 def turn_coord_cons(turn_rate, alpha, beta, TAS, gamma=0):
@@ -182,8 +148,8 @@ def rate_of_climb_cons(gamma, alpha, beta, phi):
     return theta
 
 
-def trimming_cost_func(trimmed_params, system: System, ac: Aircraft,
-                       env: Environment, trim_controls_names, controls):
+def trimming_cost_func(trimmed_params, system, ac, env, trim_controls_names,
+                       controls):
     """Function to optimize
     """
     TAS = system.TAS
@@ -191,6 +157,9 @@ def trimming_cost_func(trimmed_params, system: System, ac: Aircraft,
 
     alpha = trimmed_params[0]
     beta = trimmed_params[1]
+
+    system.alpha = alpha
+    system.beta = beta
 
     for ii, control in enumerate(trim_controls_names):
         controls[control] = trimmed_params[ii+2]

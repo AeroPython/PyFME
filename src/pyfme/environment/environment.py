@@ -3,15 +3,10 @@ Python Flight Mechanics Engine (PyFME).
 Copyright (c) AeroPython Development Team.
 Distributed under the terms of the MIT License.
 """
-from pyfme.environment.atmosphere import Atmosphere
-from pyfme.environment.gravity import Gravity
-from pyfme.environment.wind import NoWind
-from pyfme.models.systems import System
-
 
 class Environment(object):
 
-    def __init__(self, atmosphere: Atmosphere, gravity: Gravity, wind: NoWind):
+    def __init__(self, atmosphere, gravity, wind):
         self.atmosphere = atmosphere
         self.gravity = gravity
         self.wind = wind
@@ -48,7 +43,7 @@ class Environment(object):
     def horizon_wind(self):
         return self.wind.horizon_wind
 
-    def update(self, system: System):
+    def update(self, system):
         self.atmosphere.update(system)
         self.gravity.update(system)
         self.wind.update(system)

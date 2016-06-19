@@ -13,7 +13,6 @@ from math import exp, sqrt
 from abc import abstractmethod
 
 from pyfme.models.constants import GAMMA_AIR, R_AIR, GRAVITY
-from pyfme.models.systems import System
 
 
 class Atmosphere(object):
@@ -30,7 +29,7 @@ class Atmosphere(object):
         self.rho = None  # Density (kg/m³).
         self.a = None  # Speed of sound (m/s).
 
-    def update(self, system: System):
+    def update(self, system):
         """Update atmosphere state for the given system state.
 
         Parameters
@@ -74,6 +73,7 @@ class Atmosphere(object):
     def _atm(self, h):
         return
 
+
 # FIXME: TESTS to be modified
 class ISA1976(Atmosphere):
     """
@@ -116,8 +116,8 @@ class ISA1976(Atmosphere):
         self.h = 0  # Current height (m).
         self.T = self._T0_layers[0]  # Temperature (K).
         self.p = self._p0_layers[0]  # Pressure (atm).
-        self.rho = self.p / (self.R_a * self.T)
-        self.a = sqrt(self.gamma * self.R_a * self.T)
+        self.rho = self.p / (self._R_a * self.T)
+        self.a = sqrt(self._gamma * self._R_a * self.T)
 
     def _atm(self, h):
         """ISA 1976 Standard atmosphere temperature, pressure and density.
@@ -160,7 +160,7 @@ class ISA1976(Atmosphere):
 
         """
         g0 = self._g0
-        R_a = self.R_a
+        R_a = self._R_a
         gamma = self._gamma
 
         if h < 0.0:

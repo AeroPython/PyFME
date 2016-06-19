@@ -11,7 +11,6 @@ from abc import abstractmethod
 
 import numpy as np
 
-from pyfme.models.systems import System
 from pyfme.models.constants import GRAVITY, STD_GRAVITATIONAL_PARAMETER
 from pyfme.utils.coordinates import hor2body
 
@@ -23,18 +22,18 @@ class Gravity(object):
         self.vector = np.zeros([3])  # Body axis
 
     @abstractmethod
-    def update(self, system: System):
+    def update(self, system):
         pass
 
 
 class VerticalConstant(Gravity):
 
     def __init__(self):
-        Gravity.__init__()
+        Gravity.__init__(self)
         self.magnitude = GRAVITY
         self.z_horizon = np.array([0, 0, 1], dtype=float)
 
-    def update(self, system: System):
+    def update(self, system):
         self.unitary_vector = hor2body(self.z_horizon,
                                        theta=system.theta,
                                        phi=system.phi,
@@ -48,7 +47,7 @@ class VerticalNewton(Gravity):
         Gravity.__init__()
         self.z_horizon = np.array([0, 0, 1], dtype=float)
 
-    def update(self, system: System):
+    def update(self, system):
         r_squared = system.coord_geocentric @ system.coord_geocentric
         self.magnitude = STD_GRAVITATIONAL_PARAMETER / r_squared
         self.unitary_vector = hor2body(self.z_horizon,

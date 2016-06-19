@@ -9,14 +9,10 @@ Simulation class
 """
 from abc import abstractmethod
 
-from pyfme.aircrafts.aircraft import Aircraft
-from pyfme.environment.environment import Environment
-from pyfme.models.systems import System
 
 class Simulation(object):
 
-    def __init__(self, aircraft: Aircraft, system: System, environment:
-    Environment):
+    def __init__(self, aircraft, system, environment):
         self.aircraft = aircraft
         self.system = system
         self.environment = environment
@@ -25,9 +21,9 @@ class Simulation(object):
     def time_step(self, dt):
 
         self._time_step += 1
-        self.system.propagate(self.aircraft, dt)
+        self.system.propagate(self.aircraft, self.environment, dt)
         self.environment.update(self.system)
-        controls = self._get_current_aircraft_controls()
+        controls = self._get_current_aircraft_controls(self._time_step)
         self.aircraft.get_forces_and_moments(system=self.system,
                                              controls=controls,
                                              env=self.environment)
@@ -39,8 +35,8 @@ class Simulation(object):
 
 class BatchSimulation(Simulation):
 
-    def __init__(self, aircraft, system, atmosphere, gravity):
-        Simulation.__init__(aircraft, system, atmosphere, gravity)
+    def __init__(self, aircraft, system, environment):
+        Simulation.__init__(self, aircraft, system, environment)
         self.time = None
         self.aircraft_controls = {}
 
@@ -63,7 +59,7 @@ class BatchSimulation(Simulation):
         tsize = time.size
         # check dimensions
         for c in controls:
-            if c.size != tsize:
+            if controls[c].size != tsize:
                 msg = 'Control {} size ({}) does not match time size ({' \
                       '})'.fromat(c, c.size, tsize)
                 raise ValueError(msg)
@@ -87,16 +83,15 @@ class BatchSimulation(Simulation):
     def run_simulation(self):
 
         for ii, t in enumerate(self.time[1:]):
-            dt = t - self.time[ii-1]
+            dt = t - self.time[ii]
             self.time_step(dt)
 
 
 
 class RealTimeSimulation(Simulation):
 
-    def __init__(self, aircraft, system, atmosphere, gravity):
-        super(RealTimeSimulation, self).__init__(aircraft, system, atmosphere,
-                                                 gravity)
+    def __init__(self, aircraft, system, environment):
+        super(RealTimeSimulation, self).__init__(aircraft, system, environment)
         # TODO:...
 
     def _get_current_aircraft_controls(self, ii):

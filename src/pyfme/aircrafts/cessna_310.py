@@ -11,11 +11,7 @@ Cessna 310
 import numpy as np
 
 from pyfme.aircrafts.aircraft import Aircraft
-from pyfme.environment.environment import Environment
-from pyfme.models.systems import System
-from pyfme.utils.anemometry import calculate_dynamic_pressure
-from pyfme.utils.coordinates import hor2body
-from pyfme.models.constants import ft2m, slug2kg, slugft2_2_kgm2, lbs2kg
+from pyfme.models.constants import ft2m, slugft2_2_kgm2, lbs2kg
 
 
 class Cessna310(Aircraft):
@@ -112,7 +108,7 @@ class Cessna310(Aircraft):
          stabilator deflection
     """
 
-    def _set_aero_lon_forces_moments(self, system: System, controls: dict):
+    def _set_aero_lon_forces_moments(self, system, controls: dict):
 
         self._long_inputs[1] = system.alpha
         self._long_inputs[2] = controls['delta_elevator']
@@ -120,20 +116,20 @@ class Cessna310(Aircraft):
 
         self.CL, self.CD, self.Cm = self._long_coef_matrix @ self._long_inputs
 
-    def _set_aero_lat_forces_moments(self, system: System, controls: dict):
+    def _set_aero_lat_forces_moments(self, system, controls: dict):
         self._lat_inputs[0] = system.beta
         self._lat_inputs[1] = controls['delta_aileron']
         self._lat_inputs[2] = controls['delta_rudder']
 
         self.CY, self.Cl, self.Cn = self._lat_coef_matrix @ self._lat_inputs
 
-    def _set_thrust_forces_moments(self, system: System, controls: dict):
+    def _set_thrust_forces_moments(self, system, controls: dict):
 
         delta_t = controls['delta_t']
         self.Ct = 0.031 * delta_t
 
-    def get_forces_and_moments(self, system: System, controls: dict,
-                               env: Environment):
+    def get_forces_and_moments(self, system, controls: dict,
+                               env):
 
         q = system.q_inf
         Sw = self.Sw

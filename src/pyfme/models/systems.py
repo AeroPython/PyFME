@@ -12,10 +12,9 @@ from abc import abstractmethod
 import numpy as np
 from scipy.integrate import ode
 
-# from pyfme.aircrafts.aircraft import Aircraft
-from pyfme.environment.environment import Environment
 from pyfme.utils.altimetry import geometric2geopotential
-from pyfme.utils.anemometry import tas2cas, tas2eas
+from pyfme.utils.anemometry import tas2cas, tas2eas, calculate_alpha_beta_TAS
+from pyfme.utils.coordinates import body2hor
 
 
 class System(object):
@@ -49,8 +48,8 @@ class System(object):
         self.Dalpha_Dt = None  # d(alpha)/dt
         self.Dbeta_Dt = None  # d(beta)/dt
         # ATTITUDE (psi, theta, phi).
-        self.euler_angles = np.zeros_like([3], dtype=float)
-        self.quaternions = np.zeros_like([4], dtype=float)
+        self.euler_angles = np.zeros([3], dtype=float)
+        self.quaternions = np.zeros([4], dtype=float)
         # VELOCITY
         # FIXME: Ground and absolute speed may differ depending on the
         # inertial reference frame considered.
@@ -148,7 +147,7 @@ class System(object):
         return self.vel_ang[2]
 
     def set_initial_flight_conditions(self, lat, lon, h, TAS,
-                                      environment: Environment,
+                                      environment,
                                       gamma=0, turn_rate=0):
 
         self.coord_geographic[0] = lat
@@ -156,6 +155,8 @@ class System(object):
         self.coord_geographic[2] = h
         # TODO: Conversion to geocentric coordinates
         # self.coord_geocentric =
+        self.coord_earth = np.zeros([3])
+        self.coord_earth[2] = h
 
         self.alt_pre = h
         self.alt_geop = geometric2geopotential(h)
@@ -185,7 +186,7 @@ class System(object):
     def _propagate_state_vector(self, aircraft, dt):
         pass
 
-    def propagate(self, aircraft, dt=0.01):
+    def propagate(self, aircraft, environment, dt=0.01):
         pass
 
 class EulerFlatEarth(System):
@@ -277,8 +278,44 @@ class EulerFlatEarth(System):
 
         return self.state_vector
 
-    def propagate(self, aircraft, dt=0.01):
-        """Propagate the state vector and update the rest of variables."""
+    def propagate(self, aircraft, environment, dt=0.01):
+        """Propagate the state vector and update the rest of variables.
+
+        Parameters
+        ----------
+        environment
+        """
         self._propagate_state_vector(aircraft, dt)
+
         # TODO: update the rest of variables.
+        self.vel_body = self.state_vector[0:3]
+        self.vel_ang = self.state_vector[3:6]
+        self.euler_angles[0] = self.state_vector[8]  # psi
+        self.euler_angles[1] = self.state_vector[6]  # theta
+        self.euler_angles[2] = self.state_vector[7]  # phi
+        self.coord_earth = self.state_vector[9:12]
+        # self.quaternions =
+
+        # Set psi between 0 and 2*pi
+        self.euler_angles[0] = np.arctan2(np.sin(self.psi), np.cos(
+            self.psi)) % (2*np.pi)
+
+        # Altitude
+        self.alt_pre = self.state_vector[11]
+        self.alt_geop = geometric2geopotential(self.state_vector[11])
+        # ANEMOMETRY
+        self.alpha, self.beta, self.TAS = calculate_alpha_beta_TAS(self.u,
+                                                                   self.v,
+                                                                   self.w)
+        self.Mach = self.TAS / environment.a
+        self.q_inf = 0.5 * environment.rho * self.TAS ** 2
+        self.CAS = tas2cas(self.TAS, environment.p, environment.rho)
+        self.EAS = tas2eas(self.TAS, environment.rho)
+
+        # self.Dalpha_Dt = None  # d(alpha)/dt
+        # self.Dbeta_Dt = None  # d(beta)/dt
+
+        self.vel_NED = body2hor(self.vel_body, self.theta, self.phi, self.psi)
+        # self.gamma = None  # Flight path angle.
+        # self.turn_rate = None  # d(psi)/dt
 
