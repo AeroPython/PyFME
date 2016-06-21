@@ -19,29 +19,32 @@ from pyfme.environment.wind import NoWind
 from pyfme.models.systems import EulerFlatEarth
 from pyfme.simulator import BatchSimulation
 
-from pyfme.utils.trimmer import steady_state_flight_trim
-
 aircraft = Cessna310()
-environment = Environment(ISA1976(), VerticalConstant(), NoWind())
-system = EulerFlatEarth()
+atmosphere = ISA1976()
+gravity = VerticalConstant()
+wind = NoWind()
+environment = Environment(atmosphere, gravity, wind)
+system = EulerFlatEarth(lat=0, lon=0, h=1000, psi=np.pi/4, x_earth=0, y_earth=0)
 
-system.set_initial_flight_conditions(0, 0, 1000, 100, environment)
+not_trimmed_controls = {'delta_elevator': 0.05,
+                        'hor_tail_incidence': 0.00,
+                        'delta_aileron': 0.00,
+                        'delta_rudder': 0.00,
+                        'delta_t': 0.5}
 
-controls = {'delta_elevator': 0.05,
-            'hor_tail_incidence': 0.01,
-            'delta_aileron': 0.05,
-            'delta_rudder': 0.01,
-            'delta_t': 0.5}
 controls2trim = ['delta_elevator', 'delta_aileron', 'delta_rudder', 'delta_t']
 
-system, trim_controls = steady_state_flight_trim(aircraft, system, environment,
-                        controls, trim_controls_names=controls2trim)
-system.set_initial_state_vector()
+trimmed_controls, trim_system, outputs = aircraft.steady_state_flight_trim(
+    system, environment, not_trimmed_controls, TAS=120, gamma=+np.pi/180,
+    turn_rate=0.1, controls2trim=controls2trim)
 
-my_simulation = BatchSimulation(aircraft, system, environment)
+my_simulation = BatchSimulation(aircraft, trim_system, environment)
+
 N = 100
 time = np.linspace(0, 10, N)
-controls = {c_name: np.array([trim_controls[c_name]]*N)
-            for c_name in trim_controls}
-my_simulation.set_aircraft_controls(time, controls)
+controls = {c_name: np.array([trimmed_controls[c_name]] * N)
+            for c_name in trimmed_controls}
+
+my_simulation.set_controls(time, controls)
 my_simulation.run_simulation()
+

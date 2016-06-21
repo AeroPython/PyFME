@@ -21,15 +21,14 @@ class Simulation(object):
     def time_step(self, dt):
 
         self._time_step += 1
-        self.system.propagate(self.aircraft, self.environment, dt)
+        self.system.propagate(self.aircraft, dt)
         self.environment.update(self.system)
-        controls = self._get_current_aircraft_controls(self._time_step)
-        self.aircraft.get_forces_and_moments(system=self.system,
-                                             controls=controls,
-                                             env=self.environment)
+        controls = self._get_current_controls(self._time_step)
+        self.aircraft.update(controls, self.system, self.environment)
+        self.aircraft.calculate_forces_and_moments()
 
     @abstractmethod
-    def _get_current_aircraft_controls(self, ii):
+    def _get_current_controls(self, ii):
         return
 
 
@@ -40,7 +39,7 @@ class BatchSimulation(Simulation):
         self.time = None
         self.aircraft_controls = {}
 
-    def set_aircraft_controls(self, time, controls):
+    def set_controls(self, time, controls):
         """Set the time history of controls and the corresponding times.
 
         Parameters
@@ -66,7 +65,7 @@ class BatchSimulation(Simulation):
         self.time = time
         self.aircraft_controls = controls
 
-    def _get_current_aircraft_controls(self, ii):
+    def _get_current_controls(self, ii):
         """Returns controls at time step ii.
 
         Parameters
@@ -94,6 +93,6 @@ class RealTimeSimulation(Simulation):
         super(RealTimeSimulation, self).__init__(aircraft, system, environment)
         # TODO:...
 
-    def _get_current_aircraft_controls(self, ii):
+    def _get_current_controls(self, ii):
         # Joystick reading
         raise NotImplementedError

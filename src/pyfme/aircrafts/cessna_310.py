@@ -7,68 +7,6 @@ Distributed under the terms of the MIT License.
 Cessna 310
 ----------
 
-"""
-import numpy as np
-
-from pyfme.aircrafts.aircraft import Aircraft
-from pyfme.models.constants import ft2m, slugft2_2_kgm2, lbs2kg
-
-
-class Cessna310(Aircraft):
-    """
-    Cessna 310
-
-    The Cessna 310 is an American six-seat, low-wing, twin-engined monoplane
-    that was produced by Cessna between 1954 and 1980. It was the first
-    twin-engined aircraft that Cessna put into production after World War II.
-
-    References
-    ----------
-    AIRCRAFT DYNAMICS From modelling to simulation (Marcello R. Napolitano)
-    page 589
-    """
-
-    def __init__(self):
-
-        self.mass = 4600 * lbs2kg   # kg
-        self.inertia = np.diag([8884, 1939, 11001]) * slugft2_2_kgm2  # kg·m²
-        # Ixz_b = 0 * slugft2_2_kgm2  # Kg * m2
-
-        self.Sw = 175 * ft2m**2  # m2
-        self.chord = 4.79 * ft2m  # m
-        self.span = 36.9 * ft2m  # m
-
-        # |CL|   |CL_0  CL_a  CL_de  CL_dih| |  1     |
-        # |CD| = |CD_0  CD_a  0      0     | | alpha  |
-        # |Cm|   |Cm_0  Cm_a  Cm_de  Cm_dih| |delta_e |
-        #                                    |delta_ih|
-        self._long_inputs = np.zeros(4)
-        self._long_inputs[0] = 1.0
-        self._long_coef_matrix = np.array([[0.288,   4.58,  0.81, 0],
-                                           [0.029,  0.160,     0, 0],
-                                           [ 0.07, -0.137, -2.26, 0]])
-
-        self.CL = 0
-        self.CD = 0
-        self.Cm = 0
-
-        # |CY|   |CY_b  CY_da  CY_dr| |beta   |
-        # |Cl| = |Cl_b  Cl_da  Cl_dr| |delta_a|
-        # |Cn|   |Cn_b  Cn_da  Cn_dr| |delta_r|
-        self._lat_inputs = np.zeros(3)
-        self._lat_coef_matrix = np.array([[-0.698 ,       0,   0.230],
-                                          [-0.1096,   0.172,  0.0192],
-                                          [ 0.1444, -0.0168, -0.1152]])
-        self.CY = 0
-        self.Cl = 0
-        self.Cn = 0
-
-        self.control_names = ['delta_elevator', 'hor_tail_incidence',
-                              'delta_aileron', 'delta_rudder', 'delta_t']
-
-        self.forces = np.zeros(3)
-        self.moments = np.zeros(3)
-        """
     CY_b is the side force stability derivative with respect to the
         angle of sideslip
     CY_da is the side force stability derivative with respect to the
@@ -106,39 +44,130 @@ class Cessna310(Aircraft):
         elevator deflection
     Cm_dih is the pitching moment stability derivative with respect to the
          stabilator deflection
+
+"""
+import numpy as np
+
+from pyfme.aircrafts.aircraft import Aircraft
+from pyfme.models.constants import ft2m, slugft2_2_kgm2, lbs2kg
+
+
+class Cessna310(Aircraft):
+    """
+    Cessna 310
+
+    The Cessna 310 is an American six-seat, low-wing, twin-engined monoplane
+    that was produced by Cessna between 1954 and 1980. It was the first
+    twin-engined aircraft that Cessna put into production after World War II.
+
+    References
+    ----------
+    AIRCRAFT DYNAMICS From modelling to simulation (Marcello R. Napolitano)
+    page 589
     """
 
-    def _set_aero_lon_forces_moments(self, system, controls: dict):
+    def __init__(self):
 
-        self._long_inputs[1] = system.alpha
-        self._long_inputs[2] = controls['delta_elevator']
-        self._long_inputs[3] = controls['hor_tail_incidence']
+        # Mass & Inertia
+        self.mass = 4600 * lbs2kg   # kg
+        self.inertia = np.diag([8884, 1939, 11001]) * slugft2_2_kgm2  # kg·m²
+        # Ixz_b = 0 * slugft2_2_kgm2  # Kg * m2
+
+        # Geometry
+        self.Sw = 175 * ft2m**2  # m2
+        self.chord = 4.79 * ft2m  # m
+        self.span = 36.9 * ft2m  # m
+
+        # Aerodynamic Data (Linearized)
+        # |CL|   |CL_0  CL_a  CL_de  CL_dih| |  1     |
+        # |CD| = |CD_0  CD_a  0      0     | | alpha  |
+        # |Cm|   |Cm_0  Cm_a  Cm_de  Cm_dih| |delta_e |
+        #                                    |delta_ih|
+        #
+        # |CY|   |CY_b  CY_da  CY_dr| |beta   |
+        # |Cl| = |Cl_b  Cl_da  Cl_dr| |delta_a|
+        # |Cn|   |Cn_b  Cn_da  Cn_dr| |delta_r|
+        self._long_coef_matrix = np.array([[0.288,   4.58,  0.81, 0],
+                                           [0.029,  0.160,     0, 0],
+                                           [ 0.07, -0.137, -2.26, 0]])
+
+        self._lat_coef_matrix = np.array([[-0.698 ,       0,   0.230],
+                                          [-0.1096,   0.172,  0.0192],
+                                          [ 0.1444, -0.0168, -0.1152]])
+        self._long_inputs = np.zeros(4)
+        self._long_inputs[0] = 1.0
+
+        self._lat_inputs = np.zeros(3)
+
+        # CONTROLS
+        self.controls = {'delta_elevator': 0,
+                         'hor_tail_incidence': 0,
+                         'delta_aileron': 0,
+                         'delta_rudder': 0,
+                         'delta_t': 0}
+
+        # FIXME: these limits are not real
+        self.control_limits = {'delta_elevator': (-1, 1),  # rad
+                               'hor_tail_incidence': (-1, 1),  # rad
+                               'delta_aileron': (-1, 1),  # rad
+                               'delta_rudder': (-1, 1),  # rad
+                               'delta_t': (0, 1)}  # non dimensional
+
+        # Coefficients
+        # Aero
+        self.CL, self.CD, self.Cm = 0, 0, 0
+        self.CY, self.Cl, self.Cn = 0, 0, 0
+        # Thrust
+        self.Ct = 0
+
+        self.gravity_force = np.zeros(3)
+        self.total_forces = np.zeros(3)
+        self.total_moments = np.zeros(3)
+        self.load_factor = 0
+
+        # Velocities
+        self.TAS = 0  # True Air Speed.
+        self.CAS = 0  # Calibrated Air Speed.
+        self.EAS = 0  # Equivalent Air Speed.
+        self.Mach = 0  # Mach number
+
+        self.q_inf = 0  # Dynamic pressure at infty (Pa)
+
+        # Angles
+        self.alpha = 0  # Angle of attack (AOA).
+        self.beta = 0  # Angle of sideslip (AOS).
+        # Not present in this model:
+        self.Dalpha_Dt = 0  # Rate of change of AOA.
+        self.Dbeta_Dt = 0  # Rate of change of AOS.
+
+    def _calculate_aero_lon_forces_moments(self):
+
+        self._long_inputs[1] = self.alpha
+        self._long_inputs[2] = self.controls['delta_elevator']
+        self._long_inputs[3] = self.controls['hor_tail_incidence']
 
         self.CL, self.CD, self.Cm = self._long_coef_matrix @ self._long_inputs
 
-    def _set_aero_lat_forces_moments(self, system, controls: dict):
-        self._lat_inputs[0] = system.beta
-        self._lat_inputs[1] = controls['delta_aileron']
-        self._lat_inputs[2] = controls['delta_rudder']
+    def _calculate_aero_lat_forces_moments(self):
+        self._lat_inputs[0] = self.beta
+        self._lat_inputs[1] = self.controls['delta_aileron']
+        self._lat_inputs[2] = self.controls['delta_rudder']
 
         self.CY, self.Cl, self.Cn = self._lat_coef_matrix @ self._lat_inputs
 
-    def _set_thrust_forces_moments(self, system, controls: dict):
+    def _calculate_thrust_forces_moments(self):
 
-        delta_t = controls['delta_t']
-        self.Ct = 0.031 * delta_t
+        self.Ct = 0.031 * self.controls['delta_t']
 
-    def get_forces_and_moments(self, system, controls: dict,
-                               env):
+    def calculate_forces_and_moments(self):
 
-        q = system.q_inf
+        q = self.q_inf
         Sw = self.Sw
         c = self.chord
         b = self.span
-        self.check_control_limits()
-        self._set_aero_lon_forces_moments(system, controls)
-        self._set_aero_lat_forces_moments(system, controls)
-        self._set_thrust_forces_moments(system, controls)
+        self._calculate_aero_lon_forces_moments()
+        self._calculate_aero_lat_forces_moments()
+        self._calculate_thrust_forces_moments()
 
         L = q * Sw * self.CL
         D = q * Sw * self.CD
@@ -148,9 +177,9 @@ class Cessna310(Aircraft):
         n = q * Sw * b * self.Cn
 
         Ft = q * Sw * self.Ct
-        Fg = self.mass * env.gravity_vector
+        Fg = self.gravity_force
         Fa = np.array([-D, Y, -L])
 
-        self.forces = Ft + Fg + Fa
-        self.moments = np.array([l, m, n])
-        return self.forces, self.moments
+        self.total_forces = Ft + Fg + Fa
+        self.total_moments = np.array([l, m, n])
+        return self.total_forces, self.total_moments

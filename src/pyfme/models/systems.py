@@ -12,56 +12,48 @@ from abc import abstractmethod
 import numpy as np
 from scipy.integrate import ode
 
-from pyfme.utils.altimetry import geometric2geopotential
-from pyfme.utils.anemometry import tas2cas, tas2eas, calculate_alpha_beta_TAS
 from pyfme.utils.coordinates import body2hor
 
 
 class System(object):
 
-    def __init__(self):
+    def __init__(self, lat, lon, h, psi=0, x_earth=0, y_earth=0):
 
         # ABOUT UNITS: assume international system units unless otherwise
         # indicated. (meters, kilograms, seconds, kelvin, Newtons, Pascal,
         # radians...)
         # POSITION
         # Geographic coordinates: (geodetic lat, lon, height above ellipsoid)
-        self.coord_geographic = np.zeros([3], dtype=float)
-        # TODO: convert into properties.
+        self.coord_geographic = np.array([lat, lon, h], dtype=float)
         # Geocentric coordinates (rotating with Earth): (x_geo, y_geo, z_geo)
-        self.coord_geocentric = np.zeros_like([3], dtype=float)
+        # TODO: implement geographic2geocentric conversion:
+        # self.coord_geocentric = np.zeros_like([3], dtype=float)
+
         # Earth coordinates (Axis parallel to local horizon NED at h=0 at
         # the initial position of the airplane): (x_earth, y_earth, z_earth)
-        self.coord_earth = np.zeros_like([3], dtype=float)
-        # Altitude
-        self.alt_pre = None  # Pressure altitude.
-        self.alt_geop = None  # Geopotential altitude.
-        # ANEMOMETRY
-        self.TAS = None  # True Air Speed.
-        self.CAS = None  # Calibrated Air Speed.
-        self.EAS = None  # Equivalent Air Speed.
-        self.IAS = None  # Indicated Air Speed.
-        self.Mach = None  # Mach number.
-        self.q_inf = None  # Dynamic pressure.
-        self.alpha = None  # Angle of attack.
-        self.beta = None  # Angle of sideslip.
-        self.Dalpha_Dt = None  # d(alpha)/dt
-        self.Dbeta_Dt = None  # d(beta)/dt
+        self.coord_earth = np.array([x_earth, y_earth, -h], dtype=float)
+
         # ATTITUDE (psi, theta, phi).
         self.euler_angles = np.zeros([3], dtype=float)
-        self.quaternions = np.zeros([4], dtype=float)
-        # VELOCITY
-        # FIXME: Ground and absolute speed may differ depending on the
-        # inertial reference frame considered.
-        # Absolute body velocity.
+        self.euler_angles[0] = psi
+        # TODO: convert to quaternions
+        # self.quaternions = np.zeros([4], dtype=float)
+
+        # ABSOLUTE VELOCITY.
+        # Body:
         self.vel_body = np.zeros_like([3], dtype=float)
-        # Absolute local horizon (NED) velocity
+        # Local horizon (NED):
         self.vel_NED = np.zeros_like([3], dtype=float)
-        self.gamma = None  # Flight path angle.
-        self.turn_rate = None  # d(psi)/dt
+
         # ANGULAR VELOCITY: (p, q, r)
         self.vel_ang = np.zeros_like([3], dtype=float)
 
+        # Last time step dt
+        self.dt = None
+
+    # TODO: guarantee that if euler angles change <--> quaternions change
+    # TODO: guarantee that if geographic change <-->  geocentric change
+    # TODO: guarantee that if body vels change <-->  horizon vels change
     @property
     def lat(self):
         return self.coord_geographic[0]
@@ -146,44 +138,12 @@ class System(object):
     def r(self):
         return self.vel_ang[2]
 
-    def set_initial_flight_conditions(self, lat, lon, h, TAS,
-                                      environment,
-                                      gamma=0, turn_rate=0):
-
-        self.coord_geographic[0] = lat
-        self.coord_geographic[1] = lon
-        self.coord_geographic[2] = h
-        # TODO: Conversion to geocentric coordinates
-        # self.coord_geocentric =
-        self.coord_earth = np.zeros([3])
-        self.coord_earth[2] = h
-
-        self.alt_pre = h
-        self.alt_geop = geometric2geopotential(h)
-
-        environment.update(self)
-        rho = environment.rho
-        a = environment.a
-        p = environment.p
-        self.Mach = TAS / a
-        self.q_inf = 0.5 * rho * TAS**2
-        self.TAS = TAS
-        self.CAS = tas2cas(TAS, p, rho)
-        self.EAS = tas2eas(TAS, rho)
-        # self.IAS =
-
-        self.Dalpha_Dt = 0  # d(alpha)/dt
-        self.Dbeta_Dt = 0  # d(beta)/dt
-
-        self.gamma = gamma
-        self.turn_rate = turn_rate
-
     @abstractmethod
-    def set_initial_state_vector(self, t0):
+    def _propagate_state_vector(self, aircraft, dt):
         pass
 
     @abstractmethod
-    def _propagate_state_vector(self, aircraft, dt):
+    def set_initial_state_vector(self):
         pass
 
     def propagate(self, aircraft, environment, dt=0.01):
@@ -191,7 +151,8 @@ class System(object):
 
 class EulerFlatEarth(System):
 
-    def __init__(self, integrator='dopri5', use_jac=False, **integrator_params):
+    def __init__(self, lat, lon, h, psi=0, x_earth=0, y_earth=0,
+                 integrator='dopri5', use_jac=False, **integrator_params):
         """
         Initialize the equations of the chosen model and selects the
         integrator. Check `scipy.integrate.ode` to see available integrators.
@@ -199,7 +160,7 @@ class EulerFlatEarth(System):
         If use_jac = True the jacobian of the equations is used for the
         integration.
         """
-        super(EulerFlatEarth, self).__init__()
+        super().__init__(lat, lon, h, psi=0, x_earth=0, y_earth=0)
         # State vector must be initialized with set_initial_state_vector() method
         self.state_vector = None
 
@@ -224,10 +185,16 @@ class EulerFlatEarth(System):
         self._ode_kaqeq.set_integrator(integrator, **integrator_params)
         self._ode_kleq.set_integrator(integrator, **integrator_params)
 
+    @property
+    def height(self):
+        return -self.coord_earth[2]
+
     def set_initial_state_vector(self):
         """
         Set the initial values of the required variables
         """
+
+        self.vel_NED = body2hor(self.vel_body, self.theta, self.phi, self.psi)
         self.state_vector = np.array([
             self.u, self.v, self.w,
             self.p, self.q, self.r,
@@ -246,8 +213,8 @@ class EulerFlatEarth(System):
         """
         mass = aircraft.mass
         inertia = aircraft.inertia
-        forces = aircraft.forces
-        moments = aircraft.moments
+        forces = aircraft.total_forces
+        moments = aircraft.total_moments
 
         t = self._ode_lamceq.t + dt
 
@@ -278,13 +245,14 @@ class EulerFlatEarth(System):
 
         return self.state_vector
 
-    def propagate(self, aircraft, environment, dt=0.01):
+    def propagate(self, aircraft, dt=0.01):
         """Propagate the state vector and update the rest of variables.
 
         Parameters
         ----------
         environment
         """
+        self.dt = dt
         self._propagate_state_vector(aircraft, dt)
 
         # TODO: update the rest of variables.
@@ -297,25 +265,8 @@ class EulerFlatEarth(System):
         # self.quaternions =
 
         # Set psi between 0 and 2*pi
+        # FIXME: check the conversion to keep angle between 0 and 2pi again
         self.euler_angles[0] = np.arctan2(np.sin(self.psi), np.cos(
             self.psi)) % (2*np.pi)
 
-        # Altitude
-        self.alt_pre = self.state_vector[11]
-        self.alt_geop = geometric2geopotential(self.state_vector[11])
-        # ANEMOMETRY
-        self.alpha, self.beta, self.TAS = calculate_alpha_beta_TAS(self.u,
-                                                                   self.v,
-                                                                   self.w)
-        self.Mach = self.TAS / environment.a
-        self.q_inf = 0.5 * environment.rho * self.TAS ** 2
-        self.CAS = tas2cas(self.TAS, environment.p, environment.rho)
-        self.EAS = tas2eas(self.TAS, environment.rho)
-
-        # self.Dalpha_Dt = None  # d(alpha)/dt
-        # self.Dbeta_Dt = None  # d(beta)/dt
-
         self.vel_NED = body2hor(self.vel_body, self.theta, self.phi, self.psi)
-        # self.gamma = None  # Flight path angle.
-        # self.turn_rate = None  # d(psi)/dt
-

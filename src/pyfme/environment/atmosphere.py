@@ -13,17 +13,19 @@ from math import exp, sqrt
 from abc import abstractmethod
 
 from pyfme.models.constants import GAMMA_AIR, R_AIR, GRAVITY
+from pyfme.utils.altimetry import geometric2geopotential
 
 
 class Atmosphere(object):
 
     def __init__(self):
         # TODO: doc
-        self._gamma = GAMMA_AIR
-        self._R_a = R_AIR
-        self._g0 = GRAVITY
+        self._gamma = None  # Adiabatic index or ratio of specific heats
+        self._R_g = None  # Gas constant  J/(Kg·K)
+        self._g0 = None  # Gravity  m/s^2
 
-        self._h = None  # Current geopotential height (m).
+        self.geopotential_alt = None  # Current geopotential height (m).
+        self.pressure_altitude = None  # Current pressure altitude (m).
         self.T = None  # Temperature (K).
         self.p = None  # Pressure (atm).
         self.rho = None  # Density (kg/m³).
@@ -65,12 +67,12 @@ class Atmosphere(object):
         .. [2] https://en.wikipedia.org/wiki/U.S._Standard_Atmosphere
 
         """
-        h = system.alt_geop  # Geopotential altitude
-        self._h = h
-        self.T, self.p, self.rho, self.a = self._atm(h)
+         # Geopotential altitude
+        self.geopotential_alt = geometric2geopotential(system.height)
+        self.T, self.p, self.rho, self.a = self.__call__(self.geopotential_alt)
 
     @abstractmethod
-    def _atm(self, h):
+    def __call__(self, h):
         return
 
 
@@ -103,6 +105,9 @@ class ISA1976(Atmosphere):
 
     def __init__(self):
         Atmosphere.__init__(self)
+        self._gamma = GAMMA_AIR  # Adiabatic index or ratio of specific heats
+        self._R_g = R_AIR  # Gas constant  J/(Kg·K)
+        self._g0 = GRAVITY  # Gravity  m/s^2
         # Layer constants
         self._h0 = (0, 11000, 20000, 32000, 47000, 51000, 71000, 84500)  # m
         self._T0_layers = (288.15, 216.65, 216.65, 228.65, 270.65, 270.65, 
@@ -116,10 +121,10 @@ class ISA1976(Atmosphere):
         self.h = 0  # Current height (m).
         self.T = self._T0_layers[0]  # Temperature (K).
         self.p = self._p0_layers[0]  # Pressure (atm).
-        self.rho = self.p / (self._R_a * self.T)
-        self.a = sqrt(self._gamma * self._R_a * self.T)
+        self.rho = self.p / (self._R_g * self.T)
+        self.a = sqrt(self._gamma * self._R_g * self.T)
 
-    def _atm(self, h):
+    def __call__(self, h):
         """ISA 1976 Standard atmosphere temperature, pressure and density.
 
         Parameters
@@ -160,7 +165,7 @@ class ISA1976(Atmosphere):
 
         """
         g0 = self._g0
-        R_a = self._R_a
+        R_a = self._R_g
         gamma = self._gamma
 
         if h < 0.0:
@@ -231,7 +236,6 @@ class ISA1976(Atmosphere):
         else:
             raise ValueError(
                 "Altitude cannot be greater than {} m.".format(self._h0[7]))
-
         rho = p / (R_a * T)
         a = sqrt(gamma * R_a * T)
         return T, p, rho, a

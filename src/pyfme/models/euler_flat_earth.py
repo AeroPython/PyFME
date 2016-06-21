@@ -35,10 +35,10 @@ def lamceq(time, vel, mass, inertia, forces, moments):
         Current equations assume that the aircraft has a symmetry plane
         (x_b - z_b), thus J_xy and J_yz must be null.
     forces : array_like
-        3 dimensional vector containing the total forces (including gravity) in
+        3 dimensional vector containing the total total_forces (including gravity) in
         x_b, y_b, z_b axes (N).
     moments : array_like
-        3 dimensional vector containing the total moments in x_b, y_b, z_b axes
+        3 dimensional vector containing the total total_moments in x_b, y_b, z_b axes
         (N·m).
 
     Returns
@@ -67,9 +67,9 @@ def lamceq(time, vel, mass, inertia, forces, moments):
     Iy = inertia[1, 1]
     Iz = inertia[2, 2]
 
-    # Note definition of moments of inertia p.21 Gomez Tierno, et al Mecánica
+    # Note definition of total_moments of inertia p.21 Gomez Tierno, et al Mecánica
     # de vuelo
-    # TODO: define moments of inertia like this for all the code.
+    # TODO: define total_moments of inertia like this for all the code.
     Jxz = - inertia[0, 2]
 
     Fx, Fy, Fz = forces
@@ -136,9 +136,9 @@ def lamceq_jac(time, vel, mass, inertia):
     Iy = inertia[1, 1]
     Iz = inertia[2, 2]
 
-    # Note definition of moments of inertia p.21 Gomez Tierno, et al Mecánica
+    # Note definition of total_moments of inertia p.21 Gomez Tierno, et al Mecánica
     # de vuelo
-    # TODO: define moments of inertia like this for all the code.
+    # TODO: define total_moments of inertia like this for all the code.
 
     Jxz = - inertia[0, 2]
 
