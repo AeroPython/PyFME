@@ -34,17 +34,18 @@ not_trimmed_controls = {'delta_elevator': 0.05,
 
 controls2trim = ['delta_elevator', 'delta_aileron', 'delta_rudder', 'delta_t']
 
-trimmed_controls, trim_system, outputs = aircraft.steady_state_flight_trim(
+trimmed_controls, trimmed_system, outputs = aircraft.steady_state_flight_trim(
     system, environment, not_trimmed_controls, TAS=120, gamma=+np.pi/180,
     turn_rate=0.1, controls2trim=controls2trim)
 
-my_simulation = BatchSimulation(aircraft, trim_system, environment)
+my_simulation = BatchSimulation(aircraft, trimmed_system, environment)
 
 N = 100
 time = np.linspace(0, 10, N)
-controls = {c_name: np.array([trimmed_controls[c_name]] * N)
-            for c_name in trimmed_controls}
+controls = {c_name: np.full((N,), trimmed_controls[c_name]) for
+            c_name in trimmed_controls}
 
 my_simulation.set_controls(time, controls)
 my_simulation.run_simulation()
+
 
