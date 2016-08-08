@@ -17,7 +17,7 @@ from numpy.testing import (assert_equal, assert_almost_equal)
 
 import pytest
 
-from pyfme.environment.isa import atm
+from pyfme.environment.atmosphere import ISA1976
 
 
 def test_sea_level():
@@ -27,7 +27,7 @@ def test_sea_level():
     expected_rho = 1.2250  # kg / m3
     expected_a = 340.4155  # m / s
 
-    T, p, rho, a = atm(h)
+    T, p, rho, a = ISA1976(h)
 
     # Reads: "Assert if T equals expected_T"
     assert_equal(T, expected_T)
@@ -41,7 +41,7 @@ def test_altitude_is_out_of_range():
 
     for h in wrong_h:
         with pytest.raises(ValueError):
-            atm(h)
+            ISA1976(h)
 
 
 def test_results_under_11km():
@@ -77,7 +77,7 @@ def test_results_under_11km():
                            ])  # m / s
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = atm(h_)
+        T, p, rho, a = ISA1976(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
         assert_almost_equal(a, expected_a[ii], decimal=2)
@@ -108,7 +108,7 @@ def test_results_under_20km():
                            ])
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = atm(h_)
+        T, p, rho, a = ISA1976(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
         assert_almost_equal(a, expected_a[ii], decimal=2)
@@ -139,7 +139,7 @@ def test_results_under_32km():
                            ])  # m/s
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = atm(h_)
+        T, p, rho, a = ISA1976(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
         assert_almost_equal(a, expected_a[ii], decimal=2)
@@ -170,7 +170,7 @@ def test_results_under_47km():
                            ])  # m / s
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = atm(h_)
+        T, p, rho, a = ISA1976(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
         assert_almost_equal(a, expected_a[ii], decimal=2)
@@ -197,7 +197,7 @@ def test_results_under_51km():
                            ])  # m / s
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = atm(h_)
+        T, p, rho, a = ISA1976(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
         assert_almost_equal(a, expected_a[ii], decimal=2)
@@ -224,7 +224,7 @@ def test_results_under_71km():
                            ])  # m / s
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = atm(h_)
+        T, p, rho, a = ISA1976(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
         assert_almost_equal(a, expected_a[ii], decimal=2)
@@ -251,7 +251,7 @@ def test_results_under_84km():
                            ])  # m/s
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = atm(h_)
+        T, p, rho, a = ISA1976(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
         assert_almost_equal(a, expected_a[ii], decimal=2)

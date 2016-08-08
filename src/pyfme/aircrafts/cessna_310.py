@@ -52,7 +52,7 @@ from pyfme.aircrafts.aircraft import Aircraft
 from pyfme.models.constants import ft2m, slugft2_2_kgm2, lbs2kg
 
 
-class Cessna310(Aircraft):
+class _Cessna310(Aircraft):
     """
     Cessna 310
 
@@ -183,3 +183,5 @@ class Cessna310(Aircraft):
         self.total_forces = Ft + Fg + Fa
         self.total_moments = np.array([l, m, n])
         return self.total_forces, self.total_moments
+
+Cessna310 = _Cessna310()

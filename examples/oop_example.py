@@ -19,10 +19,10 @@ from pyfme.environment.wind import NoWind
 from pyfme.models.systems import EulerFlatEarth
 from pyfme.simulator import BatchSimulation
 
-aircraft = Cessna310()
-atmosphere = ISA1976()
-gravity = VerticalConstant()
-wind = NoWind()
+aircraft = Cessna310
+atmosphere = ISA1976
+gravity = VerticalConstant
+wind = NoWind
 environment = Environment(atmosphere, gravity, wind)
 system = EulerFlatEarth(lat=0, lon=0, h=1000, psi=np.pi/4, x_earth=0, y_earth=0)
 

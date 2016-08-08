@@ -26,7 +26,7 @@ class Gravity(object):
         pass
 
 
-class VerticalConstant(Gravity):
+class _VerticalConstant(Gravity):
 
     def __init__(self):
         Gravity.__init__(self)
@@ -41,10 +41,10 @@ class VerticalConstant(Gravity):
         self.vector = self.magnitude * self.unitary_vector
 
 
-class VerticalNewton(Gravity):
+class _VerticalNewton(Gravity):
 
     def __init__(self):
-        Gravity.__init__()
+        Gravity.__init__(self)
         self._z_horizon = np.array([0, 0, 1], dtype=float)
 
     def update(self, system):
@@ -57,9 +57,11 @@ class VerticalNewton(Gravity):
         self.vector = self.magnitude * self.unitary_vector
 
 
-class LatitudeModel(Gravity):
+class _LatitudeModel(Gravity):
     # TODO: https://en.wikipedia.org/wiki/Gravity_of_Earth#Latitude_model
 
     def __init__(self):
         raise NotImplementedError
 
+VerticalConstant = _VerticalConstant()
+VerticalNewton = _VerticalNewton()
