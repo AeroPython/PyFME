@@ -202,7 +202,7 @@ class Aircraft(object):
         outputs = {'alpha': self.alpha, 'beta': self.beta,
                    'u': trim_system.u, 'v': trim_system.v, 'w': trim_system.w,
                    'p': trim_system.p, 'q': trim_system.q, 'r': trim_system.r,
-                   'psi': trim_system.psi, 'theta':trim_system.theta,
+                   'psi': trim_system.psi, 'theta': trim_system.theta,
                    'phi': trim_system.phi}
 
         trimmed_controls = controls

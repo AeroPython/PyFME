@@ -8,6 +8,7 @@ Simulation class
 
 """
 from abc import abstractmethod
+import numpy as np
 
 
 class Simulation(object):
@@ -17,9 +18,37 @@ class Simulation(object):
         self.system = system
         self.environment = environment
         self._time_step = 0
+        self.PAR_KEYS = {'T': self.environment.T,  # env
+                         'pressure': self.environment.p,
+                         'rho': self.environment.rho,
+                         'a': self.environment.a,
+                         'TAS': self.aircraft.TAS,  # aircraft
+                         'Mach': self.aircraft.Mach,
+                         'q_inf': self.aircraft.q_inf,
+                         'alpha': self.aircraft.alpha,
+                         'beta': self.aircraft.beta,
+                         'x_earth': self.system.x_earth,  # system
+                         'y_earth': self.system.y_earth,
+                         'z_earth': self.system.z_earth,
+                         'psi': self.system.psi,
+                         'theta': self.system.theta,
+                         'phi': self.system.phi,
+                         'u': self.system.u,
+                         'v': self.system.v,
+                         'w': self.system.w,
+                         'v_north': self.system.v_north,
+                         'v_east': self.system.v_east,
+                         'v_down': self.system.v_down,
+                         'p': self.system.p,
+                         'q': self.system.q,
+                         'r': self.system.r,
+                         'height': self.system.height
+                         }
+        self.par_dict = {}
 
     def time_step(self, dt):
 
+        self.save_current_par_dict()
         self._time_step += 1
         self.system.propagate(self.aircraft, dt)
         self.environment.update(self.system)
@@ -29,6 +58,14 @@ class Simulation(object):
 
     @abstractmethod
     def _get_current_controls(self, ii):
+        return
+
+    @abstractmethod
+    def set_par_dict(self, par_list):
+        return
+
+    @abstractmethod
+    def save_current_par_dict(self):
         return
 
 
@@ -84,6 +121,52 @@ class BatchSimulation(Simulation):
         for ii, t in enumerate(self.time[1:]):
             dt = t - self.time[ii]
             self.time_step(dt)
+        # Save last time step
+        self.save_current_par_dict()
+
+    def set_par_dict(self, par_list):
+
+        if self.time is None:
+            msg = "Set controls with BatchSimulation.set_controls before " \
+                  "setting the par_dict"
+            raise RuntimeError(msg)
+
+        for par_name in par_list:
+            if par_name in self.PAR_KEYS:
+                self.par_dict[par_name] = np.empty_like(self.time)
+            else:
+                msg = "{} not found in PAR_KEYS".format(par_name)
+                raise RuntimeWarning(msg)
+
+    def save_current_par_dict(self):
+        self.PAR_KEYS = {'T': self.environment.T,  # env
+                         'pressure': self.environment.p,
+                         'rho': self.environment.rho,
+                         'a': self.environment.a,
+                         'TAS': self.aircraft.TAS,  # aircraft
+                         'Mach': self.aircraft.Mach,
+                         'q_inf': self.aircraft.q_inf,
+                         'alpha': self.aircraft.alpha,
+                         'beta': self.aircraft.beta,
+                         'x_earth': self.system.x_earth,  # system
+                         'y_earth': self.system.y_earth,
+                         'z_earth': self.system.z_earth,
+                         'psi': self.system.psi,
+                         'theta': self.system.theta,
+                         'phi': self.system.phi,
+                         'u': self.system.u,
+                         'v': self.system.v,
+                         'w': self.system.w,
+                         'v_north': self.system.v_north,
+                         'v_east': self.system.v_east,
+                         'v_down': self.system.v_down,
+                         'p': self.system.p,
+                         'q': self.system.q,
+                         'r': self.system.r,
+                         'height': self.system.height
+                         }
+        for par_name, par_values in self.par_dict.items():
+            par_values[self._time_step] = self.PAR_KEYS[par_name]
 
 
 
@@ -96,3 +179,42 @@ class RealTimeSimulation(Simulation):
     def _get_current_controls(self, ii):
         # Joystick reading
         raise NotImplementedError
+
+    def set_par_dict(self, par_list):
+
+        for par_name in par_list:
+            if par_name in self.PAR_KEYS:
+                self.par_dict[par_name] = []
+            else:
+                msg = "{} not found in PAR_KEYS".format(par_name)
+                raise RuntimeWarning(msg)
+
+    def save_current_par_dict(self):
+        self.PAR_KEYS = {'T': self.environment.T,  # env
+                         'pressure': self.environment.p,
+                         'rho': self.environment.rho,
+                         'a': self.environment.a,
+                         'TAS': self.aircraft.TAS,  # aircraft
+                         'Mach': self.aircraft.Mach,
+                         'q_inf': self.aircraft.q_inf,
+                         'alpha': self.aircraft.alpha,
+                         'beta': self.aircraft.beta,
+                         'x_earth': self.system.x_earth,  # system
+                         'y_earth': self.system.y_earth,
+                         'z_earth': self.system.z_earth,
+                         'psi': self.system.psi,
+                         'theta': self.system.theta,
+                         'phi': self.system.phi,
+                         'u': self.system.u,
+                         'v': self.system.v,
+                         'w': self.system.w,
+                         'v_north': self.system.v_north,
+                         'v_east': self.system.v_east,
+                         'v_down': self.system.v_down,
+                         'p': self.system.p,
+                         'q': self.system.q,
+                         'r': self.system.r,
+                         'height': self.system.height
+                         }
+        for par_name, par_values in self.par_dict:
+            par_values.append(self.PAR_KEYS[par_name])
