@@ -163,3 +163,5 @@ if __name__ == '__main__':
     plt.plot(time, d_e, label='delta_e')
     plt.plot(time, velocities[:, 4], label='q')
     plt.legend()
+
+    plt.show()

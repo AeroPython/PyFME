@@ -149,3 +149,5 @@ if __name__ == '__main__':
     plt.xlabel('X (m)')
     plt.ylabel('Y (m)')
     plt.legend()
+
+    plt.show()

@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     # Time.
     t0 = 0  # s
-    tf = 30  # s
+    tf = 120  # s
     dt = 1e-2  # s
 
     time = np.arange(t0, tf, dt)
@@ -149,3 +149,5 @@ if __name__ == '__main__':
     plt.xlabel('X (m)')
     plt.ylabel('Y (m)')
     plt.legend()
+
+    plt.show()
