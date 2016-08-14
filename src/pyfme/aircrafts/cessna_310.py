@@ -187,6 +187,6 @@ class Cessna310(Aircraft):
         # FIXME: is it necessary to use wind2body conversion?
         Fa = np.array([-D, Y, -L])
 
-        self.total_forces = Ft + Fg + Fa
+        self.total_forces = 10 * Ft + Fg + Fa
         self.total_moments = np.array([l, m, n])
         return self.total_forces, self.total_moments
