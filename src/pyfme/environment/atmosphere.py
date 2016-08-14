@@ -76,7 +76,7 @@ class Atmosphere(object):
         pass
 
 
-class _ISA1976(Atmosphere):
+class ISA1976(Atmosphere):
     """
     International Standard Atmosphere 1976
     --------------------------------------
@@ -238,6 +238,3 @@ class _ISA1976(Atmosphere):
         rho = p / (R_a * T)
         a = sqrt(gamma * R_a * T)
         return T, p, rho, a
-
-
-ISA1976 = _ISA1976()

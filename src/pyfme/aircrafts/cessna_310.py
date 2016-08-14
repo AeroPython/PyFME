@@ -50,9 +50,10 @@ import numpy as np
 
 from pyfme.aircrafts.aircraft import Aircraft
 from pyfme.models.constants import ft2m, slugft2_2_kgm2, lbs2kg
+from pyfme.utils.coordinates import wind2body
 
 
-class _Cessna310(Aircraft):
+class Cessna310(Aircraft):
     """
     Cessna 310
 
@@ -140,7 +141,7 @@ class _Cessna310(Aircraft):
         self.Dalpha_Dt = 0  # Rate of change of AOA.
         self.Dbeta_Dt = 0  # Rate of change of AOS.
 
-    def _calculate_aero_lon_forces_moments(self):
+    def _calculate_aero_lon_forces_moments_coeffs(self):
 
         self._long_inputs[1] = self.alpha
         self._long_inputs[2] = self.controls['delta_elevator']
@@ -148,40 +149,44 @@ class _Cessna310(Aircraft):
 
         self.CL, self.CD, self.Cm = self._long_coef_matrix @ self._long_inputs
 
-    def _calculate_aero_lat_forces_moments(self):
+    def _calculate_aero_lat_forces_moments_coeffs(self):
         self._lat_inputs[0] = self.beta
         self._lat_inputs[1] = self.controls['delta_aileron']
         self._lat_inputs[2] = self.controls['delta_rudder']
 
         self.CY, self.Cl, self.Cn = self._lat_coef_matrix @ self._lat_inputs
 
-    def _calculate_thrust_forces_moments(self):
-
-        self.Ct = 0.031 * self.controls['delta_t']
-
-    def calculate_forces_and_moments(self):
-
+    def _calculate_aero_forces_moments(self):
         q = self.q_inf
         Sw = self.Sw
         c = self.chord
         b = self.span
-        self._calculate_aero_lon_forces_moments()
-        self._calculate_aero_lat_forces_moments()
-        self._calculate_thrust_forces_moments()
-
+        self._calculate_aero_lon_forces_moments_coeffs()
+        self._calculate_aero_lat_forces_moments_coeffs()
         L = q * Sw * self.CL
         D = q * Sw * self.CD
         Y = q * Sw * self.CY
         l = q * Sw * b * self.Cl
         m = q * Sw * c * self.Cm
         n = q * Sw * b * self.Cn
+        return L, D, Y, l, m , n
 
+    def _calculate_thrust_forces_moments(self):
+        q = self.q_inf
+        Sw = self.Sw
+        self.Ct = 0.031 * self.controls['delta_t']
         Ft = np.array([q * Sw * self.Ct, 0, 0])
+        return Ft
+
+
+    def calculate_forces_and_moments(self):
+
+        Ft = self._calculate_thrust_forces_moments()
+        L, D, Y, l, m, n = self._calculate_aero_forces_moments()
         Fg = self.gravity_force
+        # FIXME: is it necessary to use wind2body conversion?
         Fa = np.array([-D, Y, -L])
 
         self.total_forces = Ft + Fg + Fa
         self.total_moments = np.array([l, m, n])
         return self.total_forces, self.total_moments
-
-Cessna310 = _Cessna310()

@@ -9,7 +9,7 @@ Wind Models
 """
 import numpy as np
 
-class _NoWind(object):
+class NoWind(object):
 
     def __init__(self):
         # Wind velocity: FROM North to South, FROM East to West,
@@ -19,6 +19,3 @@ class _NoWind(object):
 
     def update(self, system):
         pass
-
-
-NoWind = _NoWind()
