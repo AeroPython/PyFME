@@ -78,7 +78,7 @@ class Simulation(object):
 class BatchSimulation(Simulation):
 
     def __init__(self, aircraft, system, environment):
-        Simulation.__init__(self, aircraft, system, environment)
+        super().__init__(aircraft, system, environment)
         self.time = None
         self.aircraft_controls = {}
 
@@ -119,7 +119,7 @@ class BatchSimulation(Simulation):
         -------
 
         """
-        return {control: self.aircraft_controls[control][ii] for control in \
+        return {control: self.aircraft_controls[control][ii] for control in
                 self.aircraft_controls.keys()}
 
     def run_simulation(self):

@@ -11,59 +11,34 @@ Created on Sat Jan  9 23:56:51 2016
 @AeroPython
 """
 
-import pytest
-
 import numpy as np
-
 from numpy.testing import (assert_array_almost_equal, assert_almost_equal)
 
-from pyfme.aircrafts.cessna_310 import (get_aerodynamic_forces,
-                                        get_aerodynamic_moments,
-                                        get_engine_force)
+from pyfme.aircrafts.cessna_310 import Cessna310
 
 
-def test_get_aerodynamic_forces():
+def test_calculate_aero_forces_moments_alpha_beta_zero():
+    aircraft = Cessna310()
+    aircraft.q_inf = 0.5 * 1.225 * 100 ** 2
+    aircraft.alpha = 0
+    aircraft.beta = 0
 
-    TAS = 100
-    rho = 1.225
-    alpha = 0
-    beta = 0
-    delta_e = 0
-    ih = 0
-    delta_ail = 0
-    delta_r = 0
-    aerodynamic_forces_expected = np.array([-2887.832934, 0, -28679.16845])
+    aircraft.controls = {'delta_elevator': 0,
+                         'hor_tail_incidence': 0,
+                         'delta_aileron': 0,
+                         'delta_rudder': 0,
+                         'delta_t': 0}
 
-    aerodynamic_forces = get_aerodynamic_forces(TAS, rho, alpha,
-                                                beta, delta_e, ih, delta_ail,
-                                                delta_r)
-
-    assert_array_almost_equal(aerodynamic_forces, aerodynamic_forces_expected,
+    L, D, Y, l, m, n = aircraft._calculate_aero_forces_moments()
+    assert_array_almost_equal([L, D, Y],
+                              [28679.16845, 2887.832934, 0.],
+                              decimal=4)
+    assert_array_almost_equal([l, m, n],
+                              [0, 10177.065816, 0],
                               decimal=4)
 
 
-def test_get_aerodynamic_moments():
-
-    TAS = 100
-    rho = 1.225
-    alpha = 0
-    beta = 0
-    delta_e = 0
-    ih = 0
-    delta_ail = 0
-    delta_r = 0
-    aerodynamic_moments_expected = np.array([0, 10177.06582, 0])
-
-    aerodynamic_moments = get_aerodynamic_moments(TAS, rho, alpha, beta,
-                                                  delta_e, ih, delta_ail,
-                                                  delta_r)
-
-    assert_array_almost_equal(aerodynamic_moments,
-                              aerodynamic_moments_expected, decimal=4)
-
-
 def test_get_engine_force():
-
     delta_t = 0.5
 
     trust_expected = 1100.399064
@@ -76,6 +51,5 @@ def test_get_engine_force():
     wrong_value_1 = 2
 
     with pytest.raises(ValueError):
-
         get_engine_force(wrong_value_0)
         get_engine_force(wrong_value_1)

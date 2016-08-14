@@ -194,7 +194,8 @@ class EulerFlatEarth(System):
         Set the initial values of the required variables
         """
 
-        self.vel_NED = body2hor(self.vel_body, self.theta, self.phi, self.psi)
+        self.vel_NED = body2hor(self.vel_body, theta=self.theta,
+                                phi=self.phi, psi=self.psi)
         self.state_vector = np.array([
             self.u, self.v, self.w,
             self.p, self.q, self.r,
@@ -262,7 +263,6 @@ class EulerFlatEarth(System):
         self.euler_angles[1] = self.state_vector[6]  # theta
         self.euler_angles[2] = self.state_vector[7]  # phi
         self.coord_earth = self.state_vector[9:12]
-        # self.quaternions =
 
         # Set psi between 0 and 2*pi
         # FIXME: check the conversion to keep angle between 0 and 2pi again

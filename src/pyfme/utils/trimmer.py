@@ -148,7 +148,7 @@ def turn_coord_cons(turn_rate, alpha, beta, TAS, gamma=0):
     """Calculates phi for coordinated turn.
     """
 
-    g0 = 9.81
+    g0 = GRAVITY
     G = turn_rate * TAS / g0
 
     if abs(gamma) < 1e-8:
@@ -221,7 +221,7 @@ def trimming_cost_func(trimmed_params, system, ac, env, controls2trim,
     q = turn_rate * sin(phi) * cos(theta)
     r = turn_rate * cos(theta) * sin(phi)
     system.vel_ang = np.array([p, q, r])
-    system.vel_body = wind2body((ac.TAS, 0, 0), alpha, beta)
+    system.vel_body = wind2body((ac.TAS, 0, 0), alpha=alpha, beta=beta)
 
     env.update(system)
     ac.update(new_controls, system, env)

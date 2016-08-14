@@ -88,19 +88,14 @@ class Aircraft(object):
         # Velocity relative to air: aerodynamic velocity.
         aero_vel = system.vel_body - environment.body_wind
 
-        alpha, beta, self.TAS = calculate_alpha_beta_TAS(
+        self.alpha, self.beta, self.TAS = calculate_alpha_beta_TAS(
             u=aero_vel[0], v=aero_vel[1], w=aero_vel[2])
 
-        # Calculate alpha and beta rate of change using finite differences.
-        # TODO: include Dalpha_Dt & Dbeta_Dt
-        # self.Dalpha_Dt = (alpha - self.alpha) / system.dt
-        self.alpha = alpha
-        # self.Dbeta_Dt = (beta - self.beta) / system.dt
-        self.beta = beta
         # Setting velocities & dynamic pressure
         self.CAS = tas2cas(self.TAS, environment.p, environment.rho)
         self.EAS = tas2eas(self.TAS, environment.rho)
         self.Mach = self.TAS / environment.a
         self.q_inf = 0.5 * environment.rho * self.TAS ** 2
+
         # Gravity force
         self.gravity_force = environment.gravity_vector * self.mass
