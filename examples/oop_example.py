@@ -17,36 +17,50 @@ from pyfme.environment.gravity import VerticalConstant
 from pyfme.environment.wind import NoWind
 from pyfme.models.systems import EulerFlatEarth
 from pyfme.simulator import BatchSimulation
+from pyfme.utils.trimmer import steady_state_flight_trimmer
 
 aircraft = Cessna310
 atmosphere = ISA1976
 gravity = VerticalConstant
 wind = NoWind
 environment = Environment(atmosphere, gravity, wind)
-system = EulerFlatEarth(lat=0, lon=0, h=1000, psi=np.pi/4, x_earth=0, y_earth=0)
+
+# Initial conditions.
+TAS = 312 * 0.3048  # m/s
+h0 = 8000 * 0.3048  # m
+psi0 = 3  # rad
+x0, y0 = 0, 0  # m
+turn_rate = 0  # rad/s
+gamma0 = 0  # rad
+
+system = EulerFlatEarth(lat=0, lon=0, h=h0, psi=psi0, x_earth=x0, y_earth=y0)
 
 not_trimmed_controls = {'delta_elevator': 0.05,
                         'hor_tail_incidence': 0.00,
-                        'delta_aileron': 0.00,
-                        'delta_rudder': 0.00,
+                        'delta_aileron': 0.01 * np.sign(turn_rate),
+                        'delta_rudder': 0.01 * np.sign(turn_rate),
                         'delta_t': 0.5}
 
 controls2trim = ['delta_elevator', 'delta_aileron', 'delta_rudder', 'delta_t']
 
-trimmed_controls, trimmed_system, outputs = aircraft.steady_state_flight_trim(
-    system=system,
-    env=environment,
-    controls=not_trimmed_controls,
-    TAS=120, gamma=+0*np.pi/180, turn_rate=0.0,
-    controls2trim=controls2trim)
+trimmed_ac, trimmed_sys, trimmed_env, results = steady_state_flight_trimmer(
+    aircraft, system, environment, TAS=TAS, controls_0=not_trimmed_controls,
+    controls2trim=controls2trim, gamma=gamma0, turn_rate=turn_rate, verbose=2)
+# trimmed_controls, trimmed_system, outputs = steady_state_flight_trimmer(
+#     system=system,
+#     env=environment,
+#     controls=not_trimmed_controls,
+#     TAS=120, gamma=+0*np.pi/180, turn_rate=0.0,
+#     controls2trim=controls2trim)
 
-my_simulation = BatchSimulation(aircraft, trimmed_system, environment)
+my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
-tfin = 20  # seconds
+tfin = 60  # seconds
 N = tfin * 100 + 1
 time = np.linspace(0, tfin, N)
-controls = {c_name: np.full((N,), trimmed_controls[c_name]) for
-            c_name in trimmed_controls}
+initial_controls = trimmed_ac.controls
+controls = {c_name: np.full((N,), initial_controls[c_name]) for
+            c_name in initial_controls}
 
 my_simulation.set_controls(time, controls)
 
@@ -56,7 +70,9 @@ par_list = ['x_earth', 'y_earth', 'height',
             'v_north', 'v_east', 'v_down',
             'p', 'q', 'r',
             'alpha', 'beta', 'TAS',
-            'T', 'p', 'rho']
+            'T', 'pressure', 'rho',
+            'F_xb', 'F_yb', 'F_zb',
+            'M_xb', 'M_yb', 'M_zb']
 
 my_simulation.set_par_dict(par_list)
 my_simulation.run_simulation()

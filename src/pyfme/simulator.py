@@ -42,7 +42,13 @@ class Simulation(object):
                          'p': self.system.p,
                          'q': self.system.q,
                          'r': self.system.r,
-                         'height': self.system.height
+                         'height': self.system.height,
+                         'F_xb': self.aircraft.total_forces[0],
+                         'F_yb': self.aircraft.total_forces[1],
+                         'F_zb': self.aircraft.total_forces[2],
+                         'M_xb': self.aircraft.total_moments[0],
+                         'M_yb': self.aircraft.total_moments[1],
+                         'M_zb': self.aircraft.total_moments[2]
                          }
         self.par_dict = {}
 
@@ -163,7 +169,13 @@ class BatchSimulation(Simulation):
                          'p': self.system.p,
                          'q': self.system.q,
                          'r': self.system.r,
-                         'height': self.system.height
+                         'height': self.system.height,
+                         'F_xb': self.aircraft.total_forces[0],
+                         'F_yb': self.aircraft.total_forces[1],
+                         'F_zb': self.aircraft.total_forces[2],
+                         'M_xb': self.aircraft.total_moments[0],
+                         'M_yb': self.aircraft.total_moments[1],
+                         'M_zb': self.aircraft.total_moments[2]
                          }
         for par_name, par_values in self.par_dict.items():
             par_values[self._time_step] = self.PAR_KEYS[par_name]
