@@ -176,7 +176,7 @@ class _Cessna310(Aircraft):
         m = q * Sw * c * self.Cm
         n = q * Sw * b * self.Cn
 
-        Ft = q * Sw * self.Ct
+        Ft = np.array([q * Sw * self.Ct, 0, 0])
         Fg = self.gravity_force
         Fa = np.array([-D, Y, -L])
 
