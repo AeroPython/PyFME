@@ -74,8 +74,16 @@ class Aircraft(object):
 
     def update(self, controls, system, environment):
 
-        if self.controls_inside_range(controls):
-            self.controls = controls
+        # If a control is not given, the previous value is assigned.
+        for control_name, control_value in controls.items():
+            limits = self.control_limits[control_name]
+            if limits[0] <= control_value <= limits[1]:
+                self.controls[control_name] = control_value
+            else:
+                # TODO: maybe raise a warning and assign max deflection
+                msg = "Control {} out of range ({} when max={} and min={" \
+                      "}".format(control_name, limits[1], limits[0])
+                raise ValueError(msg)
 
         # Velocity relative to air: aerodynamic velocity.
         aero_vel = system.vel_body - environment.body_wind
@@ -84,9 +92,10 @@ class Aircraft(object):
             u=aero_vel[0], v=aero_vel[1], w=aero_vel[2])
 
         # Calculate alpha and beta rate of change using finite differences.
-        self.Dalpha_Dt = (alpha - self.alpha) / system.dt
+        # TODO: include Dalpha_Dt & Dbeta_Dt
+        # self.Dalpha_Dt = (alpha - self.alpha) / system.dt
         self.alpha = alpha
-        self.Dbeta_Dt = (beta - self.beta) / system.dt
+        # self.Dbeta_Dt = (beta - self.beta) / system.dt
         self.alpha = alpha
         # Setting velocities & dynamic pressure
         self.CAS = tas2cas(self.TAS, environment.p, environment.rho)
