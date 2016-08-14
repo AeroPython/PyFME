@@ -73,7 +73,7 @@ class Atmosphere(object):
 
     @abstractmethod
     def __call__(self, h):
-        return
+        pass
 
 
 class _ISA1976(Atmosphere):
@@ -103,7 +103,7 @@ class _ISA1976(Atmosphere):
     """
 
     def __init__(self):
-        Atmosphere.__init__(self)
+        super().__init__()
         self._gamma = GAMMA_AIR  # Adiabatic index or ratio of specific heats
         self._R_g = R_AIR  # Gas constant  J/(Kg·K)
         self._g0 = GRAVITY  # Gravity  m/s^2

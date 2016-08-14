@@ -96,7 +96,7 @@ class Aircraft(object):
         # self.Dalpha_Dt = (alpha - self.alpha) / system.dt
         self.alpha = alpha
         # self.Dbeta_Dt = (beta - self.beta) / system.dt
-        self.alpha = alpha
+        self.beta = beta
         # Setting velocities & dynamic pressure
         self.CAS = tas2cas(self.TAS, environment.p, environment.rho)
         self.EAS = tas2eas(self.TAS, environment.rho)
@@ -104,16 +104,3 @@ class Aircraft(object):
         self.q_inf = 0.5 * environment.rho * self.TAS ** 2
         # Gravity force
         self.gravity_force = environment.gravity_vector * self.mass
-
-    @abstractmethod
-    def calculate_forces_and_moments(self):
-        pass
-
-    @abstractmethod
-    def controls_inside_range(self, controls):
-        for con, val in controls.items():
-            limits = self.control_limits[con]
-            is_correct = limits[0] <= val <= limits[1]
-            if not is_correct:
-                break
-        return is_correct

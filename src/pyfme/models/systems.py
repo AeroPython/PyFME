@@ -268,5 +268,7 @@ class EulerFlatEarth(System):
         # FIXME: check the conversion to keep angle between 0 and 2pi again
         self.euler_angles[0] = np.arctan2(np.sin(self.psi), np.cos(
             self.psi)) % (2*np.pi)
+        self.euler_angles[2] = np.arctan2(np.sin(self.phi), np.cos(self.phi))
 
-        self.vel_NED = body2hor(self.vel_body, self.theta, self.phi, self.psi)
+        self.vel_NED = body2hor(self.vel_body, theta=self.theta, phi=self.phi,
+                                psi=self.psi)

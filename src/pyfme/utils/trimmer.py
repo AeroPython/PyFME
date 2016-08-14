@@ -19,6 +19,8 @@ from warnings import warn
 import numpy as np
 from scipy.optimize import least_squares
 
+from pyfme.models.constants import GRAVITY
+
 
 def steady_state_flight_trimmer(aircraft, system, env,
                                 TAS,
@@ -128,7 +130,8 @@ def steady_state_flight_trimmer(aircraft, system, env,
     results = {'alpha': trimmed_ac.alpha, 'beta': trimmed_ac.beta,
                'u': trimmed_sys.u, 'v': trimmed_sys.v, 'w': trimmed_sys.w,
                'p': trimmed_sys.p, 'q': trimmed_sys.q, 'r': trimmed_sys.r,
-               'theta': trimmed_sys.theta, 'phi': trimmed_sys.phi}
+               'theta': trimmed_sys.theta, 'phi': trimmed_sys.phi,
+               'ls_opt': results}
 
     for control in controls2trim:
         results[control] = trimmed_ac.controls[control]
@@ -170,7 +173,7 @@ def turn_coord_cons_horizontal_and_small_beta(turn_rate, alpha, TAS):
     and beta is small (beta << 1).
     """
 
-    g0 = 9.81
+    g0 = GRAVITY
     G = turn_rate * TAS / g0
     phi = G / cos(alpha)
     phi = atan(phi)
