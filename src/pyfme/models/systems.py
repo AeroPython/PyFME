@@ -160,7 +160,7 @@ class EulerFlatEarth(System):
         If use_jac = True the jacobian of the equations is used for the
         integration.
         """
-        super().__init__(lat, lon, h, psi=0, x_earth=0, y_earth=0)
+        super().__init__(lat, lon, h, psi, x_earth, y_earth)
         # State vector must be initialized with set_initial_state_vector() method
         self.state_vector = None
 
