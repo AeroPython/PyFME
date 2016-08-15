@@ -4,162 +4,108 @@ Python Flight Mechanics Engine (PyFME).
 Copyright (c) AeroPython Development Team.
 Distributed under the terms of the MIT License.
 
-Example with trimmed aircraft.
-The main purpose of this example is to see the evolution of the aircraft after
-a longitudinal perturbation (delta doublet).
-Trimmed in stationary, horizontal, symmetric, wings level flight.
+Example
+-------
+
+Cessna 310, ISA1976 integrated with Flat Earth (euler angles).
+
+Example with trimmed aircraft: stationary, horizontal turn.
+
+The main purpose of this example is to check if the aircraft trimmed in a given
+state maintains the trimmed flight condition.
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
-from pyfme.aircrafts import cessna_310
-from pyfme.models.system import System
-from pyfme.utils.trimmer import steady_state_flight_trim
-from pyfme.utils.anemometry import calculate_alpha_beta_TAS
-from pyfme.environment.isa import atm
+from pyfme.aircrafts import Cessna310
+from pyfme.environment.environment import Environment
+from pyfme.environment.atmosphere import ISA1976
+from pyfme.environment.gravity import VerticalConstant
+from pyfme.environment.wind import NoWind
+from pyfme.models.systems import EulerFlatEarth
+from pyfme.simulator import BatchSimulation
+from pyfme.utils.trimmer import steady_state_flight_trimmer
 
+aircraft = Cessna310()
+atmosphere = ISA1976()
+gravity = VerticalConstant()
+wind = NoWind()
+environment = Environment(atmosphere, gravity, wind)
 
-if __name__ == '__main__':
+# Initial conditions.
+TAS = 312.5 * 0.3048  # m/s
+h0 = 8000 * 0.3048  # m
+psi0 = 1  # rad
+x0, y0 = 0, 0  # m
+turn_rate = 0.1  # rad/s
+gamma0 = 0.00  # rad
 
-    # Aircraft parameters.
-    mass, inertia = cessna_310.mass_and_inertial_data()
+system = EulerFlatEarth(lat=0, lon=0, h=h0, psi=psi0, x_earth=x0, y_earth=y0)
 
-    # Initial conditions.
-    TAS_ = 312 * 0.3048  # m/s
-    h = 8000 * 0.3048  # m
-    psi_0 = 3  # rad
-    x_0, y_0 = 0, 0  # m
+not_trimmed_controls = {'delta_elevator': 0.05,
+                        'hor_tail_incidence': 0.00,
+                        'delta_aileron': 0.01 * np.sign(turn_rate),
+                        'delta_rudder': 0.01 * np.sign(turn_rate),
+                        'delta_t': 0.5}
 
-    # Trimming.
-    trim_results = steady_state_flight_trim(cessna_310, h, TAS_, gamma=0,
-                                            turn_rate=0)
+controls2trim = ['delta_elevator', 'delta_aileron', 'delta_rudder', 'delta_t']
 
-    lin_vel, ang_vel, theta, phi, alpha_, beta_, control_vector = trim_results
+trimmed_ac, trimmed_sys, trimmed_env, results = steady_state_flight_trimmer(
+    aircraft, system, environment, TAS=TAS, controls_0=not_trimmed_controls,
+    controls2trim=controls2trim, gamma=gamma0, turn_rate=turn_rate, verbose=2)
 
-    # Time.
-    t0 = 0  # s
-    tf = 30  # s
-    dt = 1e-2  # s
+print(results)
 
-    time = np.arange(t0, tf, dt)
+my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
-    # Results initialization.
-    results = np.zeros([time.size, 12])
+tfin = 150  # seconds
+N = tfin * 100 + 1
+time = np.linspace(0, tfin, N)
+initial_controls = trimmed_ac.controls
 
-    results[0, 0:3] = lin_vel
-    results[0, 3:6] = ang_vel
-    results[0, 6:9] = theta, phi, psi_0
-    results[0, 9:12] = x_0, y_0, h
-    alpha = np.empty_like(time)
-    alpha[0] = alpha_
-    beta = np.empty_like(time)
-    beta[0] = beta_
-    TAS = np.empty_like(time)
-    TAS[0] = TAS_
+controls = {}
+for control_name, control_value in initial_controls.items():
+    controls[control_name] = np.ones_like(time) * control_value
 
-    # Linear Momentum and Angular Momentum eqs.
-    equations = System(integrator='dopri5',
-                       model='euler_flat_earth',
-                       jac=False)
-    u, v, w = lin_vel
-    p, q, r = ang_vel
+my_simulation.set_controls(time, controls)
 
-    equations.set_initial_values(u, v, w,
-                                 p, q, r,
-                                 theta, phi, psi_0,
-                                 x_0, y_0, h)
+par_list = ['x_earth', 'y_earth', 'height',
+            'psi', 'theta', 'phi',
+            'u', 'v', 'w',
+            'v_north', 'v_east', 'v_down',
+            'p', 'q', 'r',
+            'alpha', 'beta', 'TAS',
+            'F_xb', 'F_yb', 'F_zb',
+            'M_xb', 'M_yb', 'M_zb']
 
-    _, _, rho, _ = atm(h)
+my_simulation.set_par_dict(par_list)
+my_simulation.run_simulation()
 
-    # Define control vectors.
-    delta_e, delta_ail, delta_r, delta_t = control_vector
-    d_e = np.ones_like(time) * delta_e
-    d_e[np.where(time<2)] = delta_e * 1.30
-    d_e[np.where(time<1)] = delta_e * 0.70
-    d_a = np.ones_like(time) * delta_ail
-    d_r = np.ones_like(time) * delta_r
-    d_t = np.ones_like(time) * delta_t
+# print(my_simulation.par_dict)
 
-    attitude = theta, phi, psi_0
+plt.style.use('ggplot')
 
-    # Rename function to make it shorter
-    forces_and_moments = cessna_310.get_forces_and_moments
-    for ii, t in enumerate(time[1:]):
+for ii in range(len(par_list) // 3):
+    three_params = par_list[3*ii:3*ii+3]
+    fig, ax = plt.subplots(3, 1, sharex=True)
+    for jj, par in enumerate(three_params):
+        ax[jj].plot(time, my_simulation.par_dict[par])
+        ax[jj].set_ylabel(par)
+        ax[jj].set_xlabel('time (s)')
 
-        forces, moments = forces_and_moments(
-                            TAS[ii], rho, alpha[ii], beta[ii], d_e[ii], 0,
-                            d_a[ii], d_r[ii], d_t[ii], attitude)
+fig = plt.figure()
+ax = Axes3D(fig)
+ax.plot(my_simulation.par_dict['x_earth'],
+        my_simulation.par_dict['y_earth'],
+        my_simulation.par_dict['height'])
 
-        results[ii+1, :] = equations.propagate(mass, inertia, forces, moments,
-                                               dt)
+ax.plot(my_simulation.par_dict['x_earth'],
+        my_simulation.par_dict['y_earth'],
+        my_simulation.par_dict['height'] * 0)
+ax.set_xlabel('x_earth')
+ax.set_ylabel('y_earth')
+ax.set_zlabel('z_earth')
 
-        lin_vel = results[ii+1, 0:3]
-        ang_vel = results[ii+1, 3:6]
-        attitude = results[ii+1, 6:9]
-        position = results[ii+1, 9:12]
-
-        alpha[ii+1], beta[ii+1], TAS[ii+1] = calculate_alpha_beta_TAS(*lin_vel)
-
-        _, _, rho, _ = atm(position[2])
-
-    velocities = results[:, 0:6]
-    attitude_angles = results[:, 6:9]
-    position = results[:, 9:12]
-
-    # PLOTS
-    plt.close('all')
-    plt.style.use('ggplot')
-
-    plt.figure('pos')
-    plt.plot(time, position[:, 0], label='x')
-    plt.plot(time, position[:, 1], label='y')
-    plt.plot(time, position[:, 2], label='z')
-    plt.xlabel('time (s)')
-    plt.ylabel('position (m)')
-    plt.legend()
-
-    plt.figure('angles')
-    plt.plot(time, attitude_angles[:, 0], label='theta')
-    plt.plot(time, attitude_angles[:, 1], label='phi')
-    plt.plot(time, attitude_angles[:, 2], label='psi')
-    plt.xlabel('time (s)')
-    plt.ylabel('attitude (rad)')
-    plt.legend()
-
-    plt.figure('velocities')
-    plt.plot(time, velocities[:, 0], label='u')
-    plt.plot(time, velocities[:, 1], label='v')
-    plt.plot(time, velocities[:, 2], label='w')
-    plt.plot(time, TAS, label='TAS')
-    plt.xlabel('time (s)')
-    plt.ylabel('velocity (m/s)')
-    plt.legend()
-
-    plt.figure('ang velocities')
-    plt.plot(time, velocities[:, 3], label='p')
-    plt.plot(time, velocities[:, 4], label='q')
-    plt.plot(time, velocities[:, 5], label='r')
-    plt.xlabel('time (s)')
-    plt.ylabel('angular velocity (rad/s)')
-    plt.legend()
-
-    plt.figure('aero angles')
-    plt.plot(time, alpha, label='alpha')
-    plt.plot(time, beta, label='beta')
-    plt.xlabel('time (s)')
-    plt.ylabel('angle (rad)')
-    plt.legend()
-
-    plt.figure('2D Trajectory')
-    plt.plot(position[:, 0], position[:, 1])
-    plt.xlabel('X (m)')
-    plt.ylabel('Y (m)')
-    plt.legend()
-
-    plt.figure()
-    plt.plot(time, alpha, label='alpha')
-    plt.plot(time, attitude_angles[:, 0], label='theta')
-    plt.plot(time, d_e, label='delta_e')
-    plt.plot(time, velocities[:, 4], label='q')
-    plt.legend()
+plt.show()
