@@ -9,11 +9,8 @@ Example
 
 Cessna 310, ISA1976 integrated with Flat Earth (euler angles).
 
-Example with trimmed aircraft: stationary ascent, symmetric, wings level
-flight.
-
-The main purpose of this example is to check if the aircraft trimmed in a given
-state maintains the trimmed flight condition.
+Evolution of the aircraft after a longitudinal perturbation (delta doublet).
+Trimmed in stationary, horizontal, symmetric, wings level flight.
 """
 
 import numpy as np
@@ -41,7 +38,7 @@ h0 = 8000 * 0.3048  # m
 psi0 = 1  # rad
 x0, y0 = 0, 0  # m
 turn_rate = 0.0  # rad/s
-gamma0 = +0.05  # rad
+gamma0 = 0.00  # rad
 
 system = EulerFlatEarth(lat=0, lon=0, h=h0, psi=psi0, x_earth=x0, y_earth=y0)
 
@@ -61,7 +58,7 @@ print(results)
 
 my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
-tfin = 150  # seconds
+tfin = 45  # seconds
 N = tfin * 100 + 1
 time = np.linspace(0, tfin, N)
 initial_controls = trimmed_ac.controls
@@ -69,6 +66,13 @@ initial_controls = trimmed_ac.controls
 controls = {}
 for control_name, control_value in initial_controls.items():
     controls[control_name] = np.ones_like(time) * control_value
+
+# Elevator doublet
+controls['delta_elevator'][np.where(time<2)] = \
+    initial_controls['delta_elevator'] * 1.30
+
+controls['delta_elevator'][np.where(time<1)] = \
+    initial_controls['delta_elevator'] * 0.70
 
 my_simulation.set_controls(time, controls)
 
