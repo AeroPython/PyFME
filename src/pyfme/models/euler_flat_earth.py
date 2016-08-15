@@ -18,8 +18,8 @@ Assumptions:
 import numpy as np
 
 
-def linear_and_angular_momentum_eqs(time, vel, mass, inertia, forces, moments):
-    """Linear and angular momentum equations
+def lamceq(time, vel, mass, inertia, forces, moments):
+    """Linear and angular momentum conservation equations
 
     Parameters
     ----------
@@ -35,10 +35,10 @@ def linear_and_angular_momentum_eqs(time, vel, mass, inertia, forces, moments):
         Current equations assume that the aircraft has a symmetry plane
         (x_b - z_b), thus J_xy and J_yz must be null.
     forces : array_like
-        3 dimensional vector containing the total forces (including gravity) in
+        3 dimensional vector containing the total total_forces (including gravity) in
         x_b, y_b, z_b axes (N).
     moments : array_like
-        3 dimensional vector containing the total moments in x_b, y_b, z_b axes
+        3 dimensional vector containing the total total_moments in x_b, y_b, z_b axes
         (N·m).
 
     Returns
@@ -50,7 +50,7 @@ def linear_and_angular_momentum_eqs(time, vel, mass, inertia, forces, moments):
 
     See Also
     --------
-    navigation_eqs, kinematic_angular_eqs
+    kleq, kaeq
 
     References
     ----------
@@ -67,9 +67,9 @@ def linear_and_angular_momentum_eqs(time, vel, mass, inertia, forces, moments):
     Iy = inertia[1, 1]
     Iz = inertia[2, 2]
 
-    # Note definition of moments of inertia p.21 Gomez Tierno, et al Mecánica
+    # Note definition of total_moments of inertia p.21 Gomez Tierno, et al Mecánica
     # de vuelo
-    # TODO: define moments of inertia like this for all the code.
+    # TODO: define total_moments of inertia like this for all the code.
     Jxz = - inertia[0, 2]
 
     Fx, Fy, Fz = forces
@@ -96,7 +96,7 @@ def linear_and_angular_momentum_eqs(time, vel, mass, inertia, forces, moments):
     return np.array([du_dt, dv_dt, dw_dt, dp_dt, dq_dt, dr_dt])
 
 
-def jac_linear_and_angular_momentum_eqs(time, vel, mass, inertia):
+def lamceq_jac(time, vel, mass, inertia):
     """ Jacobian of linear and angular momentum equations
 
     Parameters
@@ -121,7 +121,7 @@ def jac_linear_and_angular_momentum_eqs(time, vel, mass, inertia):
 
     See Also
     --------
-    linear_and_angular_momentum_eqs
+    lamceq
 
     References
     ----------
@@ -136,9 +136,9 @@ def jac_linear_and_angular_momentum_eqs(time, vel, mass, inertia):
     Iy = inertia[1, 1]
     Iz = inertia[2, 2]
 
-    # Note definition of moments of inertia p.21 Gomez Tierno, et al Mecánica
+    # Note definition of total_moments of inertia p.21 Gomez Tierno, et al Mecánica
     # de vuelo
-    # TODO: define moments of inertia like this for all the code.
+    # TODO: define total_moments of inertia like this for all the code.
 
     Jxz = - inertia[0, 2]
 
@@ -178,7 +178,7 @@ def jac_linear_and_angular_momentum_eqs(time, vel, mass, inertia):
     return jac
 
 
-def kinematic_angular_eqs(time, euler_angles, ang_vel):
+def kaeq(time, euler_angles, ang_vel):
     """ Kinematic angular equations
 
     Parameters
@@ -200,7 +200,7 @@ def kinematic_angular_eqs(time, euler_angles, ang_vel):
 
     See Also
     --------
-    linear_and_angular_momentum_eqs, navigation_eqs
+    lamceq, kleq
 
     References
     ----------
@@ -225,7 +225,7 @@ def kinematic_angular_eqs(time, euler_angles, ang_vel):
     return np.array([dtheta_dt, dphi_dt, dpsi_dt])
 
 
-def jac_kinematic_angular_eqs(time, euler_angles, ang_vel):
+def kaeq_jac(time, euler_angles, ang_vel):
     """Jacobian of kinematic angular equations
 
     Parameters
@@ -247,7 +247,7 @@ def jac_kinematic_angular_eqs(time, euler_angles, ang_vel):
 
     See Also
     --------
-    kinematic_angular_eqs
+    kaeq
 
     References
     ----------
@@ -275,7 +275,7 @@ def jac_kinematic_angular_eqs(time, euler_angles, ang_vel):
     return jac
 
 
-def navigation_eqs(time, lin_vel, euler_angles):
+def kleq(time, lin_vel, euler_angles):
     """Kinematic linear equations
 
     Parameters
@@ -297,7 +297,7 @@ def navigation_eqs(time, lin_vel, euler_angles):
 
     See Also
     --------
-    kinematic_angular_eqs, linear_and_angular_momentum_eqs
+    kaeq, lamceq
 
     References
     ----------

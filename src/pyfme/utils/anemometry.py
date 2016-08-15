@@ -24,12 +24,13 @@ position error.
 """
 
 from math import asin, atan, sqrt
+from pyfme.models.constants import RHO_0, P_0, SOUND_VEL_0, GAMMA_AIR
 
 
-rho_0 = 1.225  # density at sea level (kg/m3)
-p_0 = 101325  # pressure at sea level (Pa)
-a_0 = 340.293990543  # sound speed at sea level (m/s)
-gamma = 1.4  # heat capacity ratio
+rho_0 = RHO_0  # density at sea level (kg/m3)
+p_0 = P_0  # pressure at sea level (Pa)
+a_0 = SOUND_VEL_0  # sound speed at sea level (m/s)
+gamma = GAMMA_AIR  # heat capacity ratio
 
 
 def calculate_alpha_beta_TAS(u, v, w):

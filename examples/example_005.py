@@ -9,8 +9,7 @@ Example
 
 Cessna 310, ISA1976 integrated with Flat Earth (euler angles).
 
-Example with trimmed aircraft: stationary ascent, symmetric, wings level
-flight.
+Example with trimmed aircraft: stationary, turn during ascent.
 
 The main purpose of this example is to check if the aircraft trimmed in a given
 state maintains the trimmed flight condition.
@@ -40,8 +39,8 @@ TAS = 312.5 * 0.3048  # m/s
 h0 = 8000 * 0.3048  # m
 psi0 = 1  # rad
 x0, y0 = 0, 0  # m
-turn_rate = 0.0  # rad/s
-gamma0 = +0.05  # rad
+turn_rate = 0.1  # rad/s
+gamma0 = 0.05  # rad
 
 system = EulerFlatEarth(lat=0, lon=0, h=h0, psi=psi0, x_earth=x0, y_earth=y0)
 

@@ -12,12 +12,13 @@ from numpy.testing import (assert_almost_equal)
 
 from pyfme.utils.anemometry import (tas2eas, eas2tas, cas2eas, eas2cas,
                                     tas2cas, cas2tas)
-from pyfme.environment.isa import atm
+from pyfme.models.constants import RHO_0, P_0, SOUND_VEL_0, GAMMA_AIR
+from pyfme.environment.atmosphere import ISA1976
 
-rho_0 = 1.225  # density at sea level (kg/m3)
-p_0 = 101325  # pressure at sea level (Pa)
-a_0 = 340.293990543  # sound speed at sea level (m/s)
-gamma = 1.4  # heat capacity ratio
+RHO_0 = 1.225  # density at sea level (kg/m3)
+P_0 = 101325  # pressure at sea level (Pa)
+SOUND_VEL_0 = 340.293990543  # sound speed at sea level (m/s)
+GAMMA_AIR = 1.4  # heat capacity ratio
 
 
 def test_tas2eas():
@@ -26,12 +27,12 @@ def test_tas2eas():
     tas = 275
     eas_expected = 275
 
-    eas = tas2eas(tas, rho_0)
+    eas = tas2eas(tas, RHO_0)
 
     assert_almost_equal(eas, eas_expected)
 
     # Test at 11000m
-    _, _, rho, _ = atm(11000)
+    _, _, rho, _ = ISA1976(11000)
     tas = 275
     eas_expected = 149.88797172756003
 
@@ -46,12 +47,12 @@ def test_eas2tas():
     eas = 149.88797172756003
     tas_expected = 149.88797172756003
 
-    tas = eas2tas(eas, rho_0)
+    tas = eas2tas(eas, RHO_0)
 
     assert_almost_equal(tas, tas_expected)
 
     # Test at 11000m
-    _, _, rho, _ = atm(11000)
+    _, _, rho, _ = ISA1976(11000)
     eas = 149.88797172756003
     tas_expected = 275
 
@@ -66,12 +67,12 @@ def test_tas2cas():
     tas = 275
     cas_expected = 275
 
-    cas = tas2cas(tas, p_0, rho_0)
+    cas = tas2cas(tas, P_0, RHO_0)
 
     assert_almost_equal(cas, cas_expected)
 
     # Test at 11000m
-    _, p, rho, _ = atm(11000)
+    _, p, rho, _ = ISA1976(11000)
     tas = 275
     cas_expected = 162.03569680495048
 
@@ -86,12 +87,12 @@ def test_cas2tas():
     cas = 275
     tas_expected = 275
 
-    tas = cas2tas(cas, p_0, rho_0)
+    tas = cas2tas(cas, P_0, RHO_0)
 
     assert_almost_equal(tas, tas_expected)
 
     # Test at 11000m
-    _, p, rho, _ = atm(11000)
+    _, p, rho, _ = ISA1976(11000)
     cas = 162.03569680495048
     tas_expected = 275
 
@@ -106,12 +107,12 @@ def test_cas2eas():
     cas = 275
     eas_expected = 275
 
-    eas = cas2eas(cas, p_0, rho_0)
+    eas = cas2eas(cas, P_0, RHO_0)
 
     assert_almost_equal(eas, eas_expected)
 
     # Test at 11000m
-    _, p, rho, _ = atm(11000)
+    _, p, rho, _ = ISA1976(11000)
     cas = 162.03569680495048
     eas_expected = 149.88797172756003
 
@@ -126,12 +127,12 @@ def test_eas2cas():
     eas = 275
     cas_expected = 275
 
-    cas = eas2cas(eas, p_0, rho_0)
+    cas = eas2cas(eas, P_0, RHO_0)
 
     assert_almost_equal(cas, cas_expected)
 
     # Test at 11000m
-    _, p, rho, _ = atm(11000)
+    _, p, rho, _ = ISA1976(11000)
     eas = 149.88797172756003
     cas_expected = 162.03569680495048
 
