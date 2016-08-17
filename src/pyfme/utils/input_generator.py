@@ -88,8 +88,8 @@ def doublet(t_init, T, A, time, offset=0, var=None):
     return doublet_input
 
 
-def sinusoide(t_init, T, A, time, phase=0, offset=0, var=None):
-    """ Sinusoide input.
+def sinusoid(t_init, T, A, time, phase=0, offset=0, var=None):
+    """ Sinusoid input.
 
     Parameters
     ----------
@@ -113,7 +113,6 @@ def sinusoide(t_init, T, A, time, phase=0, offset=0, var=None):
     -------
     sinusoide_input : array_like
     """
-
 
     if var is None:
         sinusoide_input = np.ones_like(time) * float(offset)
@@ -169,7 +168,7 @@ def ramp(t_init, T, A, time, offset=0, var=None):
 
 
 def harmonic(t_init, T, A, time, f, phase=0, offset=0, var=None):
-    """ Sinusoide input.
+    """ Sinusoid input.
 
     Parameters
     ----------
