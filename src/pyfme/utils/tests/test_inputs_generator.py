@@ -14,7 +14,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal
 from pyfme.utils.input_generator import (step,
                                          doublet,
-                                         sinusoide,
+                                         sinusoid,
                                          ramp,
                                          harmonic)
 
@@ -313,7 +313,7 @@ def test_ramp_wrong_not_scalar_offset():
         ramp(t_init, T, A, time, offset=offset)
 
 
-def test_sinusoide():
+def test_sinusoid():
     t_init = 0
     T = 4.
     A = 3.
@@ -322,12 +322,12 @@ def test_sinusoide():
     expected_input = np.zeros([11])
     expected_input[0:5] = np.array([0, A/2, 0, -A/2, 0])
 
-    sinusoide_input = sinusoide(t_init, T, A, time)
+    sinusoid_input = sinusoid(t_init, T, A, time)
 
-    assert_almost_equal(sinusoide_input, expected_input)
+    assert_almost_equal(sinusoid_input, expected_input)
 
 
-def test_sinusoide_offset():
+def test_sinusoid_offset():
     t_init = 0
     T = 4.
     A = 3.
@@ -337,12 +337,12 @@ def test_sinusoide_offset():
     expected_input = np.zeros([11]) + offset
     expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0])
 
-    sinusoide_input = sinusoide(t_init, T, A, time, offset=offset)
+    sinusoid_input = sinusoid(t_init, T, A, time, offset=offset)
 
-    assert_almost_equal(sinusoide_input, expected_input)
+    assert_almost_equal(sinusoid_input, expected_input)
 
 
-def test_sinusoide_phase():
+def test_sinusoid_phase():
     t_init = 0
     T = 4.
     A = 3.
@@ -352,12 +352,12 @@ def test_sinusoide_phase():
     expected_input = np.zeros([11])
     expected_input[0:5] += np.array([A/2, 0, -A/2, 0, A/2])
 
-    sinusoide_input = sinusoide(t_init, T, A, time, phase=phase)
+    sinusoid_input = sinusoid(t_init, T, A, time, phase=phase)
 
-    assert_almost_equal(sinusoide_input, expected_input)
+    assert_almost_equal(sinusoid_input, expected_input)
 
 
-def test_sinusoide_var():
+def test_sinusoid_var():
     t_init = 0
     T = 4.
     A = 3.
@@ -368,12 +368,12 @@ def test_sinusoide_var():
     expected_input = var.copy()
     expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0])
 
-    sinusoide_input = sinusoide(t_init, T, A, time, offset=0, var=var)
+    sinusoid_input = sinusoid(t_init, T, A, time, offset=0, var=var)
 
-    assert_almost_equal(sinusoide_input, expected_input)
+    assert_almost_equal(sinusoid_input, expected_input)
 
 
-def test_sinusoide_var_and_offset():
+def test_sinusoid_var_and_offset():
     t_init = 0
     T = 4.
     A = 3.
@@ -385,12 +385,12 @@ def test_sinusoide_var_and_offset():
     expected_input = var + offset
     expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0])
 
-    sinusoide_input = sinusoide(t_init, T, A, time, offset=offset, var=var)
+    sinusoid_input = sinusoid(t_init, T, A, time, offset=offset, var=var)
 
-    assert_almost_equal(sinusoide_input, expected_input)
+    assert_almost_equal(sinusoid_input, expected_input)
 
 
-def test_sinusoide_wrong_size_var():
+def test_sinusoid_wrong_size_var():
     t_init = 0
     T = 5.
     A = 1.5
@@ -398,12 +398,12 @@ def test_sinusoide_wrong_size_var():
     var = np.ones([10])
 
     with pytest.raises(ValueError) as excinfo:
-        sinusoide(t_init, T, A, time, offset=0, var=var)
+        sinusoid(t_init, T, A, time, offset=0, var=var)
     assert ("ValueError: var and time must have the same size"
                 in excinfo.exconly())
 
 
-def test_sinusoide_wrong_not_scalar_offset():
+def test_sinusoid_wrong_not_scalar_offset():
     t_init = 0
     T = 5.
     A = 1.5
@@ -412,7 +412,7 @@ def test_sinusoide_wrong_not_scalar_offset():
     offset = var
 
     with pytest.raises(TypeError) as excinfo:
-        sinusoide(t_init, T, A, time, offset=offset)
+        sinusoid(t_init, T, A, time, offset=offset)
 
 
 def test_harmonic():
