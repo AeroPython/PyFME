@@ -19,12 +19,20 @@ from scipy import interpolate
 ### INPUTS ###
 ##############
 
-b, c = 10.91, 1.52 # [m]
-V = 63 # [m/s]
-alpha, alpha_dot = 0, 0 # [degree], [rad/s]
-beta = 0 # [rad]
-delta_elev, delta_aile, delta_rud = 0, 0, 0 # [degree]
-p, q, r = 0, 0, 0 # [rad/s]
+b = 10.91								# [m]
+c = 1.52								# [m]
+V = 63									# [m/s]
+alpha = 0								# [rad]
+alpha_DEG = alpha * 57.29578			# [degree]
+alpha_dot = 0 							# [rad/s]
+beta = -0.085							# [rad]
+delta_elev = 0							# [degree]
+delta_aile = 0							# [degree]
+delta_rud = 0							# [degree]
+delta_rud_RAD = delta_rud * 0.0174533	# [rad] 
+p = 0 									# [rad/s]
+q = 0 									# [rad/s]
+r = 0			 						# [rad/s]
 
 ##################
 ### TIMED PART ###
@@ -34,9 +42,9 @@ start = time.time()
 
 # LOADING OF DATA -- paleolithic style
 
-alpha_data = np.array([-7.5,-5,-2.5,0,2.5,5,7.5,10,15,17,18,19.5])
-delta_elev_data = np.array([-26,-20,-10,-5,0,7.5,15,22.5,28])
-delta_aile_data = np.array([20,15,10,5,0,-2.5,-5,-10,-15])
+alpha_data = np.array([-7.5,-5,-2.5,0,2.5,5,7.5,10,15,17,18,19.5]) # degree
+delta_elev_data = np.array([-26,-20,-10,-5,0,7.5,15,22.5,28]) # degree
+delta_aile_data = np.array([20,15,10,5,0,-2.5,-5,-10,-15]) # degree
 
 CD_data = np.array([0.044,0.034,0.03,0.03,0.036,0.048,0.067,0.093,0.15,0.169,0.177,0.184])
 
@@ -98,33 +106,23 @@ CN_delta_rud_interp = interpolate.interp1d(alpha_data, CN_delta_rud_data)
 
 # CALCULATIONS
 
-CD = CD_interp()
+CD = CD_interp(alpha_DEG) # TBConsidered: CD_delta_elev_interp(alpha, delta_elev)
 
-CLsus = CLsus_interp() + CLsus_alphadot_interp() + CLsus_q_interp() + CLsus_delta_elev_interp()
+CLsus = CLsus_interp(alpha_DEG) + CLsus_delta_elev_interp(delta_elev) + (c/(2*V))*(CLsus_alphadot_interp(alpha_DEG)*alpha_dot + CLsus_q_interp(alpha_DEG)*q)
 
-CY = CY_beta_interp()
-CY_p_interp()
-CY_r_interp()
-CY_delta_rud_interp()
+CY = CY_beta_interp(alpha_DEG)*beta + CY_delta_rud_interp(alpha_DEG)*delta_rud_RAD + (b/(2*V))*(CY_p_interp(alpha_DEG)*p + CY_r_interp(alpha_DEG)*r)
 
-Cl_beta_interp()
-Cl_p_interp()
-Cl_r_interp()
-Cl_delta_rud_interp()
-Cl_delta_aile_interp()
+Cl = Cl_beta_interp(alpha_DEG)*beta + Cl_delta_aile_interp(delta_aile) + Cl_delta_rud_interp(alpha_DEG)*delta_rud_RAD + (b/(2*V))*(Cl_p_interp(alpha_DEG)*p + Cl_r_interp(alpha_DEG)*r)
 
-CM_interp()
-CM_q_interp()
-CM_alphadot_interp()
-CM_delta_aile_interp()
+CM = CM_interp(alpha_DEG) + CM_delta_aile_interp(delta_elev) + (c/(2*V))*(CM_q_interp(alpha_DEG)*q + CM_alphadot_interp(alpha_DEG)*alpha_dot) 
 
-CN_beta_interp()
-CN_p_interp()
-CN_r_interp()
-CN_delta_rud_interp()
+CN = CN_beta_interp(alpha_DEG)*beta + CN_delta_rud_interp(alpha_DEG)*delta_rud_RAD + (b/(2*V))*(CN_p_interp(alpha_DEG)*p + CN_r_interp(alpha_DEG)*r)  # TBConsidered: CN_delta_aile_interp(alpha, delta_aile)
 
 
 
 end = time.time()
-print(CLsus_alphadot)
+print("CD = ",CD,"CL = ",CLsus,"CY = ",CY)
+print("Cl = ",Cl,"CM = ",CM,"CN = ",CN)
 print(end - start)
+
+
