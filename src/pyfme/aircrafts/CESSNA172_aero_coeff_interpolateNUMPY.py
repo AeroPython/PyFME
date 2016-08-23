@@ -4,7 +4,7 @@ Python Flight Mechanics Engine (PyFME).
 Copyright (c) AeroPython Development Team.
 Distributed under the terms of the MIT License.
 
-Tests with Scipy interpolate interp1d for the 1-D coefficients
+Tests with Numpy interpolation for the 1-D coefficients
 
 @author: andres.quezada.reed@gmail.com
 @AeroPython
@@ -79,47 +79,42 @@ CN_delta_rud_data = np.array([-0.2113,-0.215,-0.218,-0.22134,-0.2239,-0.226,-0.2
 
 # INTERPOLATIONS
 
-CD_interp = interpolate.interp1d(alpha_data, CD_data)
+CD_interp = np.interp(alpha_DEG, alpha_data, CD_data)
 
-CLsus_interp = interpolate.interp1d(alpha_data, CLsus_data)
-CLsus_alphadot_interp = interpolate.interp1d(alpha_data, CLsus_alphadot_data)
-CLsus_q_interp = interpolate.interp1d(alpha_data, CLsus_q_data)
-CLsus_delta_elev_interp = interpolate.interp1d(delta_elev_data, CLsus_delta_elev_data)
+CLsus_interp = np.interp(alpha_DEG, alpha_data, CLsus_data)
+CLsus_alphadot_interp = np.interp(alpha_DEG, alpha_data, CLsus_alphadot_data)
+CLsus_q_interp = np.interp(alpha_DEG, alpha_data, CLsus_q_data)
+CLsus_delta_elev_interp = np.interp(delta_elev, delta_elev_data, CLsus_delta_elev_data)
 
-CY_beta_interp = interpolate.interp1d(alpha_data, CY_beta_data)
-CY_p_interp = interpolate.interp1d(alpha_data, CY_p_data)
-CY_r_interp = interpolate.interp1d(alpha_data, CY_r_data)
-CY_delta_rud_interp = interpolate.interp1d(alpha_data, CY_delta_rud_data)
+CY_beta_interp = np.interp(alpha_DEG, alpha_data, CY_beta_data)
+CY_p_interp = np.interp(alpha_DEG, alpha_data, CY_p_data)
+CY_r_interp = np.interp(alpha_DEG, alpha_data, CY_r_data)
+CY_delta_rud_interp = np.interp(alpha_DEG, alpha_data, CY_delta_rud_data)
 
-Cl_beta_interp = interpolate.interp1d(alpha_data, Cl_beta_data)
-Cl_p_interp = interpolate.interp1d(alpha_data, Cl_p_data)
-Cl_r_interp = interpolate.interp1d(alpha_data, Cl_r_data)
-Cl_delta_rud_interp = interpolate.interp1d(alpha_data, Cl_delta_rud_data)
-Cl_delta_aile_interp = interpolate.interp1d(delta_aile_data, Cl_delta_aile_data)
+Cl_beta_interp = np.interp(alpha_DEG, alpha_data, Cl_beta_data)
+Cl_p_interp = np.interp(alpha_DEG, alpha_data, Cl_p_data)
+Cl_r_interp = np.interp(alpha_DEG, alpha_data, Cl_r_data)
+Cl_delta_rud_interp = np.interp(alpha_DEG, alpha_data, Cl_delta_rud_data)
+Cl_delta_aile_interp = np.interp(delta_aile, delta_aile_data, Cl_delta_aile_data)
 
-CM_interp = interpolate.interp1d(alpha_data, CM_data)
-CM_q_interp = interpolate.interp1d(alpha_data, CM_q_data)
-CM_alphadot_interp = interpolate.interp1d(alpha_data, CM_alphadot_data)
-CM_delta_aile_interp = interpolate.interp1d(delta_elev_data, CM_delta_aile_data)
+CM_interp = np.interp(alpha_DEG, alpha_data, CM_data)
+CM_q_interp = np.interp(alpha_DEG, alpha_data, CM_q_data)
+CM_alphadot_interp = np.interp(alpha_DEG, alpha_data, CM_alphadot_data)
+CM_delta_aile_interp = np.interp(delta_elev, delta_elev_data, CM_delta_aile_data)
 
-CN_beta_interp = interpolate.interp1d(alpha_data, CN_beta_data)
-CN_p_interp = interpolate.interp1d(alpha_data, CN_p_data)
-CN_r_interp = interpolate.interp1d(alpha_data, CN_r_data)
-CN_delta_rud_interp = interpolate.interp1d(alpha_data, CN_delta_rud_data)
+CN_beta_interp = np.interp(alpha_DEG, alpha_data, CN_beta_data)
+CN_p_interp = np.interp(alpha_DEG, alpha_data, CN_p_data)
+CN_r_interp = np.interp(alpha_DEG, alpha_data, CN_r_data)
+CN_delta_rud_interp = np.interp(alpha_DEG, alpha_data, CN_delta_rud_data)
 
 # CALCULATIONS
 
-CD = CD_interp(alpha_DEG) # TBConsidered: CD_delta_elev_interp(alpha, delta_elev)
-
-CLsus = CLsus_interp(alpha_DEG) + CLsus_delta_elev_interp(delta_elev) + (c/(2*V))*(CLsus_alphadot_interp(alpha_DEG)*alpha_dot + CLsus_q_interp(alpha_DEG)*q)
-
-CY = CY_beta_interp(alpha_DEG)*beta + CY_delta_rud_interp(alpha_DEG)*delta_rud_RAD + (b/(2*V))*(CY_p_interp(alpha_DEG)*p + CY_r_interp(alpha_DEG)*r)
-
-Cl = Cl_beta_interp(alpha_DEG)*beta + Cl_delta_aile_interp(delta_aile) + Cl_delta_rud_interp(alpha_DEG)*delta_rud_RAD + (b/(2*V))*(Cl_p_interp(alpha_DEG)*p + Cl_r_interp(alpha_DEG)*r)
-
-CM = CM_interp(alpha_DEG) + CM_delta_aile_interp(delta_elev) + (c/(2*V))*(CM_q_interp(alpha_DEG)*q + CM_alphadot_interp(alpha_DEG)*alpha_dot) 
-
-CN = CN_beta_interp(alpha_DEG)*beta + CN_delta_rud_interp(alpha_DEG)*delta_rud_RAD + (b/(2*V))*(CN_p_interp(alpha_DEG)*p + CN_r_interp(alpha_DEG)*r)  # TBConsidered: CN_delta_aile_interp(alpha, delta_aile)
+CD = CD_interp # TBConsidered: CD_delta_elev_interp(alpha, delta_elev)
+CLsus = CLsus_interp + CLsus_delta_elev_interp + (c/(2*V))*(CLsus_alphadot_interp*alpha_dot + CLsus_q_interp*q)
+CY = CY_beta_interp*beta + CY_delta_rud_interp*delta_rud_RAD + (b/(2*V))*(CY_p_interp*p + CY_r_interp*r)
+Cl = Cl_beta_interp*beta + Cl_delta_aile_interp + Cl_delta_rud_interp*delta_rud_RAD + (b/(2*V))*(Cl_p_interp*p + Cl_r_interp*r)
+CM = CM_interp + CM_delta_aile_interp + (c/(2*V))*(CM_q_interp*q + CM_alphadot_interp*alpha_dot) 
+CN = CN_beta_interp*beta + CN_delta_rud_interp*delta_rud_RAD + (b/(2*V))*(CN_p_interp*p + CN_r_interp*r)  # TBConsidered: CN_delta_aile_interp(alpha, delta_aile)
 
 
 
