@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Python Flight Mechanics Engine (PyFME).
 Copyright (c) AeroPython Development Team.
