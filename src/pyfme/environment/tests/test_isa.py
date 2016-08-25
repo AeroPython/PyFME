@@ -19,21 +19,22 @@ import pytest
 
 from pyfme.environment.atmosphere import ISA1976
 
+atmosphere = ISA1976()
 
 def test_sea_level():
     h = 0.0  # m
     expected_T = 288.15  # K
     expected_p = 101325.0  # Pa
     expected_rho = 1.2250  # kg / m3
-    expected_a = 340.4155  # m / s
+    expected_a = 340.293990543  # m / s
 
-    T, p, rho, a = ISA1976(h)
+    T, p, rho, a = atmosphere(h)
 
     # Reads: "Assert if T equals expected_T"
     assert_equal(T, expected_T)
     assert_equal(p, expected_p)
     assert_almost_equal(rho, expected_rho, decimal=4)
-    assert_almost_equal(a, expected_a, decimal=2)
+    assert_almost_equal(a, expected_a, decimal=4)
 
 
 def test_altitude_is_out_of_range():
@@ -41,7 +42,7 @@ def test_altitude_is_out_of_range():
 
     for h in wrong_h:
         with pytest.raises(ValueError):
-            ISA1976(h)
+            atmosphere(h)
 
 
 def test_results_under_11km():
@@ -68,16 +69,16 @@ def test_results_under_11km():
                              0.36392
                              ])  # kg / m3
 
-    expected_a = np.array([340.4155,
-                           340.2235,
-                           338.2972,
-                           314.4700,
-                           299.5701,
-                           295.1749
+    expected_a = np.array([340.29,
+                           340.10,
+                           338.18,
+                           314.36,
+                           299.46,
+                           295.07
                            ])  # m / s
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = ISA1976(h_)
+        T, p, rho, a = atmosphere(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
         assert_almost_equal(rho, expected_rho[ii], decimal=4)
         assert_almost_equal(a, expected_a[ii], decimal=2)
@@ -101,16 +102,16 @@ def test_results_under_20km():
                              0.088035
                              ])  # kg / m3
 
-    expected_a = np.array([295.1749,
-                           295.1749,
-                           295.1749,
-                           295.1749,
+    expected_a = np.array([295.07,
+                           295.07,
+                           295.07,
+                           295.07,
                            ])
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = ISA1976(h_)
+        T, p, rho, a = atmosphere(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
-        assert_almost_equal(rho, expected_rho[ii], decimal=4)
+        assert_almost_equal(rho, expected_rho[ii], decimal=5)
         assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
@@ -132,16 +133,16 @@ def test_results_under_32km():
                              0.013225
                              ])  # kg / m3
 
-    expected_a = np.array([296.6020,
-                           297.8873,
-                           301.1100,
-                           303.2394
+    expected_a = np.array([296.50,
+                           297.78,
+                           301.00,
+                           303.13
                            ])  # m/s
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = ISA1976(h_)
+        T, p, rho, a = atmosphere(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
-        assert_almost_equal(rho, expected_rho[ii], decimal=4)
+        assert_almost_equal(rho, expected_rho[ii], decimal=6)
         assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
@@ -163,16 +164,16 @@ def test_results_under_47km():
                              0.0014275
                              ])  # kg / m3
 
-    expected_a = np.array([303.6105,
-                           310.5774,
-                           321.2704,
-                           329.9165
+    expected_a = np.array([303.50,
+                           310.47,
+                           321.16,
+                           329.80
                            ])  # m / s
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = ISA1976(h_)
+        T, p, rho, a = atmosphere(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
-        assert_almost_equal(rho, expected_rho[ii], decimal=4)
+        assert_almost_equal(rho, expected_rho[ii], decimal=6)
         assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
@@ -191,15 +192,15 @@ def test_results_under_51km():
                              0.00086160
                              ])  # kg / m3
 
-    expected_a = np.array([329.9165,
-                           329.9165,
-                           329.9165
+    expected_a = np.array([329.80,
+                           329.80,
+                           329.80
                            ])  # m / s
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = ISA1976(h_)
+        T, p, rho, a = atmosphere(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
-        assert_almost_equal(rho, expected_rho[ii], decimal=4)
+        assert_almost_equal(rho, expected_rho[ii], decimal=7)
         assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
@@ -218,15 +219,15 @@ def test_results_under_71km():
                              6.4211e-5
                              ])  # kg / m3
 
-    expected_a = np.array([329.0621,
-                           314.1823,
-                           293.8092
+    expected_a = np.array([328.94,
+                           314.07,
+                           293.70
                            ])  # m / s
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = ISA1976(h_)
+        T, p, rho, a = atmosphere(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
-        assert_almost_equal(rho, expected_rho[ii], decimal=4)
+        assert_almost_equal(rho, expected_rho[ii], decimal=8)
         assert_almost_equal(a, expected_a[ii], decimal=2)
 
 
@@ -245,13 +246,13 @@ def test_results_under_84km():
                              7.3914e-6
                              ])  # kg / m3
 
-    expected_a = np.array([328.2055,
-                           314.1822,
-                           274.7099,
+    expected_a = np.array([328.09,
+                           314.07,
+                           274.61,
                            ])  # m/s
 
     for ii, h_ in enumerate(h):
-        T, p, rho, a = ISA1976(h_)
+        T, p, rho, a = atmosphere(h_)
         assert_almost_equal(T, expected_T[ii], decimal=3)
-        assert_almost_equal(rho, expected_rho[ii], decimal=4)
+        assert_almost_equal(rho, expected_rho[ii], decimal=8)
         assert_almost_equal(a, expected_a[ii], decimal=2)
