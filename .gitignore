@@ -8,3 +8,7 @@ build
 *.egg-info
 
 .spyder*
+
+examples/.ipynb_checkpoints
+examples/examples-notebook/.ipynb_checkpoints/
+
