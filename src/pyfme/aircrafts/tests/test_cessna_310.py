@@ -38,18 +38,3 @@ def test_calculate_aero_forces_moments_alpha_beta_zero():
                               decimal=4)
 
 
-def test_get_engine_force():
-    delta_t = 0.5
-
-    trust_expected = 1100.399064
-
-    trust = get_engine_force(delta_t)
-
-    assert_almost_equal(trust, trust_expected, decimal=4)
-
-    wrong_value_0 = -0.5
-    wrong_value_1 = 2
-
-    with pytest.raises(ValueError):
-        get_engine_force(wrong_value_0)
-        get_engine_force(wrong_value_1)

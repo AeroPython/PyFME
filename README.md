@@ -1,7 +1,7 @@
 # PyFME
 Python Flight Mechanics Engine
 
-[![Build Status](https://img.shields.io/travis/AeroPython/PyFME/master.svg?style=flat-square)](https://travis-ci.org/AeroPython/PyFME)
+[![Build Status](https://img.shields.io/travis/AeroPython/PyFME/master.svg?style=flat-square)](https://travis-ci.org/AeroPython/PyFME) [![Coverage](https://img.shields.io/codecov/c/github/AeroPython/PyFME.svg?style=flat-square)](https://codecov.io/github/AeroPython/PyFME?branch=master)
 
 License: MIT (see `COPYING`).
 
