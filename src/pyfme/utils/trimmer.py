@@ -7,18 +7,21 @@ Distributed under the terms of the MIT License.
 Trimmer
 -------
 This module solves the problem of calculating the values of the state and
-control vectors that satisfy the state equations of the aircraft at the initial
-condition (or any other given condition. This cannot be done analytically
-because of the very complex functional dependence of the erodynamic data.
-Instead, it must be done with a numerical algorithm which iteratively adjusts
-the independent variables until some solution criterion is met.
+control vectors that satisfy the state equations of the aircraft at the
+given condition. This cannot be done analytically because of the very complex
+functional dependence on the aerodynamic data. Instead, it must be done with
+a numerical algorithm which iteratively adjusts the independent variables
+until some solution criterion is met.
 """
+
 from copy import deepcopy
 from warnings import warn
+from math import sqrt, sin, cos, tan, atan
 
 import numpy as np
 from scipy.optimize import least_squares
 
+from pyfme.utils.coordinates import wind2body
 from pyfme.models.constants import GRAVITY
 
 
@@ -27,42 +30,52 @@ def steady_state_flight_trimmer(aircraft, system, env,
                                 controls_0, controls2trim=None,
                                 gamma=0.0, turn_rate=0.0,
                                 verbose=0):
-    # TODO: write docstring again
     """Finds a combination of values of the state and control variables that
     correspond to a steady-state flight condition. Steady-state aircraft flight
     can be defined as a condition in which all of the motion variables are
     constant or zero. That is, the linear and angular velocity components are
-    constant (or zero), and all acceleration components are zero.
+    constant (or zero), thus all acceleration components are zero.
 
     Parameters
     ----------
-    aircraft : aircraft class
-        Aircraft class with methods get_forces, get_moments
-    h : float
-        Geopotential altitude for ISA (m).
+    aircraft : Aircraft
+        Plane to be trimmed.
+    system : System
+        System for aircraft trimming.
+    env : Environment
+        Environment with the models for wind, atmosphere and gravity.
     TAS : float
         True Air Speed (m/s).
+    controls_0 : dict
+        Initial value guess for each control. If the control is not in
+        `controls2trim` or `controls2trim` is `None` the control is
+        considered fixed to that value during the trimming process.
+    controls2trim : list, optional
+        List with controls to be trimmed. If not given, no control is
+        considered fixed.
     gamma : float, optional
         Flight path angle (rad).
     turn_rate : float, optional
         Turn rate, d(psi)/dt (rad/s).
+    verbose : {0, 1, 2}, optional
+        Level of algorithm's verbosity:
+
+            * 0 (default) : work silently.
+            * 1 : display a termination report.
+            * 2 : display progress during iterations (not supported by 'lm'
+              method).
 
     Returns
     -------
-    lin_vel : float array
-        [u, v, w] air linear velocity body-axes (m/s).
-    ang_vel : float array
-        [p, q, r] air angular velocity body-axes (m/s).
-    theta : float
-        Pitch angle (rad).
-    phi : float
-        Bank angle (rad).
-    alpha : float
-        Angle of attack (rad).
-    beta : float
-        Sideslip angle (rad).
-    control_vector : array_like
-        [delta_e, delta_ail, delta_r, delta_t].
+    aircraft : Aircraft
+        Trimmed plane.
+    system : System
+        Trimmed system.
+    env : Environment
+        Trimmed environment (gravity in body axis).
+    results : dict
+        Relevant parameters calculated during the aircraft trimming,
+        including least square results.
 
     Notes
     -----
@@ -98,7 +111,7 @@ def steady_state_flight_trimmer(aircraft, system, env,
     if controls2trim is None:
         controls2trim = list(controls_0.keys())
 
-    # TODO: try to look for a good inizialization method for alpha & beta
+    # TODO: try to look for a good initialization method for alpha & beta
     initial_guess = [0.05 * np.sign(turn_rate),  # alpha
                      0.001 * np.sign(turn_rate)]  # beta
 
@@ -118,7 +131,6 @@ def steady_state_flight_trimmer(aircraft, system, env,
     results = least_squares(trimming_cost_func, x0=initial_guess, args=args,
                             verbose=verbose, bounds=bounds)
 
-    trimmed_params = results['x']
     fun = results['fun']
     cost = results['cost']
 
@@ -137,11 +149,6 @@ def steady_state_flight_trimmer(aircraft, system, env,
         results[control] = trimmed_ac.controls[control]
 
     return trimmed_ac, trimmed_sys, trimmed_env, results
-
-
-from math import sqrt, sin, cos, tan, atan
-
-from pyfme.utils.coordinates import wind2body
 
 
 def turn_coord_cons(turn_rate, alpha, beta, TAS, gamma=0):
@@ -169,7 +176,7 @@ def turn_coord_cons(turn_rate, alpha, beta, TAS, gamma=0):
 
 
 def turn_coord_cons_horizontal_and_small_beta(turn_rate, alpha, TAS):
-    """Calculates phi for coordinated turn given that gamma is equal to cero
+    """Calculates phi for coordinated turn given that gamma is equal to zero
     and beta is small (beta << 1).
     """
 
