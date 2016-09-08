@@ -12,8 +12,25 @@ import numpy as np
 
 
 class Simulation(object):
+    """
+    Simulation class stores the simulation configuration, aircraft, system and
+    environment. It provides methods for simulation running and results
+    storing.
+    """
 
     def __init__(self, aircraft, system, environment):
+        """
+        Simulation objects.
+
+        Parameters
+        ----------
+        aircraft : Aircraft
+            Aircraft.
+        system : System
+            System.
+        environment : Environment
+            Environment.
+        """
         self.aircraft = aircraft
         self.system = system
         self.environment = environment
@@ -53,6 +70,14 @@ class Simulation(object):
         self.par_dict = {}
 
     def time_step(self, dt):
+        """
+        Performs a simulation time step.
+
+        Parameters
+        ----------
+        dt : float
+            Time step (s).
+        """
 
         self.save_current_par_dict()
         self._time_step += 1
@@ -78,6 +103,18 @@ class Simulation(object):
 class BatchSimulation(Simulation):
 
     def __init__(self, aircraft, system, environment):
+        """
+        Simulation objects.
+
+        Parameters
+        ----------
+        aircraft : Aircraft
+            Aircraft.
+        system : System
+            System.
+        environment : Environment
+            Environment.
+        """
         super().__init__(aircraft, system, environment)
         self.time = None
         self.aircraft_controls = {}
@@ -87,12 +124,10 @@ class BatchSimulation(Simulation):
 
         Parameters
         ----------
-        time
-        controls
-
-        Returns
-        -------
-
+        time : array_like
+            Time history for the simulation.
+        controls : array_like
+            Controls for the given time array.
         """
 
         # check time dimensions
@@ -123,6 +158,12 @@ class BatchSimulation(Simulation):
                 self.aircraft_controls.keys()}
 
     def run_simulation(self):
+        """
+        Run simulation for the times in self.time.
+        """
+        if self.time is None:
+            raise ValueError("Time and controls for the simulation must be "
+                             "set with `set_controls()`")
 
         for ii, t in enumerate(self.time[1:]):
             dt = t - self.time[ii]
@@ -131,7 +172,14 @@ class BatchSimulation(Simulation):
         self.save_current_par_dict()
 
     def set_par_dict(self, par_list):
+        """
+        Set parameters to be saved
 
+        Parameters
+        ----------
+        par_list : list
+            List with parameter names.
+        """
         if self.time is None:
             msg = "Set controls with BatchSimulation.set_controls before " \
                   "setting the par_dict"
@@ -181,10 +229,10 @@ class BatchSimulation(Simulation):
             par_values[self._time_step] = self.PAR_KEYS[par_name]
 
 
-
 class RealTimeSimulation(Simulation):
 
     def __init__(self, aircraft, system, environment):
+        raise NotImplementedError()
         super(RealTimeSimulation, self).__init__(aircraft, system, environment)
         # TODO:...
 
