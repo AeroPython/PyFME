@@ -52,10 +52,10 @@ class Aircraft(object):
         self.Mach = 0  # Mach number
         self.q_inf = 0  # Dynamic pressure at infty (Pa)
 
-		# Angular velocities
-		self.p = 0 # rad/s
-		self.q = 0 # rad/s
-		self.r = 0 # rad/s
+        # Angular velocities
+        self.p = 0 # rad/s
+        self.q = 0 # rad/s
+        self.r = 0 # rad/s
 
         # Angles
         self.alpha = 0  # Angle of attack (AOA).
