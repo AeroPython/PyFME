@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Python Flight Mechanics Engine (PyFME).
 Copyright (c) AeroPython Development Team.
@@ -8,7 +9,7 @@ Constant variables
 
 """
 # AIR
-GAMMA_AIR = 1.401  # Adiabatic index or ratio of specific heats (dry air at
+GAMMA_AIR = 1.4    # Adiabatic index or ratio of specific heats (dry air at
                    # 20º C)
 R_AIR = 287.05287  # J/(Kg·K)
 # Sea level conditions
