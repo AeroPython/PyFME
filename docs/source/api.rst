@@ -6,8 +6,21 @@ API Reference
 
 .. automodule:: pyfme.environment
 
-.. automodule:: pyfme.environment.isa
+.. autoclass:: pyfme.environment.environment.Environment
    :members:
+
+.. autoclass:: pyfme.environment.atmosphere.Atmosphere
+   :members:
+
+.. autoclass:: pyfme.environment.atmosphere.ISA1976
+   :members:
+
+.. automodule:: pyfme.environment.gravity
+   :members:
+
+.. automodule:: pyfme.environment.wind
+   :members:
+
 
 `pyfme.models` package
 ----------------------
@@ -17,7 +30,10 @@ API Reference
 .. automodule:: pyfme.models.euler_flat_earth
    :members:
 
-.. automodule:: pyfme.models.system
+.. automodule:: pyfme.models.systems
+   :members:
+
+.. automodule:: pyfme.constants
    :members:
 
 `pyfme.utils` package
@@ -26,4 +42,13 @@ API Reference
 .. automodule:: pyfme.utils
 
 .. automodule:: pyfme.utils.coordinates
+   :members:
+
+.. automodule:: pyfme.utils.anemometry
+   :members:
+
+.. automodule:: pyfme.utils.input_generator
+   :members:
+
+.. automodule:: pyfme.utils.trimmer
    :members:
