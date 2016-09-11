@@ -7,7 +7,7 @@ Distributed under the terms of the MIT License.
 Cessna 172
 ----------
 
-    CD - drag coefficient as function of the angle of attack via [2]
+    CD - drag coefficient as fhunction of the angle of attack via [2]
     CD_delta_elev - incremental induced-drag coefficient as function of
                     the angle of attack and deflection angle via [2]
 
