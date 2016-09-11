@@ -36,9 +36,6 @@ API Reference
 .. automodule:: pyfme.models.systems
    :members:
 
-.. automodule:: pyfme.models.constants
-   :members:
-
 `pyfme.utils` package
 ---------------------
 
