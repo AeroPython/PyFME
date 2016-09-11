@@ -50,15 +50,18 @@ class Aircraft(object):
         self.CAS = 0  # Calibrated Air Speed.
         self.EAS = 0  # Equivalent Air Speed.
         self.Mach = 0  # Mach number
-
         self.q_inf = 0  # Dynamic pressure at infty (Pa)
+
+        # Angular velocities
+        self.p = 0 # rad/s
+        self.q = 0 # rad/s
+        self.r = 0 # rad/s
 
         # Angles
         self.alpha = 0  # Angle of attack (AOA).
         self.beta = 0  # Angle of sideslip (AOS).
-        # Not present in this model:
-        self.Dalpha_Dt = 0  # Rate of change of AOA.
-        self.Dbeta_Dt = 0  # Rate of change of AOS.
+        self.alpha_dot = 0  # Rate of change of AOA.
+        #NOT PRESENT self.Dbeta_Dt = 0  # Rate of change of AOS.
 
     @property
     def Ixx(self):
