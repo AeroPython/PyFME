@@ -1,6 +1,9 @@
 API Reference
 =============
 
+.. automodule:: pyfme.simulator
+   :members:
+
 `pyfme.environment` package
 ---------------------------
 
