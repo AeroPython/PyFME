@@ -151,7 +151,8 @@ class Cessna172(Aircraft):
         # FIXME: these limits are not real
         self.control_limits = {'delta_elevator': (np.deg2rad(-26), np.deg2rad(28)),  # rad
                                'delta_aileron': (np.deg2rad(-15), np.deg2rad(20)),  # rad
-                               'delta_rudder': (np.deg2rad(-16), np.deg2rad(16))}  # rad
+                               'delta_rudder': (np.deg2rad(-16), np.deg2rad(16)),
+                               'delta_t': (0, 1)}  # rad
 
         # Coefficients
         # Aero

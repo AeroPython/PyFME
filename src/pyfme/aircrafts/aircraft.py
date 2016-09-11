@@ -53,9 +53,9 @@ class Aircraft(object):
         self.q_inf = 0  # Dynamic pressure at infty (Pa)
 
         # Angular velocities
-        self.p = 0 # rad/s
-        self.q = 0 # rad/s
-        self.r = 0 # rad/s
+        self.p = 0  # rad/s
+        self.q = 0  # rad/s
+        self.r = 0  # rad/s
 
         # Angles
         self.alpha = 0  # Angle of attack (AOA).
@@ -93,6 +93,8 @@ class Aircraft(object):
 
         self.alpha, self.beta, self.TAS = calculate_alpha_beta_TAS(
             u=aero_vel[0], v=aero_vel[1], w=aero_vel[2])
+
+        self.p, self.q, self.r = system.vel_ang
 
         # Setting velocities & dynamic pressure
         self.CAS = tas2cas(self.TAS, environment.p, environment.rho)
