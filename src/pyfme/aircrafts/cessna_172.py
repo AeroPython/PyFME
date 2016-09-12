@@ -190,93 +190,93 @@ class Cessna172(Aircraft):
         self.beta = 0  # rad
         self.alpha_dot = 0  # rad/s
 
-        def _calculate_aero_lon_forces_moments_coeffs(self):
-            delta_elev = np.rad2deg(self.controls['delta_elevator'])  # deg
-            alpha_DEG = np.rad2deg(self.alpha)  # deg
-            c = self.chord  # m
-            V = self.TAS  # m/s
-            p, q, r = self.p, self.q, self.r  # rad/s
+    def _calculate_aero_lon_forces_moments_coeffs(self):
+        delta_elev = np.rad2deg(self.controls['delta_elevator'])  # deg
+        alpha_DEG = np.rad2deg(self.alpha)  # deg
+        c = self.chord  # m
+        V = self.TAS  # m/s
+        p, q, r = self.p, self.q, self.r  # rad/s
 
-            CD_interp = np.interp(alpha_DEG, self.alpha_data, self.CD_data)
-            CD_delta_elev_interp = interpolate.RectBivariateSpline(self.delta_elev_data, self.alpha_data, self.CD_delta_elev_data)
+        CD_interp = np.interp(alpha_DEG, self.alpha_data, self.CD_data)
+        CD_delta_elev_interp = interpolate.RectBivariateSpline(self.delta_elev_data, self.alpha_data, self.CD_delta_elev_data)
 
-            CL_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_data)
-            CL_alphadot_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_alphadot_data)
-            CL_q_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_q_data)
-            CL_delta_elev_interp = np.interp(delta_elev, self.delta_elev_data, self.CL_delta_elev_data)
+        CL_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_data)
+        CL_alphadot_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_alphadot_data)
+        CL_q_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_q_data)
+        CL_delta_elev_interp = np.interp(delta_elev, self.delta_elev_data, self.CL_delta_elev_data)
 
-            CM_interp = np.interp(alpha_DEG, self.alpha_data, self.CM_data)
-            CM_q_interp = np.interp(alpha_DEG, self.alpha_data, self.CM_q_data)
-            CM_alphadot_interp = np.interp(alpha_DEG, self.alpha_data, self.CM_alphadot_data)
-            CM_delta_elev_interp = np.interp(delta_elev, self.delta_elev_data, self.CM_delta_elev_data)
+        CM_interp = np.interp(alpha_DEG, self.alpha_data, self.CM_data)
+        CM_q_interp = np.interp(alpha_DEG, self.alpha_data, self.CM_q_data)
+        CM_alphadot_interp = np.interp(alpha_DEG, self.alpha_data, self.CM_alphadot_data)
+        CM_delta_elev_interp = np.interp(delta_elev, self.delta_elev_data, self.CM_delta_elev_data)
 
-            self.CL = CL_interp + CL_delta_elev_interp + (c/(2 * V)) * (CL_alphadot_interp * self.alpha_dot + CL_q_interp * q)
-            self.CD = CD_interp + CD_delta_elev_interp(delta_elev, alpha_DEG)[0, 0]
-            self.CM = CM_interp + CM_delta_elev_interp + (c/(2 * V)) * (CM_q_interp * q + CM_alphadot_interp * self.alpha_dot)
+        self.CL = CL_interp + CL_delta_elev_interp + (c/(2 * V)) * (CL_alphadot_interp * self.alpha_dot + CL_q_interp * q)
+        self.CD = CD_interp + CD_delta_elev_interp(delta_elev, alpha_DEG)[0, 0]
+        self.CM = CM_interp + CM_delta_elev_interp + (c/(2 * V)) * (CM_q_interp * q + CM_alphadot_interp * self.alpha_dot)
 
-        def _calculate_aero_lat_forces_moments_coeffs(self):
-            delta_aile = np.rad2deg(self.controls['delta_aileron'])  # deg
-            delta_rud = np.rad2deg(self.controls['delta_rudder'])  # deg
-            delta_rud_RAD = self.controls['delta_rudder']  # rad
-            alpha_DEG = np.rad2deg(self.alpha)  # deg
-            b = self.span
-            V = self.TAS
-            p, q, r = self.p, self.q, self.r
+    def _calculate_aero_lat_forces_moments_coeffs(self):
+        delta_aile = np.rad2deg(self.controls['delta_aileron'])  # deg
+        delta_rud = np.rad2deg(self.controls['delta_rudder'])  # deg
+        delta_rud_RAD = self.controls['delta_rudder']  # rad
+        alpha_DEG = np.rad2deg(self.alpha)  # deg
+        b = self.span
+        V = self.TAS
+        p, q, r = self.p, self.q, self.r
 
-            CY_beta_interp = np.interp(alpha_DEG, self.alpha_data, self.CY_beta_data)
-            CY_p_interp = np.interp(alpha_DEG, self.alpha_data, self.CY_p_data)
-            CY_r_interp = np.interp(alpha_DEG, self.alpha_data, self.CY_r_data)
-            CY_delta_rud_interp = np.interp(alpha_DEG, self.alpha_data, self.CY_delta_rud_data)
+        CY_beta_interp = np.interp(alpha_DEG, self.alpha_data, self.CY_beta_data)
+        CY_p_interp = np.interp(alpha_DEG, self.alpha_data, self.CY_p_data)
+        CY_r_interp = np.interp(alpha_DEG, self.alpha_data, self.CY_r_data)
+        CY_delta_rud_interp = np.interp(alpha_DEG, self.alpha_data, self.CY_delta_rud_data)
 
-            Cl_beta_interp = np.interp(alpha_DEG, self.alpha_data, self.Cl_beta_data)
-            Cl_p_interp = np.interp(alpha_DEG, self.alpha_data, self.Cl_p_data)
-            Cl_r_interp = np.interp(alpha_DEG, self.alpha_data, self.Cl_r_data)
-            Cl_delta_rud_interp = np.interp(alpha_DEG, self.alpha_data, self.Cl_delta_rud_data)
-            Cl_delta_aile_interp = np.interp(delta_aile, self.delta_aile_data, self.Cl_delta_aile_data)
+        Cl_beta_interp = np.interp(alpha_DEG, self.alpha_data, self.Cl_beta_data)
+        Cl_p_interp = np.interp(alpha_DEG, self.alpha_data, self.Cl_p_data)
+        Cl_r_interp = np.interp(alpha_DEG, self.alpha_data, self.Cl_r_data)
+        Cl_delta_rud_interp = np.interp(alpha_DEG, self.alpha_data, self.Cl_delta_rud_data)
+        Cl_delta_aile_interp = np.interp(delta_aile, self.delta_aile_data, self.Cl_delta_aile_data)
 
-            CN_beta_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_beta_data)
-            CN_p_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_p_data)
-            CN_r_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_r_data)
-            CN_delta_rud_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_delta_rud_data)
-            CN_delta_aile_interp = interpolate.RectBivariateSpline(self.delta_aile_data, self.alpha_data, self.CN_delta_aile_data)
+        CN_beta_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_beta_data)
+        CN_p_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_p_data)
+        CN_r_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_r_data)
+        CN_delta_rud_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_delta_rud_data)
+        CN_delta_aile_interp = interpolate.RectBivariateSpline(self.delta_aile_data, self.alpha_data, self.CN_delta_aile_data)
 
-            self.CY = CY_beta_interp * self.beta + CY_delta_rud_interp * delta_rud_RAD + (b/(2 * V)) * (CY_p_interp * p + CY_r_interp * r)
-            self.Cl = Cl_beta_interp * self.beta + Cl_delta_aile_interp + Cl_delta_rud_interp * delta_rud_RAD + (b/(2 * V)) * (Cl_p_interp * p + Cl_r_interp * r)
-            self.CN = CN_beta_interp * self.beta + CN_delta_aile_interp(delta_aile, alpha_DEG)[0, 0] + CN_delta_rud_interp * delta_rud_RAD + (b/(2 * V)) * (CN_p_interp * p + CN_r_interp * r)
+        self.CY = CY_beta_interp * self.beta + CY_delta_rud_interp * delta_rud_RAD + (b/(2 * V)) * (CY_p_interp * p + CY_r_interp * r)
+        self.Cl = Cl_beta_interp * self.beta + Cl_delta_aile_interp + Cl_delta_rud_interp * delta_rud_RAD + (b/(2 * V)) * (Cl_p_interp * p + Cl_r_interp * r)
+        self.CN = CN_beta_interp * self.beta + CN_delta_aile_interp(delta_aile, alpha_DEG)[0, 0] + CN_delta_rud_interp * delta_rud_RAD + (b/(2 * V)) * (CN_p_interp * p + CN_r_interp * r)
 
-        def _calculate_aero_forces_moments(self):
-            q = self.q_inf
-            Sw = self.Sw
-            c = self.chord
-            b = self.span
-            self._calculate_aero_lon_forces_moments_coeffs()
-            self._calculate_aero_lat_forces_moments_coeffs()
-            L = q * Sw * self.CL
-            D = q * Sw * self.CD
-            Y = q * Sw * self.CY
-            l = q * Sw * b * self.Cl
-            m = q * Sw * c * self.CM
-            n = q * Sw * b * self.CN
-            return L, D, Y, l, m, n
+    def _calculate_aero_forces_moments(self):
+        q = self.q_inf
+        Sw = self.Sw
+        c = self.chord
+        b = self.span
+        self._calculate_aero_lon_forces_moments_coeffs()
+        self._calculate_aero_lat_forces_moments_coeffs()
+        L = q * Sw * self.CL
+        D = q * Sw * self.CD
+        Y = q * Sw * self.CY
+        l = q * Sw * b * self.Cl
+        m = q * Sw * c * self.CM
+        n = q * Sw * b * self.CN
+        return L, D, Y, l, m, n
 
-        def _calculate_thrust_forces_moments(self):
-            q = self.q_inf
-            Sw = self.Sw
-            self.Ct = 0.031 * self.controls['delta_t']
-            Ft = np.array([q * Sw * self.Ct, 0, 0])
-            return Ft
+    def _calculate_thrust_forces_moments(self):
+        q = self.q_inf
+        Sw = self.Sw
+        self.Ct = 0.031 * self.controls['delta_t']
+        Ft = np.array([q * Sw * self.Ct, 0, 0])
+        return Ft
 
-        def calculate_forces_and_moments(self):
-            Ft = self._calculate_thrust_forces_moments()
-            L, D, Y, l, m, n = self._calculate_aero_forces_moments()
-            Fg = self.gravity_force
+    def calculate_forces_and_moments(self):
+        Ft = self._calculate_thrust_forces_moments()
+        L, D, Y, l, m, n = self._calculate_aero_forces_moments()
+        Fg = self.gravity_force
 
-            Fax = -D*np.cos(self.alpha)*np.cos(self.beta) + Y*np.cos(self.alpha)*np.sin(self.beta) + L*np.sin(self.alpha)
-            Fay =  D*np.sin(self.beta)                    + Y*np.cos(self.beta)
-            Faz = -D*np.sin(self.alpha)*np.cos(self.beta) + Y*np.sin(self.alpha)*np.sin(self.beta) - L*np.cos(self.alpha)
+        Fax = -D*np.cos(self.alpha)*np.cos(self.beta) + Y*np.cos(self.alpha)*np.sin(self.beta) + L*np.sin(self.alpha)
+        Fay =  D*np.sin(self.beta)                    + Y*np.cos(self.beta)
+        Faz = -D*np.sin(self.alpha)*np.cos(self.beta) + Y*np.sin(self.alpha)*np.sin(self.beta) - L*np.cos(self.alpha)
 
-            Fa = np.array([Fax, Fay, Faz])
+        Fa = np.array([Fax, Fay, Faz])
 
-            self.total_forces = 10 * Ft + Fg + Fa
-            self.total_moments = np.array([l, m, n])
-            return self.total_forces, self.total_moments
+        self.total_forces = 10 * Ft + Fg + Fa
+        self.total_moments = np.array([l, m, n])
+        return self.total_forces, self.total_moments
