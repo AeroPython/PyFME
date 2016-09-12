@@ -87,7 +87,7 @@ class Cessna172(Aircraft):
     """
 
 
-def __init__(self):
+    def __init__(self):
 
     # Mass & Inertia
     self.mass = 2300 * lbs2kg   # kg
