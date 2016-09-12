@@ -152,7 +152,8 @@ def __init__(self):
     # CONTROLS
     self.controls = {'delta_elevator': 0,
                      'delta_aileron': 0,
-                     'delta_rudder': 0}
+                     'delta_rudder': 0,
+                     'delta_t':0}
 
     self.control_limits = {'delta_elevator': (np.deg2rad(-26), np.deg2rad(28)),  # rad
                            'delta_aileron': (np.deg2rad(-15), np.deg2rad(20)),  # rad
