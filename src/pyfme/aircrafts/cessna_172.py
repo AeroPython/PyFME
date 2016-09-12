@@ -154,11 +154,10 @@ def __init__(self):
                      'delta_aileron': 0,
                      'delta_rudder': 0}
 
-    # FIXME: these limits are not real
     self.control_limits = {'delta_elevator': (np.deg2rad(-26), np.deg2rad(28)),  # rad
                            'delta_aileron': (np.deg2rad(-15), np.deg2rad(20)),  # rad
-                           'delta_rudder': (np.deg2rad(-16), np.deg2rad(16)),
-                           'delta_t': (0, 1)}  # rad
+                           'delta_rudder': (np.deg2rad(-16), np.deg2rad(16)),  #rad
+                           'delta_t': (0, 1)}  # non-dimensional
 
     # Coefficients
     # Aero
@@ -270,8 +269,12 @@ def __init__(self):
         Ft = self._calculate_thrust_forces_moments()
         L, D, Y, l, m, n = self._calculate_aero_forces_moments()
         Fg = self.gravity_force
-        # FIXME: is it necessary to use wind2body conversion?
-        Fa = np.array([-D, Y, -L])
+
+        Fax = -D*np.cos(self.alpha)*np.cos(self.beta) + Y*np.cos(self.alpha)*np.sin(self.beta) + L*np.sin(self.alpha)
+        Fay =  D*np.sin(self.beta)                    + Y*np.cos(self.beta)
+        Faz = -D*np.sin(self.alpha)*np.cos(self.beta) + Y*np.sin(self.alpha)*np.sin(self.beta) - L*np.cos(self.alpha)
+
+        Fa = np.array([Fax, Fay, Faz])
 
         self.total_forces = 10 * Ft + Fg + Fa
         self.total_moments = np.array([l, m, n])
