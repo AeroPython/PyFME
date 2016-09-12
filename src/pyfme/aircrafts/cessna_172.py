@@ -97,6 +97,7 @@ class Cessna172(Aircraft):
         self.Sw = 174 * ft2m**2  # m2
         self.chord = 4.9 * ft2m  # m
         self.span = 35.8 * ft2m  # m
+        self.propeller_radius = 1.88  # m
 
         # Aerodynamic Data
         self.alpha_data = np.array([-7.5, -5, -2.5, 0, 2.5, 5, 7.5, 10, 15, 17, 18, 19.5])  # degree
@@ -148,6 +149,11 @@ class Cessna172(Aircraft):
                                             [0.00202, 0.001044, 0.00013, -0.0008, -0.00173, -0.002735, -0.0038, -0.004844, -0.00652, -0.00692, -0.00706, -0.0072],
                                             [0.00332, 0.00172, 0.000214, -0.001263, -0.00284, -0.0045, -0.00622, -0.008, -0.01072, -0.01138, -0.01161, -0.01181],
                                             [0.004321, 0.00224, 0.00028, -0.001645, -0.0037, -0.00586, -0.0081, -0.0104, -0.014, -0.01483, -0.01512, -0.0154]])
+        # Propeller Data
+        self.J_data = np.array([0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94])
+        self.Ct_data = np.array([0.102122, 0.11097, 0.107621, 0.105191, 0.102446, 0.09947, 0.096775, 0.094706, 0.092341, 0.088912, 0.083878, 0.076336, 0.066669, 0.056342, 0.045688, 0.034716, 0.032492, 0.030253, 0.028001, 0.025735, 0.023453, 0.021159, 0.018852, 0.016529, 0.014194, 0.011843, 0.009479, 0.0071, 0.004686, 0.002278, -0.0002, -0.002638, -0.005145, -0.007641, -0.010188])
+        self.delta_t_data = np.array([0.0, 1.0])
+        self.omega_data = np.array([1000.0, 2800.0])  # min RPM & max RPM
 
         # CONTROLS
         self.controls = {'delta_elevator': 0,
@@ -160,11 +166,11 @@ class Cessna172(Aircraft):
                                'delta_rudder': (np.deg2rad(-16), np.deg2rad(16)),  # rad
                                'delta_t': (0, 1)}  # non-dimensional
 
-        # Coefficients
-        # Aero
+        # Aerodynamic Coefficients
         self.CL, self.CD, self.Cm = 0, 0, 0
         self.CY, self.Cl, self.Cn = 0, 0, 0
-        # Thrust
+
+        # Thrust Coefficient
         self.Ct = 0
 
         self.gravity_force = np.zeros(3)
@@ -177,7 +183,6 @@ class Cessna172(Aircraft):
         self.CAS = 0  # Calibrated Air Speed.
         self.EAS = 0  # Equivalent Air Speed.
         self.Mach = 0  # Mach number
-
         self.q_inf = 0  # Dynamic pressure at infty (Pa)
 
         # Angular velocities
@@ -189,6 +194,9 @@ class Cessna172(Aircraft):
         self.alpha = 0  # rad
         self.beta = 0  # rad
         self.alpha_dot = 0  # rad/s
+
+        # Environment
+        self.rho = 0  # kg/m3
 
     def _calculate_aero_lon_forces_moments_coeffs(self):
         delta_elev = np.rad2deg(self.controls['delta_elevator'])  # deg
@@ -260,10 +268,20 @@ class Cessna172(Aircraft):
         return L, D, Y, l, m, n
 
     def _calculate_thrust_forces_moments(self):
-        q = self.q_inf
-        Sw = self.Sw
-        self.Ct = 0.031 * self.controls['delta_t']
-        Ft = np.array([q * Sw * self.Ct, 0, 0])
+        delta_t = self.controls['delta_aileron']
+        rho = self.rho
+        V = self.TAS
+        propeller_radius = self.propeller_radius
+
+        omega = np.interp(delta_t, delta_t_data, omega_data)  # rpm
+        omega_RAD = (omega * 2 * np.pi) / 60.0  # rad/s
+
+        J = (np.pi * V) / (omega_RAD * propeller_radius)  # non-dimensional
+        Ct_interp = np.interp(J, J_data, Ct_data)  # non-dimensional
+
+        T = ((2/np.pi)**2) * rho * (omega * propeller_radius)**2 * Ct_interp  # N
+
+        Ft = np.array([T, 0, 0])
         return Ft
 
     def calculate_forces_and_moments(self):
