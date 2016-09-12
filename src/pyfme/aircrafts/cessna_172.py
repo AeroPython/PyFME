@@ -97,9 +97,10 @@ class Cessna172(Aircraft):
         self.Sw = 174 * ft2m**2  # m2
         self.chord = 4.9 * ft2m  # m
         self.span = 35.8 * ft2m  # m
-        self.propeller_radius = 1.88  # m
+        self.propeller_radius = 0.94  # m
 
         # Aerodynamic Data
+        # Obtained with the referred methods
         self.alpha_data = np.array([-7.5, -5, -2.5, 0, 2.5, 5, 7.5, 10, 15, 17, 18, 19.5])  # degree
         self.delta_elev_data = np.array([-26, -20, -10, -5, 0, 7.5, 15, 22.5, 28])  # degree
         self.delta_aile_data = np.array([-15, -10, -5, -2.5, 0, 5, 10, 15, 20])  # degree
@@ -150,6 +151,7 @@ class Cessna172(Aircraft):
                                             [0.00332, 0.00172, 0.000214, -0.001263, -0.00284, -0.0045, -0.00622, -0.008, -0.01072, -0.01138, -0.01161, -0.01181],
                                             [0.004321, 0.00224, 0.00028, -0.001645, -0.0037, -0.00586, -0.0081, -0.0104, -0.014, -0.01483, -0.01512, -0.0154]])
         # Propeller Data
+        # Obtained with JavaProp
         self.J_data = np.array([0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94])
         self.Ct_data = np.array([0.102122, 0.11097, 0.107621, 0.105191, 0.102446, 0.09947, 0.096775, 0.094706, 0.092341, 0.088912, 0.083878, 0.076336, 0.066669, 0.056342, 0.045688, 0.034716, 0.032492, 0.030253, 0.028001, 0.025735, 0.023453, 0.021159, 0.018852, 0.016529, 0.014194, 0.011843, 0.009479, 0.0071, 0.004686, 0.002278, -0.0002, -0.002638, -0.005145, -0.007641, -0.010188])
         self.delta_t_data = np.array([0.0, 1.0])
@@ -183,7 +185,7 @@ class Cessna172(Aircraft):
         self.CAS = 0  # Calibrated Air Speed.
         self.EAS = 0  # Equivalent Air Speed.
         self.Mach = 0  # Mach number
-        self.q_inf = 0  # Dynamic pressure at infty (Pa)
+        self.q_inf = 0  # Dynamic pressure at infinity (Pa)
 
         # Angular velocities
         self.p = 0  # rad/s
@@ -273,14 +275,19 @@ class Cessna172(Aircraft):
         V = self.TAS
         propeller_radius = self.propeller_radius
 
+        # In this model the throttle controls the revolutions of the propeller
+        # linearly. Later on, a much detailed model will be included
         omega = np.interp(delta_t, delta_t_data, omega_data)  # rpm
         omega_RAD = (omega * 2 * np.pi) / 60.0  # rad/s
 
+        # We calculate the relation between the thrust coefficient Ct and the
+        # advance ratio J using the program JavaProp
         J = (np.pi * V) / (omega_RAD * propeller_radius)  # non-dimensional
         Ct_interp = np.interp(J, J_data, Ct_data)  # non-dimensional
 
         T = ((2/np.pi)**2) * rho * (omega * propeller_radius)**2 * Ct_interp  # N
 
+        # We will consider that the engine is aligned along the OX (body) axis
         Ft = np.array([T, 0, 0])
         return Ft
 
@@ -295,6 +302,6 @@ class Cessna172(Aircraft):
 
         Fa = np.array([Fax, Fay, Faz])
 
-        self.total_forces = 10 * Ft + Fg + Fa
+        self.total_forces = Ft + Fg + Fa
         self.total_moments = np.array([l, m, n])
         return self.total_forces, self.total_moments

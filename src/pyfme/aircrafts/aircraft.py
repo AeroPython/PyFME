@@ -26,6 +26,7 @@ class Aircraft(object):
         # Mass & Inertia
         self.mass = 0  # kg
         self.inertia = 0  # kg·m²
+        self.propeller_radius = 0  # m
         # Geometry
         self.Sw = 0  # m2
         self.chord = 0  # m
@@ -62,6 +63,8 @@ class Aircraft(object):
         self.beta = 0  # Angle of sideslip (AOS).
         self.alpha_dot = 0  # Rate of change of AOA.
         #NOT PRESENT self.Dbeta_Dt = 0  # Rate of change of AOS.
+        # Environment
+        self.rho = 0  # kg/m3
 
     @property
     def Ixx(self):
@@ -101,6 +104,9 @@ class Aircraft(object):
         self.EAS = tas2eas(self.TAS, environment.rho)
         self.Mach = self.TAS / environment.a
         self.q_inf = 0.5 * environment.rho * self.TAS ** 2
+
+        # Setting environment
+        self.rho = environment.rho
 
         # Gravity force
         self.gravity_force = environment.gravity_vector * self.mass
