@@ -296,11 +296,9 @@ class Cessna172(Aircraft):
         L, D, Y, l, m, n = self._calculate_aero_forces_moments()
         Fg = self.gravity_force
 
-        Fax = -D*np.cos(self.alpha)*np.cos(self.beta) + Y*np.cos(self.alpha)*np.sin(self.beta) + L*np.sin(self.alpha)
-        Fay =  D*np.sin(self.beta)                    + Y*np.cos(self.beta)
-        Faz = -D*np.sin(self.alpha)*np.cos(self.beta) + Y*np.sin(self.alpha)*np.sin(self.beta) - L*np.cos(self.alpha)
-
-        Fa = np.array([Fax, Fay, Faz])
+        Fa_wind = np.array([-D, Y, -L])
+        Fa_body = wind2body(Fa_wind, self.alpha, self.beta)
+        Fa = Fa_body
 
         self.total_forces = Ft + Fg + Fa
         self.total_moments = np.array([l, m, n])
