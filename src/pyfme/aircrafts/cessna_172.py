@@ -270,7 +270,7 @@ class Cessna172(Aircraft):
         return L, D, Y, l, m, n
 
     def _calculate_thrust_forces_moments(self):
-        delta_t = self.controls['delta_aileron']
+        delta_t = self.controls['delta_t']
         rho = self.rho
         V = self.TAS
         propeller_radius = self.propeller_radius
