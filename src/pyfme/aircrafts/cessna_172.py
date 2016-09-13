@@ -277,13 +277,13 @@ class Cessna172(Aircraft):
 
         # In this model the throttle controls the revolutions of the propeller
         # linearly. Later on, a much detailed model will be included
-        omega = np.interp(delta_t, delta_t_data, omega_data)  # rpm
+        omega = np.interp(delta_t, self.delta_t_data, self.omega_data)  # rpm
         omega_RAD = (omega * 2 * np.pi) / 60.0  # rad/s
 
         # We calculate the relation between the thrust coefficient Ct and the
         # advance ratio J using the program JavaProp
         J = (np.pi * V) / (omega_RAD * propeller_radius)  # non-dimensional
-        Ct_interp = np.interp(J, J_data, Ct_data)  # non-dimensional
+        Ct_interp = np.interp(J, self.J_data, self.Ct_data)  # non-dimensional
 
         T = ((2/np.pi)**2) * rho * (omega_RAD * propeller_radius)**2 * Ct_interp  # N
 
