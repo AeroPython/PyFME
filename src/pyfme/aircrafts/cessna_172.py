@@ -285,7 +285,7 @@ class Cessna172(Aircraft):
         J = (np.pi * V) / (omega_RAD * propeller_radius)  # non-dimensional
         Ct_interp = np.interp(J, J_data, Ct_data)  # non-dimensional
 
-        T = ((2/np.pi)**2) * rho * (omega * propeller_radius)**2 * Ct_interp  # N
+        T = ((2/np.pi)**2) * rho * (omega_RAD * propeller_radius)**2 * Ct_interp  # N
 
         # We will consider that the engine is aligned along the OX (body) axis
         Ft = np.array([T, 0, 0])
