@@ -4,9 +4,23 @@ Copyright (c) AeroPython Development Team.
 Distributed under the terms of the MIT License.
 """
 
+
 class Environment(object):
+    """
+    Stores all the environment info: atmosphere, gravity and wind.
+    """
 
     def __init__(self, atmosphere, gravity, wind):
+        """
+        Parameters
+        ----------
+        atmosphere : Atmosphere
+            Atmospheric model.
+        gravity : Gravity
+            Gravity model.
+        wind : Wind
+            Wind or gust model.
+        """
         self.atmosphere = atmosphere
         self.gravity = gravity
         self.wind = wind

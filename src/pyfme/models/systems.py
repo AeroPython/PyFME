@@ -16,6 +16,9 @@ from pyfme.utils.coordinates import body2hor
 
 
 class System(object):
+    """Generic system class contains the state vector and other derived
+    variables related to the system's state.
+    """
 
     def __init__(self, lat, lon, h, psi=0, x_earth=0, y_earth=0):
 
@@ -149,16 +152,29 @@ class System(object):
     def propagate(self, aircraft, environment, dt=0.01):
         pass
 
+
 class EulerFlatEarth(System):
+    """Euler flat Earth equations system"""
 
     def __init__(self, lat, lon, h, psi=0, x_earth=0, y_earth=0,
                  integrator='dopri5', use_jac=False, **integrator_params):
-        """
-        Initialize the equations of the chosen model and selects the
+        """Initialize the equations of the chosen model and selects the
         integrator. Check `scipy.integrate.ode` to see available integrators.
 
         If use_jac = True the jacobian of the equations is used for the
         integration.
+
+        Parameters
+        ----------
+        lat, lon, h: float
+            Latitude, longitude and height (rad, rad, m).
+        psi, x_earth, y_earth: float, opt
+            Yaw angle and initial Earth position (rad, m, m).
+        integrator: str, optional
+            Any allowed integrator for `ode` class: "vode", "zvode", "lsoda",
+            "dopri5", "dop853".
+        use_jac : bool, optional
+            Use analytical jacobians of system equations.
         """
         super().__init__(lat, lon, h, psi, x_earth, y_earth)
         # State vector must be initialized with set_initial_state_vector() method
@@ -191,7 +207,9 @@ class EulerFlatEarth(System):
 
     def set_initial_state_vector(self):
         """
-        Set the initial values of the required variables
+        Set the initial values of the state vector for system integration
+        once the values for the involved variables have been assigned or the
+        system has been trimmed.
         """
 
         self.vel_NED = body2hor(self.vel_body, theta=self.theta,
@@ -251,7 +269,8 @@ class EulerFlatEarth(System):
 
         Parameters
         ----------
-        environment
+        aircraft : Aircraft
+            Aircraft model for simulation is used to get forces.
         """
         self.dt = dt
         self._propagate_state_vector(aircraft, dt)
