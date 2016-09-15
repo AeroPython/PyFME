@@ -8,4 +8,5 @@ setup(
     version="0.1.dev0",
     packages=find_packages('src'),
     package_dir={'': 'src'},
+    install_requires=['scipy', 'numpy']
 )

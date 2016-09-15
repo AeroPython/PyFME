@@ -14,7 +14,9 @@ import numpy as np
 from pyfme.models.constants import GRAVITY, STD_GRAVITATIONAL_PARAMETER
 from pyfme.utils.coordinates import hor2body
 
+
 class Gravity(object):
+    """Generic gravity model"""
 
     def __init__(self):
         self.magnitude = None
@@ -27,6 +29,8 @@ class Gravity(object):
 
 
 class VerticalConstant(Gravity):
+    """Vertical constant gravity model.
+    """
 
     def __init__(self):
         Gravity.__init__(self)
@@ -42,6 +46,9 @@ class VerticalConstant(Gravity):
 
 
 class VerticalNewton(Gravity):
+    """Vertical gravity model with magnitude varying according to Newton's
+    universal law of gravitation.
+    """
 
     def __init__(self):
         Gravity.__init__(self)
