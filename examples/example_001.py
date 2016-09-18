@@ -35,12 +35,12 @@ wind = NoWind()
 environment = Environment(atmosphere, gravity, wind)
 
 # Initial conditions.
-TAS = 312.5 * 0.3048  # m/s
-h0 = 8000 * 0.3048  # m
+TAS = 45  # m/s
+h0 = 3000  # m
 psi0 = 1.0  # rad
 x0, y0 = 0, 0  # m
-turn_rate = 0.1  # rad/s
-gamma0 = 0.1  # rad
+turn_rate = 0.0  # rad/s
+gamma0 = 0.0  # rad
 
 system = EulerFlatEarth(lat=0, lon=0, h=h0, psi=psi0, x_earth=x0, y_earth=y0)
 
