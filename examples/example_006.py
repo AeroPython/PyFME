@@ -17,7 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from pyfme.aircrafts import Cessna310
+from pyfme.aircrafts import Cessna172
 from pyfme.environment.environment import Environment
 from pyfme.environment.atmosphere import ISA1976
 from pyfme.environment.gravity import VerticalConstant
@@ -25,15 +25,16 @@ from pyfme.environment.wind import NoWind
 from pyfme.models.systems import EulerFlatEarth
 from pyfme.simulator import BatchSimulation
 from pyfme.utils.trimmer import steady_state_flight_trimmer
+from pyfme.utils.input_generator import doublet
 
-aircraft = Cessna310()
+aircraft = Cessna172()
 atmosphere = ISA1976()
 gravity = VerticalConstant()
 wind = NoWind()
 environment = Environment(atmosphere, gravity, wind)
 
 # Initial conditions.
-TAS = 312.5 * 0.3048  # m/s
+TAS = 45  # m/s
 h0 = 8000 * 0.3048  # m
 psi0 = 1  # rad
 x0, y0 = 0, 0  # m
@@ -43,7 +44,6 @@ gamma0 = 0.00  # rad
 system = EulerFlatEarth(lat=0, lon=0, h=h0, psi=psi0, x_earth=x0, y_earth=y0)
 
 not_trimmed_controls = {'delta_elevator': 0.05,
-                        'hor_tail_incidence': 0.00,
                         'delta_aileron': 0.01 * np.sign(turn_rate),
                         'delta_rudder': 0.01 * np.sign(turn_rate),
                         'delta_t': 0.5}
@@ -68,11 +68,12 @@ for control_name, control_value in initial_controls.items():
     controls[control_name] = np.ones_like(time) * control_value
 
 # Elevator doublet
-controls['delta_elevator'][np.where(time<2)] = \
-    initial_controls['delta_elevator'] * 1.30
-
-controls['delta_elevator'][np.where(time<1)] = \
-    initial_controls['delta_elevator'] * 0.70
+amplitude = initial_controls['delta_elevator'] * 1.5
+controls['delta_elevator'] = doublet(t_init=1,
+                                     T=1,
+                                     A=amplitude,
+                                     time=time,
+                                     offset=initial_controls['delta_elevator'])
 
 my_simulation.set_controls(time, controls)
 
