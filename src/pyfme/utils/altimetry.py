@@ -10,6 +10,9 @@ Functions which transform geometric altitude into geopotential altitude, and
 vice versa.
 """
 
+from pyfme.models.constants import EARTH_MEAN_RADIUS
+
+Re = EARTH_MEAN_RADIUS
 
 def geopotential2geometric(h):
     """Geometric altiude above MSL (mean sea level)
@@ -36,7 +39,6 @@ def geopotential2geometric(h):
 
     """
 
-    Re = 6371000  # Mean radius Earth (m)
     z = Re * h / (Re - h)
     return z
 
@@ -65,7 +67,6 @@ def geometric2geopotential(z):
         ISO 2533:1975, 1975
 
     """
-
-    Re = 6371000  # Mean radius Earth (m)
+    
     h = Re * z / (Re + z)
     return h
