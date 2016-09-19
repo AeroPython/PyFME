@@ -19,7 +19,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from pyfme.aircrafts import Cessna310
+from pyfme.aircrafts import Cessna172
 from pyfme.environment.environment import Environment
 from pyfme.environment.atmosphere import ISA1976
 from pyfme.environment.gravity import VerticalConstant
@@ -28,24 +28,23 @@ from pyfme.models.systems import EulerFlatEarth
 from pyfme.simulator import BatchSimulation
 from pyfme.utils.trimmer import steady_state_flight_trimmer
 
-aircraft = Cessna310()
+aircraft = Cessna172()
 atmosphere = ISA1976()
 gravity = VerticalConstant()
 wind = NoWind()
 environment = Environment(atmosphere, gravity, wind)
 
 # Initial conditions.
-TAS = 312.5 * 0.3048  # m/s
-h0 = 8000 * 0.3048  # m
-psi0 = 1  # rad
+TAS = 45  # m/s
+h0 = 3000  # m
+psi0 = 1.0  # rad
 x0, y0 = 0, 0  # m
-turn_rate = 0.1  # rad/s
-gamma0 = 0.00  # rad
+turn_rate = 0.05  # rad/s
+gamma0 = 0.0  # rad
 
 system = EulerFlatEarth(lat=0, lon=0, h=h0, psi=psi0, x_earth=x0, y_earth=y0)
 
 not_trimmed_controls = {'delta_elevator': 0.05,
-                        'hor_tail_incidence': 0.00,
                         'delta_aileron': 0.01 * np.sign(turn_rate),
                         'delta_rudder': 0.01 * np.sign(turn_rate),
                         'delta_t': 0.5}
@@ -60,7 +59,7 @@ print(results)
 
 my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
-tfin = 150  # seconds
+tfin = 30  # seconds
 N = tfin * 100 + 1
 time = np.linspace(0, tfin, N)
 initial_controls = trimmed_ac.controls

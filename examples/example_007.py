@@ -9,10 +9,8 @@ Example
 
 Cessna 310, ISA1976 integrated with Flat Earth (euler angles).
 
-Example with trimmed aircraft: stationary, turn during ascent.
-
-The main purpose of this example is to check if the aircraft trimmed in a given
-state maintains the trimmed flight condition.
+Evolution of the aircraft after a lat-dir perturbation.
+Trimmed in stationary, horizontal, symmetric, wings level flight.
 """
 
 import numpy as np
@@ -27,6 +25,7 @@ from pyfme.environment.wind import NoWind
 from pyfme.models.systems import EulerFlatEarth
 from pyfme.simulator import BatchSimulation
 from pyfme.utils.trimmer import steady_state_flight_trimmer
+from pyfme.utils.input_generator import doublet
 
 aircraft = Cessna172()
 atmosphere = ISA1976()
@@ -36,11 +35,11 @@ environment = Environment(atmosphere, gravity, wind)
 
 # Initial conditions.
 TAS = 45  # m/s
-h0 = 3000  # m
-psi0 = 1.0  # rad
+h0 = 8000 * 0.3048  # m
+psi0 = 1  # rad
 x0, y0 = 0, 0  # m
-turn_rate = 0.05  # rad/s
-gamma0 = 0.05  # rad
+turn_rate = 0.0  # rad/s
+gamma0 = 0.00  # rad
 
 system = EulerFlatEarth(lat=0, lon=0, h=h0, psi=psi0, x_earth=x0, y_earth=y0)
 
@@ -59,7 +58,7 @@ print(results)
 
 my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
-tfin = 30  # seconds
+tfin = 15  # seconds
 N = tfin * 100 + 1
 time = np.linspace(0, tfin, N)
 initial_controls = trimmed_ac.controls
@@ -67,6 +66,22 @@ initial_controls = trimmed_ac.controls
 controls = {}
 for control_name, control_value in initial_controls.items():
     controls[control_name] = np.ones_like(time) * control_value
+
+# Rudder doublet
+amplitude = 0.10
+controls['delta_elevator'] = doublet(t_init=1,
+                                     T=1,
+                                     A=amplitude,
+                                     time=time,
+                                     offset=initial_controls['delta_rudder'])
+
+# Rudder aileron
+amplitude = 0.15
+controls['delta_elevator'] = doublet(t_init=1.5,
+                                     T=1,
+                                     A=amplitude,
+                                     time=time,
+                                     offset=initial_controls['delta_aileron'])
 
 my_simulation.set_controls(time, controls)
 
