@@ -69,19 +69,19 @@ for control_name, control_value in initial_controls.items():
 
 # Rudder doublet
 amplitude = 0.10
-controls['delta_elevator'] = doublet(t_init=1,
-                                     T=1,
-                                     A=amplitude,
-                                     time=time,
-                                     offset=initial_controls['delta_rudder'])
+controls['delta_rudder'] = doublet(t_init=1,
+                                   T=1,
+                                   A=amplitude,
+                                   time=time,
+                                   offset=initial_controls['delta_rudder'])
 
 # Rudder aileron
 amplitude = 0.15
-controls['delta_elevator'] = doublet(t_init=1.5,
-                                     T=1,
-                                     A=amplitude,
-                                     time=time,
-                                     offset=initial_controls['delta_aileron'])
+controls['delta_aileron'] = doublet(t_init=1.5,
+                                    T=1,
+                                    A=amplitude,
+                                    time=time,
+                                    offset=initial_controls['delta_aileron'])
 
 my_simulation.set_controls(time, controls)
 
@@ -102,7 +102,7 @@ my_simulation.run_simulation()
 plt.style.use('ggplot')
 
 for ii in range(len(par_list) // 3):
-    three_params = par_list[3*ii:3*ii+3]
+    three_params = par_list[3 * ii:3 * ii + 3]
     fig, ax = plt.subplots(3, 1, sharex=True)
     for jj, par in enumerate(three_params):
         ax[jj].plot(time, my_simulation.par_dict[par])
