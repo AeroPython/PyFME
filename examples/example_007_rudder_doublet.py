@@ -70,7 +70,8 @@ for control_name, control_value in initial_controls.items():
 
 # Rudder doublet
 amplitude = 0.10
-controls['delta_rudder'] = doublet(t_init=2,
+
+controls['delta_rudder'] = doublet(t_init=1,
                                    T=1,
                                    A=amplitude,
                                    time=time,
