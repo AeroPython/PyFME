@@ -59,7 +59,7 @@ print(results)
 
 my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
-tfin = 30  # seconds
+tfin = 20  # seconds
 N = tfin * 100 + 1
 time = np.linspace(0, tfin, N)
 initial_controls = trimmed_ac.controls
