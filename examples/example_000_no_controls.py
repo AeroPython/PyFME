@@ -9,8 +9,7 @@ Example
 
 Cessna 172, ISA1976 integrated with Flat Earth (Euler angles).
 
-Evolution of the aircraft after a roll perturbation (delta doublet 
-applied on the ailerons).
+Evolution of the aircraft with no deflecion of control surfaces.
 Trimmed in stationary, horizontal, symmetric, wings level flight.
 """
 
@@ -57,27 +56,22 @@ trimmed_ac, trimmed_sys, trimmed_env, results = steady_state_flight_trimmer(
 
 print(results)
 
+no_controls = {'delta_elevator': 0.0,
+               'delta_aileron': 0.0,
+               'delta_rudder': 0.0,
+               'delta_t': 0.0}
+
 my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
-tfin = 10  # seconds
+tfin = 20  # seconds
 N = tfin * 100 + 1
 time = np.linspace(0, tfin, N)
-initial_controls = trimmed_ac.controls
+
+initial_controls = no_controls
 
 controls = {}
 for control_name, control_value in initial_controls.items():
     controls[control_name] = np.ones_like(time) * control_value
-
-# Aileron doublet
-# Aileron travel: +20º/-15º
-amplitude = np.deg2rad(35)
-controls['delta_aileron'] = doublet(t_init=2,
-                                    T=1,
-                                    A=amplitude,
-                                    time=time,
-                                    offset=np.deg2rad(2.5))
-#                                     offset=initial_controls['delta_aileron'])
-
 
 my_simulation.set_controls(time, controls)
 
