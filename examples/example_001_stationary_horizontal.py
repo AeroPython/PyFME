@@ -7,12 +7,13 @@ Distributed under the terms of the MIT License.
 Example
 -------
 
-Cessna 310, ISA1976 integrated with Flat Earth (euler angles).
+Cessna 172, ISA1976 integrated with Flat Earth (Euler angles).
 
-Example with trimmed aircraft: stationary, horizontal turn.
+Example with trimmed aircraft: stationary, horizontal, symmetric,
+wings level flight.
 
-The main purpose of this example is to check if the aircraft trimmed in a given
-state maintains the trimmed flight condition.
+The main purpose of this example is to check if the aircraft trimmed 
+in a given state maintains the trimmed flight condition.
 """
 
 import numpy as np
@@ -39,7 +40,7 @@ TAS = 45  # m/s
 h0 = 3000  # m
 psi0 = 1.0  # rad
 x0, y0 = 0, 0  # m
-turn_rate = 0.05  # rad/s
+turn_rate = 0.0  # rad/s
 gamma0 = 0.0  # rad
 
 system = EulerFlatEarth(lat=0, lon=0, h=h0, psi=psi0, x_earth=x0, y_earth=y0)
@@ -59,7 +60,7 @@ print(results)
 
 my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
-tfin = 30  # seconds
+tfin = 10  # seconds
 N = tfin * 100 + 1
 time = np.linspace(0, tfin, N)
 initial_controls = trimmed_ac.controls
@@ -87,7 +88,7 @@ my_simulation.run_simulation()
 plt.style.use('ggplot')
 
 for ii in range(len(par_list) // 3):
-    three_params = par_list[3*ii:3*ii+3]
+    three_params = par_list[3 * ii:3 * ii + 3]
     fig, ax = plt.subplots(3, 1, sharex=True)
     for jj, par in enumerate(three_params):
         ax[jj].plot(time, my_simulation.par_dict[par])
