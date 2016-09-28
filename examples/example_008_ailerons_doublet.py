@@ -81,7 +81,7 @@ print()
 
 my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
-tfin = 10  # seconds
+tfin = 20  # seconds
 N = tfin * 100 + 1
 time = np.linspace(0, tfin, N)
 initial_controls = trimmed_ac.controls
@@ -94,7 +94,7 @@ for control_name, control_value in initial_controls.items():
 # Aileron travel: +20º/-15º
 amplitude = np.deg2rad(15)
 controls['delta_aileron'] = doublet(t_init=2,
-                                    T=2,
+                                    T=1,
                                     A=amplitude,
                                     time=time,
                                     offset=np.deg2rad(2.5))
