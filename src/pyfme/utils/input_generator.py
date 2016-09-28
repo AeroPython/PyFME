@@ -73,18 +73,24 @@ def doublet(t_init, T, A, time, offset=0, var=None):
     """
 
     if var is None:
-        doublet_input = np.ones_like(time) * float(offset)
+            doublet_input = np.ones_like(time) * float(offset)
     else:
         if np.size(var) == np.size(time):
             doublet_input = float(offset) + var
         else:
             raise ValueError('var and time must have the same size')
 
+    part_0 = (time < t_init)
+    doublet_input[part_0] = 0
+
     part_1 = (time >= t_init) & (time <= t_init + T / 2)
     doublet_input[part_1] += A / 2
 
     part_2 = (time > t_init + T / 2) & (time <= t_init + T)
     doublet_input[part_2] += - A / 2
+
+    part_4 = (time > t_init + T)
+    doublet_input[part_4] = 0
     return doublet_input
 
 
