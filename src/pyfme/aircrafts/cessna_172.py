@@ -222,7 +222,8 @@ class Cessna172(Aircraft):
 
         self.CL = CL_interp + CL_delta_elev_interp + (c/(2 * V)) * (CL_alphadot_interp * self.alpha_dot + CL_q_interp * q)
         self.CD = CD_interp + CD_delta_elev_interp(delta_elev, alpha_DEG)[0, 0]
-        self.CM = CM_interp + CM_delta_elev_interp + (c/(2 * V)) * (CM_q_interp * q + CM_alphadot_interp * self.alpha_dot)
+        self.CM = CM_interp + CM_delta_elev_interp + (c/(2 * V)) * (2*CM_q_interp * q + CM_alphadot_interp * self.alpha_dot)
+        # CM_q multiplicado por 2 hasta que alpha_dot pueda ser calculado
 
     def _calculate_aero_lat_forces_moments_coeffs(self):
         delta_aile = np.rad2deg(self.controls['delta_aileron'])  # deg
@@ -251,8 +252,8 @@ class Cessna172(Aircraft):
         CN_delta_aile_interp = interpolate.RectBivariateSpline(self.delta_aile_data, self.alpha_data, self.CN_delta_aile_data)
 
         self.CY = CY_beta_interp * self.beta + CY_delta_rud_interp * delta_rud_RAD + (b/(2 * V)) * (CY_p_interp * p + CY_r_interp * r)
-        self.Cl = Cl_beta_interp * self.beta + Cl_delta_aile_interp + Cl_delta_rud_interp * delta_rud_RAD + (b/(2 * V)) * (Cl_p_interp * p + Cl_r_interp * r)
-        self.CN = CN_beta_interp * self.beta + CN_delta_aile_interp(delta_aile, alpha_DEG)[0, 0] + CN_delta_rud_interp * delta_rud_RAD + (b/(2 * V)) * (CN_p_interp * p + CN_r_interp * r)
+        self.Cl = 0.5*Cl_beta_interp * self.beta + Cl_delta_aile_interp + 0.1*Cl_delta_rud_interp * delta_rud_RAD + (b/(2 * V)) * (Cl_p_interp * p + Cl_r_interp * r)
+        self.CN = CN_beta_interp * self.beta + CN_delta_aile_interp(delta_aile, alpha_DEG)[0, 0] + 0.075*CN_delta_rud_interp * delta_rud_RAD + (b/(2 * V)) * (CN_p_interp * p + CN_r_interp * r)
 
     def _calculate_aero_forces_moments(self):
         q = self.q_inf
