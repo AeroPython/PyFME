@@ -37,7 +37,7 @@ environment = Environment(atmosphere, gravity, wind)
 
 # Initial conditions.
 TAS = 45  # m/s
-h0 = 3000  # m
+h0 = 2000  # m
 psi0 = 1.0  # rad
 x0, y0 = 0, 0  # m
 turn_rate = 0.0  # rad/s

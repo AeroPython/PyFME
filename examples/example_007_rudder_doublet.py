@@ -36,7 +36,7 @@ environment = Environment(atmosphere, gravity, wind)
 
 # Initial conditions.
 TAS = 45  # m/s
-h0 = 8000 * 0.3048  # m
+h0 = 2000  # m
 psi0 = 1  # rad
 x0, y0 = 0, 0  # m
 turn_rate = 0.0  # rad/s
@@ -81,7 +81,7 @@ print()
 
 my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
-tfin = 10  # seconds
+tfin = 20  # seconds
 N = tfin * 100 + 1
 time = np.linspace(0, tfin, N)
 initial_controls = trimmed_ac.controls
@@ -91,31 +91,24 @@ for control_name, control_value in initial_controls.items():
     controls[control_name] = np.ones_like(time) * control_value
 
 # Rudder doublet
-amplitude = 0.10
+# Rudder travel: +16º/-16º
+amplitude = np.deg2rad(20)
 
-controls['delta_rudder'] = doublet(t_init=1,
-                                   T=1,
+controls['delta_rudder'] = doublet(t_init=2,
+                                   T=2,
                                    A=amplitude,
                                    time=time,
-                                   offset=initial_controls['delta_rudder'])
-
-# Aileron doublet
-amplitude = 0.15
-controls['delta_aileron'] = doublet(t_init=1.5,
-                                    T=1,
-                                    A=amplitude,
-                                    time=time,
-                                    offset=initial_controls['delta_aileron'])
+                                   offset=np.deg2rad(0))
 
 my_simulation.set_controls(time, controls)
 
 par_list = ['x_earth', 'y_earth', 'height',
             'psi', 'theta', 'phi',
             'u', 'v', 'w',
-            'v_north', 'v_east', 'v_down',
+#            'v_north', 'v_east', 'v_down',
             'p', 'q', 'r',
             'alpha', 'beta', 'TAS',
-            'F_xb', 'F_yb', 'F_zb',
+#            'F_xb', 'F_yb', 'F_zb',
             'M_xb', 'M_yb', 'M_zb']
 
 my_simulation.set_par_dict(par_list)

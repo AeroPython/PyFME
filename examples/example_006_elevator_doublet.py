@@ -36,7 +36,7 @@ environment = Environment(atmosphere, gravity, wind)
 
 # Initial conditions.
 TAS = 45  # m/s
-h0 = 8000 * 0.3048  # m
+h0 = 2000  # m
 psi0 = 1  # rad
 x0, y0 = 0, 0  # m
 turn_rate = 0.0  # rad/s
@@ -92,23 +92,23 @@ for control_name, control_value in initial_controls.items():
 
 # Elevator doublet 
 # Elevator travel: +28º/-26º
-amplitude = np.deg2rad(54)
+amplitude = np.deg2rad(20)
 controls['delta_elevator'] = doublet(t_init=2,
                                      T=1,
                                      A=amplitude,
                                      time=time,
-                                     offset=np.deg2rad(1.0))
 #                                     offset=initial_controls['delta_elevator'])
+                                     offset=np.deg2rad(1.0))
 
 my_simulation.set_controls(time, controls)
 
 par_list = ['x_earth', 'y_earth', 'height',
             'psi', 'theta', 'phi',
             'u', 'v', 'w',
-            'v_north', 'v_east', 'v_down',
+#            'v_north', 'v_east', 'v_down',
             'p', 'q', 'r',
             'alpha', 'beta', 'TAS',
-            'F_xb', 'F_yb', 'F_zb',
+#            'F_xb', 'F_yb', 'F_zb',
             'M_xb', 'M_yb', 'M_zb']
 
 my_simulation.set_par_dict(par_list)
