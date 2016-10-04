@@ -9,7 +9,7 @@ Example
 
 Cessna 172, ISA1976 integrated with Flat Earth (Euler angles).
 
-Evolution of the aircraft after a pitch perturbation (delta doublet 
+Evolution of the aircraft after a pitch perturbation (delta doublet
 applied on the elevator).
 Trimmed in stationary, horizontal, symmetric, wings level flight.
 """
@@ -55,10 +55,10 @@ trimmed_ac, trimmed_sys, trimmed_env, results = steady_state_flight_trimmer(
     aircraft, system, environment, TAS=TAS, controls_0=not_trimmed_controls,
     controls2trim=controls2trim, gamma=gamma0, turn_rate=turn_rate, verbose=1)
 
-#print(results)
+# print(results)
 
 print()
-print('delta_elevator = ',"%8.4f" % np.rad2deg(results['delta_elevator']), 'deg')
+print('delta_elevator = ', "%8.4f" % np.rad2deg(results['delta_elevator']), 'deg')
 print('delta_aileron = ', "%8.4f" % np.rad2deg(results['delta_aileron']), 'deg')
 print('delta_rudder = ', "%8.4f" % np.rad2deg(results['delta_rudder']), 'deg')
 print('delta_t = ', "%8.4f" % results['delta_t'], '%')
@@ -81,7 +81,7 @@ print()
 
 my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
-tfin = 10  # seconds
+tfin = 15  # seconds
 N = tfin * 100 + 1
 time = np.linspace(0, tfin, N)
 initial_controls = trimmed_ac.controls
@@ -90,24 +90,41 @@ controls = {}
 for control_name, control_value in initial_controls.items():
     controls[control_name] = np.ones_like(time) * control_value
 
-# Elevator doublet 
+# Elevator and aileron doublet
 # Elevator travel: +28º/-26º
-amplitude = np.deg2rad(0)
-controls['delta_elevator'] = doublet(t_init=2,
-                                     T=1,
-                                     A=amplitude,
+# Aileron travel: +20º/-15º
+# Rudder travel: +16º/-16º
+
+amplitude_elev = np.deg2rad(26)
+controls['delta_elevator'] = initial_controls['delta_elevator'] + \
+                             doublet(t_init=2,
+                                     T=2,
+                                     A=amplitude_elev,
                                      time=time,
-#                                     offset=initial_controls['delta_elevator'])
-                                     offset=np.deg2rad(1.0))
+                                     offset=np.deg2rad(0.0))
+
+amplitude_aile = np.deg2rad(15)
+controls['delta_aileron'] = doublet(t_init=5,
+                                    T=2,
+                                    A=amplitude_aile,
+                                    time=time,
+                                    offset=np.deg2rad(0.0))
+
+amplitude_rud = np.deg2rad(32)
+controls['delta_rudder'] = doublet(t_init=10,
+                                   T=2,
+                                   A=amplitude_rud,
+                                   time=time,
+                                   offset=np.deg2rad(0.0))
 
 my_simulation.set_controls(time, controls)
 
-par_list = [#'x_earth', 'y_earth', 'height',
-#            'psi', 'theta', 'phi',
-#            'u', 'v', 'w',
+par_list = [  # 'x_earth', 'y_earth', 'height',
+            'psi', 'theta', 'phi',
+            'u', 'v', 'w',
 #            'v_north', 'v_east', 'v_down',
             'p', 'q', 'r',
-#            'alpha', 'beta', 'TAS',
+            'alpha', 'beta', 'TAS',
 #            'F_xb', 'F_yb', 'F_zb',
             'M_xb', 'M_yb', 'M_zb']
 
@@ -126,17 +143,17 @@ for ii in range(len(par_list) // 3):
         ax[jj].set_ylabel(par)
         ax[jj].set_xlabel('time (s)')
 
-#fig = plt.figure()
-#ax = Axes3D(fig)
-#ax.plot(my_simulation.par_dict['x_earth'],
+# fig = plt.figure()
+# ax = Axes3D(fig)
+# ax.plot(my_simulation.par_dict['x_earth'],
 #        my_simulation.par_dict['y_earth'],
 #        my_simulation.par_dict['height'])
 
-#ax.plot(my_simulation.par_dict['x_earth'],
+# ax.plot(my_simulation.par_dict['x_earth'],
 #        my_simulation.par_dict['y_earth'],
 #        my_simulation.par_dict['height'] * 0)
-#ax.set_xlabel('x_earth')
-#ax.set_ylabel('y_earth')
-#ax.set_zlabel('z_earth')
+# ax.set_xlabel('x_earth')
+# ax.set_ylabel('y_earth')
+# ax.set_zlabel('z_earth')
 
 plt.show()

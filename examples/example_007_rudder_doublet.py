@@ -92,17 +92,17 @@ for control_name, control_value in initial_controls.items():
 
 # Rudder doublet
 # Rudder travel: +16º/-16º
-amplitude = np.deg2rad(20)
+amplitude = np.deg2rad(32)
 
 controls['delta_rudder'] = doublet(t_init=2,
                                    T=2,
                                    A=amplitude,
                                    time=time,
-                                   offset=np.deg2rad(0))
+                                   offset=np.deg2rad(0.0))
 
 my_simulation.set_controls(time, controls)
 
-par_list = ['x_earth', 'y_earth', 'height',
+par_list = [#'x_earth', 'y_earth', 'height',
             'psi', 'theta', 'phi',
             'u', 'v', 'w',
 #            'v_north', 'v_east', 'v_down',
@@ -126,17 +126,17 @@ for ii in range(len(par_list) // 3):
         ax[jj].set_ylabel(par)
         ax[jj].set_xlabel('time (s)')
 
-fig = plt.figure()
-ax = Axes3D(fig)
-ax.plot(my_simulation.par_dict['x_earth'],
-        my_simulation.par_dict['y_earth'],
-        my_simulation.par_dict['height'])
+#fig = plt.figure()
+#ax = Axes3D(fig)
+#ax.plot(my_simulation.par_dict['x_earth'],
+#        my_simulation.par_dict['y_earth'],
+#        my_simulation.par_dict['height'])
 
-ax.plot(my_simulation.par_dict['x_earth'],
-        my_simulation.par_dict['y_earth'],
-        my_simulation.par_dict['height'] * 0)
-ax.set_xlabel('x_earth')
-ax.set_ylabel('y_earth')
-ax.set_zlabel('z_earth')
+#ax.plot(my_simulation.par_dict['x_earth'],
+#        my_simulation.par_dict['y_earth'],
+#        my_simulation.par_dict['height'] * 0)
+#ax.set_xlabel('x_earth')
+#ax.set_ylabel('y_earth')
+#ax.set_zlabel('z_earth')
 
 plt.show()
