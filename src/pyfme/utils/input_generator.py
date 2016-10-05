@@ -44,7 +44,6 @@ def step(t_init, T, A, time, offset=0, var=None):
             raise ValueError('var and time must have the same size')
 
     step_input[(time >= t_init) & (time <= t_init + T)] += A + float(offset)
-
     return step_input
 
 
@@ -86,9 +85,6 @@ def doublet(t_init, T, A, time, offset=0, var=None):
     part_2 = (time > t_init + T / 2) & (time <= t_init + T)
     doublet_input[part_2] += - A / 2 + float(offset)
     return doublet_input
-
-    time_input = time[(time >= t_init) & (time <= t_init + T)]
-
 
 
 def ramp(t_init, T, A, time, offset=0, var=None):
