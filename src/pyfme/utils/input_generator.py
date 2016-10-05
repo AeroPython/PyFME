@@ -80,17 +80,11 @@ def doublet(t_init, T, A, time, offset=0, var=None):
         else:
             raise ValueError('var and time must have the same size')
 
-    part_0 = (time < t_init)
-    doublet_input[part_0] = 0
-
     part_1 = (time >= t_init) & (time <= t_init + T / 2)
     doublet_input[part_1] += A / 2
 
     part_2 = (time > t_init + T / 2) & (time <= t_init + T)
     doublet_input[part_2] += - A / 2
-
-    part_4 = (time > t_init + T)
-    doublet_input[part_4] = 0
     return doublet_input
 
 
