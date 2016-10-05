@@ -94,9 +94,9 @@ class Cessna172(Aircraft):
         self.inertia = np.diag([948, 1346, 1967]) * slugft2_2_kgm2  # kg·m²
 
         # Geometry
-        self.Sw = 174 * ft2m**2  # m2
-        self.chord = 4.9 * ft2m  # m
-        self.span = 35.8 * ft2m  # m
+        self.Sw = 16.2  # m2
+        self.chord = 1.49352  # m
+        self.span = 10.91184  # m
         self.propeller_radius = 0.94  # m
 
         # Aerodynamic Data
