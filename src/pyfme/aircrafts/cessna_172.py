@@ -163,9 +163,12 @@ class Cessna172(Aircraft):
                          'delta_rudder': 0,
                          'delta_t': 0}
 
-        self.control_limits = {'delta_elevator': (np.deg2rad(-26), np.deg2rad(28)),  # rad
-                               'delta_aileron': (np.deg2rad(-15), np.deg2rad(20)),  # rad
-                               'delta_rudder': (np.deg2rad(-16), np.deg2rad(16)),  # rad
+        self.control_limits = {'delta_elevator': (np.deg2rad(-26),
+                                                  np.deg2rad(28)),  # rad
+                               'delta_aileron': (np.deg2rad(-15),
+                                                 np.deg2rad(20)),  # rad
+                               'delta_rudder': (np.deg2rad(-16),
+                                                np.deg2rad(16)),  # rad
                                'delta_t': (0, 1)}  # non-dimensional
 
         # Aerodynamic Coefficients
@@ -208,91 +211,100 @@ class Cessna172(Aircraft):
         p, q, r = self.p, self.q, self.r  # rad/s
         alpha_dot = self.alpha_dot
 
-        CD_interp = np.interp(alpha_DEG, self.alpha_data, self.CD_data)
-        CD_delta_elev_interp = RectBivariateSpline(self.delta_elev_data,
+        CD_alpha_interp = np.interp(alpha_DEG, self.alpha_data, self.CD_data)
+        CD_delta_elev_interp_ = RectBivariateSpline(self.delta_elev_data,
                                                    self.alpha_data,
                                                    self.CD_delta_elev_data)
-        CD_delta_elev = CD_delta_elev_interp(delta_elev, alpha_DEG)[0, 0]
+        CD_delta_elev_interp = CD_delta_elev_interp_(delta_elev, alpha_DEG)[0, 0]
 
-        CL_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_data)
-        CL_alphadot_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_alphadot_data)
-        CL_q_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_q_data)
+        CL_alpha_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_data)
+        CL_alphadot = np.interp(alpha_DEG, self.alpha_data, self.CL_alphadot_data)
+        CL_q = np.interp(alpha_DEG, self.alpha_data, self.CL_q_data)
         CL_delta_elev_interp = np.interp(delta_elev, self.delta_elev_data, self.CL_delta_elev_data)
 
-        CM_interp = np.interp(alpha_DEG, self.alpha_data, self.CM_data)
-        CM_q_interp = np.interp(alpha_DEG, self.alpha_data, self.CM_q_data)
-        CM_alphadot_interp = np.interp(alpha_DEG, self.alpha_data, self.CM_alphadot_data)
+        CM_alpha_interp = np.interp(alpha_DEG, self.alpha_data, self.CM_data)
+        CM_q = np.interp(alpha_DEG, self.alpha_data, self.CM_q_data)
+        CM_alphadot = np.interp(alpha_DEG, self.alpha_data, self.CM_alphadot_data)
         CM_delta_elev_interp = np.interp(delta_elev, self.delta_elev_data, self.CM_delta_elev_data)
 
-        self.CL = (CL_interp +
-                   CL_delta_elev_interp +
-                   c/(2*V) * (CL_q_interp * q + CL_alphadot_interp * alpha_dot)
-                   )
-        self.CD = CD_interp + CD_delta_elev
-        self.CM = (CM_interp +
-                   CM_delta_elev_interp +
-                   (c/(2*V)) * (2*CM_q_interp * q +
-                                CM_alphadot_interp * alpha_dot)
-                   )
-        # CM_q multiplicado por 2 hasta que alpha_dot pueda ser calculado
+        self.CL = (
+            CL_alpha_interp +
+            CL_delta_elev_interp +
+            c/(2*V) * (CL_q * q + CL_alphadot * alpha_dot)
+        )
+        self.CD = CD_alpha_interp + CD_delta_elev_interp
+
+        self.CM = (
+            CM_alpha_interp +
+            CM_delta_elev_interp +
+            c/(2*V) * (2*CM_q * q + CM_alphadot * alpha_dot)
+        )
+        # FIXME: CM_q multiplicado por 2 hasta que alpha_dot pueda ser calculado
 
     def _calculate_aero_lat_forces_moments_coeffs(self):
         delta_aile = np.rad2deg(self.controls['delta_aileron'])  # deg
-        delta_rud = np.rad2deg(self.controls['delta_rudder'])  # deg
         delta_rud_RAD = self.controls['delta_rudder']  # rad
         alpha_DEG = np.rad2deg(self.alpha)  # deg
         b = self.span
         V = self.TAS
         p, q, r = self.p, self.q, self.r
 
-        CY_beta_interp = np.interp(alpha_DEG, self.alpha_data, self.CY_beta_data)
-        CY_p_interp = np.interp(alpha_DEG, self.alpha_data, self.CY_p_data)
-        CY_r_interp = np.interp(alpha_DEG, self.alpha_data, self.CY_r_data)
-        CY_delta_rud_interp = np.interp(alpha_DEG, self.alpha_data, self.CY_delta_rud_data)
+        CY_beta = np.interp(alpha_DEG, self.alpha_data, self.CY_beta_data)
+        CY_p = np.interp(alpha_DEG, self.alpha_data, self.CY_p_data)
+        CY_r = np.interp(alpha_DEG, self.alpha_data, self.CY_r_data)
+        CY_delta_rud = np.interp(alpha_DEG, self.alpha_data, self.CY_delta_rud_data)
 
-        Cl_beta_interp = np.interp(alpha_DEG, self.alpha_data, self.Cl_beta_data)
-        Cl_p_interp = np.interp(alpha_DEG, self.alpha_data, self.Cl_p_data)
-        Cl_r_interp = np.interp(alpha_DEG, self.alpha_data, self.Cl_r_data)
-        Cl_delta_rud_interp = np.interp(alpha_DEG, self.alpha_data, self.Cl_delta_rud_data)
+        Cl_beta = np.interp(alpha_DEG, self.alpha_data, self.Cl_beta_data)
+        Cl_p = np.interp(alpha_DEG, self.alpha_data, self.Cl_p_data)
+        Cl_r = np.interp(alpha_DEG, self.alpha_data, self.Cl_r_data)
+        Cl_delta_rud = np.interp(alpha_DEG, self.alpha_data, self.Cl_delta_rud_data)
         Cl_delta_aile_interp = np.interp(delta_aile, self.delta_aile_data, self.Cl_delta_aile_data)
 
-        CN_beta_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_beta_data)
-        CN_p_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_p_data)
-        CN_r_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_r_data)
-        CN_delta_rud_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_delta_rud_data)
-        CN_delta_aile_interp = RectBivariateSpline(self.delta_aile_data,
+        CN_beta = np.interp(alpha_DEG, self.alpha_data, self.CN_beta_data)
+        CN_p = np.interp(alpha_DEG, self.alpha_data, self.CN_p_data)
+        CN_r = np.interp(alpha_DEG, self.alpha_data, self.CN_r_data)
+        CN_delta_rud = np.interp(alpha_DEG, self.alpha_data, self.CN_delta_rud_data)
+        CN_delta_aile_interp_ = RectBivariateSpline(self.delta_aile_data,
                                                    self.alpha_data,
                                                    self.CN_delta_aile_data)
-        CN_delta_aile = CN_delta_aile_interp(delta_aile, alpha_DEG)[0, 0]
+        CN_delta_aile_interp = CN_delta_aile_interp_(delta_aile, alpha_DEG)[0, 0]
 
-        self.CY = (CY_beta_interp * self.beta +
-                   CY_delta_rud_interp * delta_rud_RAD +
-                   (b/(2 * V)) * (CY_p_interp * p + CY_r_interp * r)
-                   )
-        self.Cl = (0.1*Cl_beta_interp * self.beta +
-                   Cl_delta_aile_interp +
-                   0.075*Cl_delta_rud_interp * delta_rud_RAD +
-                   (b/(2 * V)) * (Cl_p_interp * p + Cl_r_interp * r)
-                   )
-        self.CN = (CN_beta_interp * self.beta +
-                   CN_delta_aile +
-                   0.075*CN_delta_rud_interp * delta_rud_RAD +
-                   (b/(2 * V)) * (CN_p_interp * p + CN_r_interp * r)
-                   )
+        self.CY = (
+            CY_beta * self.beta +
+            CY_delta_rud * delta_rud_RAD +
+            b/(2 * V) * (CY_p * p + CY_r * r)
+        )
+        # XXX: Tunned Cl_delta_rud
+        self.Cl = (
+            0.1*Cl_beta * self.beta +
+            Cl_delta_aile_interp +
+            0.075*Cl_delta_rud * delta_rud_RAD +
+            b/(2 * V) * (Cl_p * p + Cl_r * r)
+        )
+        # XXX: Tunned CN_delta_rud
+        self.CN = (
+            CN_beta * self.beta +
+            CN_delta_aile_interp +
+            0.075*CN_delta_rud * delta_rud_RAD +
+            b/(2 * V) * (CN_p * p + CN_r * r)
+        )
 
     def _calculate_aero_forces_moments(self):
         q = self.q_inf
         Sw = self.Sw
         c = self.chord
         b = self.span
+
         self._calculate_aero_lon_forces_moments_coeffs()
         self._calculate_aero_lat_forces_moments_coeffs()
+
         L = q * Sw * self.CL
         D = q * Sw * self.CD
         Y = q * Sw * self.CY
         l = q * Sw * b * self.Cl
         m = q * Sw * c * self.CM
         n = q * Sw * b * self.CN
+
         return L, D, Y, l, m, n
 
     def _calculate_thrust_forces_moments(self):
@@ -315,6 +327,7 @@ class Cessna172(Aircraft):
 
         # We will consider that the engine is aligned along the OX (body) axis
         Ft = np.array([T, 0, 0])
+
         return Ft
 
     def calculate_forces_and_moments(self):
@@ -328,4 +341,5 @@ class Cessna172(Aircraft):
 
         self.total_forces = Ft + Fg + Fa
         self.total_moments = np.array([l, m, n])
+
         return self.total_forces, self.total_moments
