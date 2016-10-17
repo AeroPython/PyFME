@@ -74,7 +74,7 @@ CN_delta_aile - incremental yawing moment coefficient derivative with respect
                 deflection and the angle of attack via [2]
 """
 import numpy as np
-from scipy import interpolate
+from scipy.interpolate import RectBivariateSpline
 
 from pyfme.aircrafts.aircraft import Aircraft
 from pyfme.models.constants import ft2m, slugft2_2_kgm2, lbs2kg
@@ -206,9 +206,12 @@ class Cessna172(Aircraft):
         c = self.chord  # m
         V = self.TAS  # m/s
         p, q, r = self.p, self.q, self.r  # rad/s
+        alpha_dot = self.alpha_dot
 
         CD_interp = np.interp(alpha_DEG, self.alpha_data, self.CD_data)
-        CD_delta_elev_interp = interpolate.RectBivariateSpline(self.delta_elev_data, self.alpha_data, self.CD_delta_elev_data)
+        CD_delta_elev_interp = RectBivariateSpline(self.delta_elev_data,
+                                                   self.alpha_data,
+                                                   self.CD_delta_elev_data)
 
         CL_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_data)
         CL_alphadot_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_alphadot_data)
@@ -220,11 +223,16 @@ class Cessna172(Aircraft):
         CM_alphadot_interp = np.interp(alpha_DEG, self.alpha_data, self.CM_alphadot_data)
         CM_delta_elev_interp = np.interp(delta_elev, self.delta_elev_data, self.CM_delta_elev_data)
 
-        self.CL = CL_interp + CL_delta_elev_interp \
-                  + (c/(2 * V)) * (CL_q_interp * q + CL_alphadot_interp * self.alpha_dot)
+        self.CL = (CL_interp +
+                   CL_delta_elev_interp +
+                   c/(2*V) * (CL_q_interp * q + CL_alphadot_interp * alpha_dot)
+                   )
         self.CD = CD_interp + CD_delta_elev_interp(delta_elev, alpha_DEG)[0, 0]
-        self.CM = CM_interp + CM_delta_elev_interp \
-                  + (c/(2 * V)) * (2*CM_q_interp * q + CM_alphadot_interp * self.alpha_dot)
+        self.CM = (CM_interp +
+                   CM_delta_elev_interp +
+                   (c/(2*V)) * (2*CM_q_interp * q +
+                                CM_alphadot_interp * alpha_dot)
+                   )
         # CM_q multiplicado por 2 hasta que alpha_dot pueda ser calculado
 
     def _calculate_aero_lat_forces_moments_coeffs(self):
@@ -251,16 +259,24 @@ class Cessna172(Aircraft):
         CN_p_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_p_data)
         CN_r_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_r_data)
         CN_delta_rud_interp = np.interp(alpha_DEG, self.alpha_data, self.CN_delta_rud_data)
-        CN_delta_aile_interp = interpolate.RectBivariateSpline(self.delta_aile_data, self.alpha_data, self.CN_delta_aile_data)
+        CN_delta_aile_interp = RectBivariateSpline(self.delta_aile_data,
+                                                   self.alpha_data,
+                                                   self.CN_delta_aile_data)
 
-        self.CY = CY_beta_interp * self.beta + CY_delta_rud_interp * delta_rud_RAD \
-                  + (b/(2 * V)) * (CY_p_interp * p + CY_r_interp * r)
-        self.Cl = 0.1*Cl_beta_interp * self.beta + Cl_delta_aile_interp \
-                  + 0.075*Cl_delta_rud_interp * delta_rud_RAD \
-                  + (b/(2 * V)) * (Cl_p_interp * p + Cl_r_interp * r)
-        self.CN = CN_beta_interp * self.beta + CN_delta_aile_interp(delta_aile, alpha_DEG)[0, 0] \
-                  + 0.075*CN_delta_rud_interp * delta_rud_RAD \
-                  + (b/(2 * V)) * (CN_p_interp * p + CN_r_interp * r)
+        self.CY = (CY_beta_interp * self.beta +
+                   CY_delta_rud_interp * delta_rud_RAD +
+                   (b/(2 * V)) * (CY_p_interp * p + CY_r_interp * r)
+                   )
+        self.Cl = (0.1*Cl_beta_interp * self.beta +
+                   Cl_delta_aile_interp +
+                   0.075*Cl_delta_rud_interp * delta_rud_RAD +
+                   (b/(2 * V)) * (Cl_p_interp * p + Cl_r_interp * r)
+                   )
+        self.CN = (CN_beta_interp * self.beta +
+                   CN_delta_aile_interp(delta_aile, alpha_DEG)[0, 0] +
+                   0.075*CN_delta_rud_interp * delta_rud_RAD +
+                   (b/(2 * V)) * (CN_p_interp * p + CN_r_interp * r)
+                   )
 
     def _calculate_aero_forces_moments(self):
         q = self.q_inf
@@ -281,7 +297,7 @@ class Cessna172(Aircraft):
         delta_t = self.controls['delta_t']
         rho = self.rho
         V = self.TAS
-        propeller_radius = self.propeller_radius
+        prop_rad = self.propeller_radius
 
         # In this model the throttle controls the revolutions of the propeller
         # linearly. Later on, a much detailed model will be included
@@ -290,10 +306,10 @@ class Cessna172(Aircraft):
 
         # We calculate the relation between the thrust coefficient Ct and the
         # advance ratio J using the program JavaProp
-        J = (np.pi * V) / (omega_RAD * propeller_radius)  # non-dimensional
+        J = (np.pi * V) / (omega_RAD * prop_rad)  # non-dimensional
         Ct_interp = np.interp(J, self.J_data, self.Ct_data)  # non-dimensional
 
-        T = ((2/np.pi)**2) * rho * (omega_RAD * propeller_radius)**2 * Ct_interp  # N
+        T = (2/np.pi)**2 * rho * (omega_RAD * prop_rad)**2 * Ct_interp  # N
 
         # We will consider that the engine is aligned along the OX (body) axis
         Ft = np.array([T, 0, 0])
