@@ -213,8 +213,8 @@ class Cessna172(Aircraft):
 
         CD_alpha_interp = np.interp(alpha_DEG, self.alpha_data, self.CD_data)
         CD_delta_elev_interp_ = RectBivariateSpline(self.delta_elev_data,
-                                                   self.alpha_data,
-                                                   self.CD_delta_elev_data)
+                                                    self.alpha_data,
+                                                    self.CD_delta_elev_data)
         CD_delta_elev_interp = CD_delta_elev_interp_(delta_elev, alpha_DEG)[0, 0]
 
         CL_alpha_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_data)
@@ -265,8 +265,8 @@ class Cessna172(Aircraft):
         CN_r = np.interp(alpha_DEG, self.alpha_data, self.CN_r_data)
         CN_delta_rud = np.interp(alpha_DEG, self.alpha_data, self.CN_delta_rud_data)
         CN_delta_aile_interp_ = RectBivariateSpline(self.delta_aile_data,
-                                                   self.alpha_data,
-                                                   self.CN_delta_aile_data)
+                                                    self.alpha_data,
+                                                    self.CN_delta_aile_data)
         CN_delta_aile_interp = CN_delta_aile_interp_(delta_aile, alpha_DEG)[0, 0]
 
         self.CY = (
