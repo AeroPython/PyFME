@@ -97,8 +97,7 @@ controls['delta_elevator'] = doublet(t_init=2,
                                      T=1,
                                      A=amplitude,
                                      time=time,
-#                                     offset=initial_controls['delta_elevator'])
-                                     offset=np.deg2rad(1.0))
+                                     offset=initial_controls['delta_elevator'])
 
 my_simulation.set_controls(time, controls)
 
