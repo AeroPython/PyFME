@@ -211,32 +211,32 @@ class Cessna172(Aircraft):
         p, q, r = self.p, self.q, self.r  # rad/s
         alpha_dot = self.alpha_dot
 
-        CD_alpha_interp = np.interp(alpha_DEG, self.alpha_data, self.CD_data)
+        CD_alpha = np.interp(alpha_DEG, self.alpha_data, self.CD_data)
         CD_delta_elev_interp_ = RectBivariateSpline(self.delta_elev_data,
-                                                   self.alpha_data,
-                                                   self.CD_delta_elev_data)
-        CD_delta_elev_interp = CD_delta_elev_interp_(delta_elev, alpha_DEG)[0, 0]
+                                                    self.alpha_data,
+                                                    self.CD_delta_elev_data)
+        CD_delta_elev = CD_delta_elev_interp_(delta_elev, alpha_DEG)[0, 0]
 
-        CL_alpha_interp = np.interp(alpha_DEG, self.alpha_data, self.CL_data)
+        CL_alpha = np.interp(alpha_DEG, self.alpha_data, self.CL_data)
         CL_alphadot = np.interp(alpha_DEG, self.alpha_data, self.CL_alphadot_data)
         CL_q = np.interp(alpha_DEG, self.alpha_data, self.CL_q_data)
-        CL_delta_elev_interp = np.interp(delta_elev, self.delta_elev_data, self.CL_delta_elev_data)
+        CL_delta_elev = np.interp(delta_elev, self.delta_elev_data, self.CL_delta_elev_data)
 
-        CM_alpha_interp = np.interp(alpha_DEG, self.alpha_data, self.CM_data)
+        CM_alpha = np.interp(alpha_DEG, self.alpha_data, self.CM_data)
         CM_q = np.interp(alpha_DEG, self.alpha_data, self.CM_q_data)
         CM_alphadot = np.interp(alpha_DEG, self.alpha_data, self.CM_alphadot_data)
-        CM_delta_elev_interp = np.interp(delta_elev, self.delta_elev_data, self.CM_delta_elev_data)
+        CM_delta_elev = np.interp(delta_elev, self.delta_elev_data, self.CM_delta_elev_data)
 
         self.CL = (
-            CL_alpha_interp +
-            CL_delta_elev_interp +
+            CL_alpha +
+            CL_delta_elev +
             c/(2*V) * (CL_q * q + CL_alphadot * alpha_dot)
         )
-        self.CD = CD_alpha_interp + CD_delta_elev_interp
+        self.CD = CD_alpha + CD_delta_elev
 
         self.CM = (
-            CM_alpha_interp +
-            CM_delta_elev_interp +
+            CM_alpha +
+            CM_delta_elev +
             c/(2*V) * (2*CM_q * q + CM_alphadot * alpha_dot)
         )
         # FIXME: CM_q multiplicado por 2 hasta que alpha_dot pueda ser calculado
@@ -258,16 +258,16 @@ class Cessna172(Aircraft):
         Cl_p = np.interp(alpha_DEG, self.alpha_data, self.Cl_p_data)
         Cl_r = np.interp(alpha_DEG, self.alpha_data, self.Cl_r_data)
         Cl_delta_rud = np.interp(alpha_DEG, self.alpha_data, self.Cl_delta_rud_data)
-        Cl_delta_aile_interp = np.interp(delta_aile, self.delta_aile_data, self.Cl_delta_aile_data)
+        Cl_delta_aile = np.interp(delta_aile, self.delta_aile_data, self.Cl_delta_aile_data)
 
         CN_beta = np.interp(alpha_DEG, self.alpha_data, self.CN_beta_data)
         CN_p = np.interp(alpha_DEG, self.alpha_data, self.CN_p_data)
         CN_r = np.interp(alpha_DEG, self.alpha_data, self.CN_r_data)
         CN_delta_rud = np.interp(alpha_DEG, self.alpha_data, self.CN_delta_rud_data)
         CN_delta_aile_interp_ = RectBivariateSpline(self.delta_aile_data,
-                                                   self.alpha_data,
-                                                   self.CN_delta_aile_data)
-        CN_delta_aile_interp = CN_delta_aile_interp_(delta_aile, alpha_DEG)[0, 0]
+                                                    self.alpha_data,
+                                                    self.CN_delta_aile_data)
+        CN_delta_aile = CN_delta_aile_interp_(delta_aile, alpha_DEG)[0, 0]
 
         self.CY = (
             CY_beta * self.beta +
@@ -277,14 +277,14 @@ class Cessna172(Aircraft):
         # XXX: Tunned Cl_delta_rud
         self.Cl = (
             0.1*Cl_beta * self.beta +
-            Cl_delta_aile_interp +
+            Cl_delta_aile +
             0.075*Cl_delta_rud * delta_rud_RAD +
             b/(2 * V) * (Cl_p * p + Cl_r * r)
         )
         # XXX: Tunned CN_delta_rud
         self.CN = (
             CN_beta * self.beta +
-            CN_delta_aile_interp +
+            CN_delta_aile +
             0.075*CN_delta_rud * delta_rud_RAD +
             b/(2 * V) * (CN_p * p + CN_r * r)
         )
