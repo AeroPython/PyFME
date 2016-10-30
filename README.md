@@ -7,6 +7,10 @@ License: MIT (see `COPYING`).
 
 **If you want to know how PyFME works, how to collaborate or get our contact information, please visit our [wiki](https://github.com/AeroPython/PyFME/wiki)**
 
+## Gallery of examples
+
+[Visit the examples gallery!](http://mybinder.org/repo/AeroPython/PyFME)
+
 ## How to install
 
 PyFME is not yet in PyPI, so you can install directly from the source code:
