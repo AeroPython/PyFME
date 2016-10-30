@@ -11,6 +11,10 @@ License: MIT (see `COPYING`).
 
 PyFME is not yet in PyPI, so you can install directly from the source code:
 
+    $ pip install https://github.com/AeroPython/PyFME/archive/master.zip
+
+If you have git installed, you can also try:
+
     $ pip install git+https://github.com/AeroPython/PyFME.git
 
 If you get any installation or compilation errors, make sure you have the latest pip and setuptools:
