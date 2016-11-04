@@ -26,6 +26,7 @@ class Aircraft(object):
         # Mass & Inertia
         self.mass = 0  # kg
         self.inertia = 0  # kg·m²
+        self.propeller_radius = 0  # m
         # Geometry
         self.Sw = 0  # m2
         self.chord = 0  # m
@@ -50,15 +51,20 @@ class Aircraft(object):
         self.CAS = 0  # Calibrated Air Speed.
         self.EAS = 0  # Equivalent Air Speed.
         self.Mach = 0  # Mach number
-
         self.q_inf = 0  # Dynamic pressure at infty (Pa)
+
+        # Angular velocities
+        self.p = 0  # rad/s
+        self.q = 0  # rad/s
+        self.r = 0  # rad/s
 
         # Angles
         self.alpha = 0  # Angle of attack (AOA).
         self.beta = 0  # Angle of sideslip (AOS).
-        # Not present in this model:
-        self.Dalpha_Dt = 0  # Rate of change of AOA.
-        self.Dbeta_Dt = 0  # Rate of change of AOS.
+        self.alpha_dot = 0  # Rate of change of AOA.
+        #NOT PRESENT self.Dbeta_Dt = 0  # Rate of change of AOS.
+        # Environment
+        self.rho = 0  # kg/m3
 
     @property
     def Ixx(self):
@@ -91,11 +97,16 @@ class Aircraft(object):
         self.alpha, self.beta, self.TAS = calculate_alpha_beta_TAS(
             u=aero_vel[0], v=aero_vel[1], w=aero_vel[2])
 
+        self.p, self.q, self.r = system.vel_ang
+
         # Setting velocities & dynamic pressure
         self.CAS = tas2cas(self.TAS, environment.p, environment.rho)
         self.EAS = tas2eas(self.TAS, environment.rho)
         self.Mach = self.TAS / environment.a
         self.q_inf = 0.5 * environment.rho * self.TAS ** 2
+
+        # Setting environment
+        self.rho = environment.rho
 
         # Gravity force
         self.gravity_force = environment.gravity_vector * self.mass

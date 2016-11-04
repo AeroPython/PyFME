@@ -3,7 +3,7 @@ __pycache__
 .idea
 build
 
-*.py[cod]
+*.py[cod~]
 
 *.egg-info
 
