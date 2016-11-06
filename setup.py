@@ -44,7 +44,7 @@ setup(
       "Topic :: Scientific/Engineering",
       "Topic :: Scientific/Engineering :: Physics",
     ],
-    long_description=io.open('README.md', encoding='utf-8').read(),
+    long_description=io.open('README.rst', encoding='utf-8').read(),
     include_package_data=True,
     zip_safe=False,
 )
