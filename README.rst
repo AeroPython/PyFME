@@ -7,12 +7,6 @@ PyFME
 :Author: AeroPython Team <aeropython@groups.io>
 :Version: 0.1.dev0
 
-.. image:: ./docs/source/logo/logo_300.png
-   :target: https://github.com/AeroPython/PyFME
-   :alt: PyFME
-   :width: 300px
-   :align: center
-
 .. |travisci| image:: https://img.shields.io/travis/AeroPython/PyFME/master.svg?style=flat-square
    :target: https://travis-ci.org/poliastro/poliastro
 
@@ -30,8 +24,14 @@ PyFME
 
 |travisci| |codecov| |docs| |license| |mailing|
 
-**If you want to know how PyFME works, how to collaborate or get our contact information,
-please visit our `wiki`_.
+.. image:: ./docs/source/logo/logo_300.png
+   :target: https://github.com/AeroPython/PyFME
+   :alt: PyFME
+   :width: 300px
+   :align: center
+
+*If you want to know how PyFME works, how to collaborate or get our contact information,
+please visit our `wiki`_*.
 
 .. _`wiki`: https://github.com/AeroPython/PyFME/wiki
 
