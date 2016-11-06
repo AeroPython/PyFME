@@ -5,7 +5,7 @@ PyFME
 :Description: Python Flight Mechanics Engine
 :Website: https://github.com/AeroPython/PyFME
 :Author: AeroPython Team <aeropython@groups.io>
-:Version: 0.1.dev0
+:Version: 0.2.dev0
 
 .. |travisci| image:: https://img.shields.io/travis/AeroPython/PyFME/master.svg?style=flat-square
    :target: https://travis-ci.org/poliastro/poliastro
@@ -24,7 +24,7 @@ PyFME
 
 |travisci| |codecov| |docs| |license| |mailing|
 
-.. image:: ./docs/source/logo/logo_300.png
+.. image:: http://pyfme.readthedocs.io/en/latest/_images/logo_300.png
    :target: https://github.com/AeroPython/PyFME
    :alt: PyFME
    :width: 300px
