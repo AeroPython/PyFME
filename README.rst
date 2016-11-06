@@ -5,19 +5,19 @@ PyFME
 :Description: Python Flight Mechanics Engine
 :Website: https://github.com/AeroPython/PyFME
 :Author: AeroPython Team <aeropython@groups.io>
-:Version: 0.1.dev0
+:Version: 0.1.0
 
-.. |travisci| image:: https://img.shields.io/travis/AeroPython/PyFME/master.svg?style=flat-square
+.. |travisci| image:: https://img.shields.io/travis/AeroPython/PyFME/0.1.x.svg?style=flat-square
    :target: https://travis-ci.org/poliastro/poliastro
 
 .. |codecov| image:: https://img.shields.io/codecov/c/github/AeroPython/PyFME.svg?style=flat-square
-   :target: https://codecov.io/gh/AeroPython/PyFME?branch=master
+   :target: https://codecov.io/gh/AeroPython/PyFME?branch=0.1.x
 
 .. |docs| image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat-square
    :target: http://pyfme.readthedocs.io/en/latest/?badge=latest
 
 .. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square
-   :target: https://github.com/AeroPython/PyFME/raw/master/COPYING
+   :target: https://github.com/AeroPython/PyFME/raw/0.1.x/COPYING
 
 .. |mailing| image:: https://img.shields.io/badge/mailing%20list-groups.io-8cbcd1.svg?style=flat-square
    :target: https://groups.io/g/aeropython

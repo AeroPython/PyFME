@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 # http://blog.ionelmc.ro/2014/05/25/python-packaging/
 setup(
     name="PyFME",
-    version="0.1.dev0",
+    version="0.1.0",
     description="Python Flight Mechanics Engine",
     author="AeroPython Team",
     author_email="aeropython@groups.io",
