@@ -24,7 +24,7 @@ PyFME
 
 |travisci| |codecov| |docs| |license| |mailing|
 
-.. image:: ./docs/source/logo/logo_300.png
+.. image:: http://pyfme.readthedocs.io/en/latest/_images/logo_300.png
    :target: https://github.com/AeroPython/PyFME
    :alt: PyFME
    :width: 300px
