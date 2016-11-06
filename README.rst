@@ -31,7 +31,7 @@ PyFME
    :align: center
 
 **If you want to know how PyFME works, how to collaborate or get our contact information,
-please visit our `wiki`_.**
+please visit our** `wiki`_
 
 .. _`wiki`: https://github.com/AeroPython/PyFME/wiki
 
