@@ -40,7 +40,7 @@ Gallery of examples
 
 `Visit the examples gallery!`_
 
-.. _`Visit the examples gallery!`: http://mybinder.org/repo/AeroPython/PyFME
+.. _`Visit the examples gallery!`: http://nbviewer.jupyter.org/github/AeroPython/PyFME/tree/master/examples/examples-notebook/
 
 How to install
 --------------
