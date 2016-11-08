@@ -4,7 +4,7 @@ Python Flight Mechanics Engine (PyFME).
 Copyright (c) AeroPython Development Team.
 Distributed under the terms of the MIT License.
 
-Example
+Example 001
 -------
 
 Cessna 172, ISA1976 integrated with Flat Earth (Euler angles).
@@ -12,8 +12,8 @@ Cessna 172, ISA1976 integrated with Flat Earth (Euler angles).
 Example with trimmed aircraft: stationary, horizontal, symmetric,
 wings level flight.
 
-The main purpose of this example is to check if the aircraft trimmed 
-in a given state maintains the trimmed flight condition.
+The purpose of this example is to check if during the aircraft's
+evolution it maintains the initially trimmed flight condition.
 """
 
 import numpy as np
@@ -56,29 +56,22 @@ trimmed_ac, trimmed_sys, trimmed_env, results = steady_state_flight_trimmer(
     aircraft, system, environment, TAS=TAS, controls_0=not_trimmed_controls,
     controls2trim=controls2trim, gamma=gamma0, turn_rate=turn_rate, verbose=1)
 
-#print(results)
-
 print()
-print('delta_elevator = ',"%8.4f" % np.rad2deg(results['delta_elevator']), 'deg')
-print('delta_aileron = ', "%8.4f" % np.rad2deg(results['delta_aileron']), 'deg')
-print('delta_rudder = ', "%8.4f" % np.rad2deg(results['delta_rudder']), 'deg')
-print('delta_t = ', "%8.4f" % results['delta_t'], '%')
-print()
+print('delta_elev = ', "%8.4f" % np.rad2deg(results['delta_elevator']), 'deg')
+print('delta_aile = ', "%8.4f" % np.rad2deg(results['delta_aileron']), 'deg')
+print('delta_rud = ', "%8.4f" % np.rad2deg(results['delta_rudder']), 'deg')
+print('delta_t = ', "%8.4f" % results['delta_t'], '%', '\n')
 print('alpha = ', "%8.4f" % np.rad2deg(results['alpha']), 'deg')
-print('beta = ', "%8.4f" % np.rad2deg(results['beta']), 'deg')
-print()
+print('beta = ', "%8.4f" % np.rad2deg(results['beta']), 'deg', '\n')
 print('u = ', "%8.4f" % results['u'], 'm/s')
 print('v = ', "%8.4f" % results['v'], 'm/s')
-print('w = ', "%8.4f" % results['w'], 'm/s')
-print()
+print('w = ', "%8.4f" % results['w'], 'm/s', '\n')
 print('psi = ', "%8.4f" % np.rad2deg(psi0), 'deg')
 print('theta = ', "%8.4f" % np.rad2deg(results['theta']), 'deg')
-print('phi = ', "%8.4f" % np.rad2deg(results['phi']), 'deg')
-print()
+print('phi = ', "%8.4f" % np.rad2deg(results['phi']), 'deg', '\n')
 print('p =', "%8.4f" % results['p'], 'rad/s')
 print('q =', "%8.4f" % results['q'], 'rad/s')
 print('r =', "%8.4f" % results['r'], 'rad/s')
-print()
 
 my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
