@@ -1,0 +1,73 @@
+ *
+ *   Cessna 172
+ *   Input file for Digital Datcom
+ *
+ *   PyFME @ Aeropython
+ *
+CASEID Cessna172 : Fuselage + Wing + Aileron
+DIM M
+DERIV RAD
+ * Flight condition
+ $FLTCON LOOP=3.0,
+ NMACH=1.0, MACH(1)=0.16,
+ NALT=1.0, ALT(1)=1500.0,
+ NALPHA=12.0, ALSCHD(1)=-7.5,-5.0,-2.5,0.0,2.5,5.,7.5,10.,15.,17.,18.,19.5$
+ * Location of CG, wing, vertical and horizontal tails
+ $SYNTHS
+ XCG=2.22, ZCG=0.99,
+ XW=1.84, ZW=2.07, ALIW=1.5,
+ XH=5.95, ZH=1.16, ALIH=0.0,
+ XV=6.18, ZV=1.29,
+ SCALE=1.0, VERTUP=.TRUE.$
+ * Body geometry
+ $BODY NX=20.0, ITYPE=2.0, METHOD=2.0,
+ X(1)=0.10,0.26,0.55,0.67,1.16,1.53,1.75,1.88,2.59,3.09,3.52,
+ 3.95,4.39,4.85,5.41,5.87,6.33,6.79,7.22,7.57,
+ S(1)=0.71,1.9,2.02,2.13,2.26,2.6,2.93,3.21,3.26,2.99,
+ 2.45,2.17,1.85,1.63,1.39,1.13,0.93,0.65,0.45,0.06,
+ P(1)=5.36,5.72,5.63,5.71,6.24,6.63,6.95,6.98,6.77,6.09,
+ 6.09,5.5,5.36,5.21,5.05,4.97,4.93,4.89,4.87,
+ R(1)=0.17,0.49,0.55,0.58,0.64,0.67,0.71,0.74,0.75,0.69,0.63,0.57,
+ 0.52,0.44,0.38,0.31,0.25,0.17,0.12,0.01,
+ ZU(1)=1.47,1.60,1.62,1.63,1.63,1.89,2.04,2.15,2.12,2.04,1.76,
+ 1.57,1.51,1.50,1.46,1.42,1.38,1.35,1.32,1.29,
+ ZL(1)=1.14,0.88,0.72,0.70,0.61,0.59,0.59,0.62,0.66,0.71,0.75,0.78,
+ 0.83,0.85,0.88,0.92,0.97,0.01,1.09,1.14$
+NACA-W-4-2412
+ * Wing airfoil and planform
+ $WGPLNF
+ CHRDR=1.626, CHRDBP=1.626, CHRDTP=1.13,
+ SSPN=5.49, SSPNE=4.75, SSPNOP=2.941,
+ SAVSI=0.0, SAVSO=3.0, CHSTAT=0.0,
+ TWISTA=-3.0, DHDADI=1.7333, DHDADO=1.7333, TYPE=1.0$
+ * Aileron geometry 
+ $ASYFLP 
+ NDELTA=9.0,STYPE=4.0, 
+ DELTAL(1)=-15.,-10.,-5.,-2.5,0.,5.,10.,15.,20.,                              
+ DELTAR(1)=20.,15.,10.,5.,0.,-2.5,-5.,-10.,-15.,                          
+ CHRDFI=0.312, CHRDFO=0.312,                                 
+ SPANFI=2.44, SPANFO=5.15$ 
+SAVE
+NEXT CASE
+CASEID Cessna172 : Vertical and Horizontal Stabilizer + Elevator
+DAMP
+NACA-V-4-0009
+ * Vertical tail planform 
+ $VTPLNF
+ CHRDR=1.39, CHRDTP=0.65,
+ SSPN=1.36, SSPNE=1.30,
+ SAVSI=35.0, CHSTAT=0.25, TYPE=1.0$
+NACA-H-4-0012
+ * Horizontal tail planform 
+ $HTPLNF
+ CHRDR=1.39, CHRDTP=0.77,
+ SSPN=1.73, SSPNE=1.50,
+ SAVSI=9.0, CHSTAT=0.0, TWISTA=0.0,
+ DHDADI=0.0, TYPE=1.0$
+ * Elevator geometry
+ $SYMFLP FTYPE=1.0,
+ SPANFI=0.23, SPANFO=1.727,
+ CHRDFI=0.56, CHRDFO=0.27,
+ NTYPE=1.0, NDELTA=9.0,
+ DELTA(1)=-26.0,-20.0,-10.0,-5.0,0.0,7.5,15.0,22.5,28.0$
+ 
