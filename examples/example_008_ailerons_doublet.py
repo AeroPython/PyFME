@@ -97,7 +97,7 @@ controls['delta_aileron'] = doublet(t_init=2,
                                     T=1,
                                     A=amplitude,
                                     time=time,
-                                    offset=np.deg2rad(2.5))
+                                    offset=np.deg2rad(0))
 #                                     offset=initial_controls['delta_aileron'])
 
 
