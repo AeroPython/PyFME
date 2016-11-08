@@ -40,7 +40,7 @@ Gallery of examples
 
 `Visit the examples gallery!`_
 
-.. _`Visit the examples gallery!`: http://nbviewer.jupyter.org/github/AeroPython/PyFME/tree/master/examples/examples-notebook/
+.. _`Visit the examples gallery!`: http://mybinder.org/repo/AeroPython/PyFME
 
 How to install
 --------------
@@ -64,4 +64,3 @@ Install in editable mode and call `py.test`::
 
     $ pip install -e .
     $ py.test
- 
