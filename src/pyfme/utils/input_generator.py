@@ -44,6 +44,7 @@ def step(t_init, T, A, time, offset=0, var=None):
             raise ValueError('var and time must have the same size')
 
     step_input[(time >= t_init) & (time <= t_init + T)] += A + float(offset)
+
     return step_input
 
 
@@ -84,6 +85,7 @@ def doublet(t_init, T, A, time, offset=0, var=None):
 
     part_2 = (time > t_init + T / 2) & (time <= t_init + T)
     doublet_input[part_2] += - A / 2 + float(offset)
+
     return doublet_input
 
 
@@ -122,6 +124,7 @@ def ramp(t_init, T, A, time, offset=0, var=None):
     time_input = time[(time >= t_init) & (time <= t_init + T)]
     condition = (time >= t_init) & (time <= t_init + T)
     ramp_input[condition] += (A / T) * (time_input - t_init) + float(offset)
+
     return ramp_input
 
 
@@ -165,6 +168,7 @@ def harmonic(t_init, T, A, time, f, phase=0, offset=0, var=None):
     harmonic_input[(time >= t_init) & (time <= t_init + T)] += \
         A / 2 * np.sin(2 * np.pi * f * (time_input - t_init) + phase) + \
         float(offset)
+
     return harmonic_input
 
 
@@ -195,4 +199,5 @@ def sinusoid(t_init, T, A, time, phase=0, offset=0, var=None):
     """
     output = harmonic(t_init, T, A, time, f=1/T, phase=phase, offset=offset,
                       var=var)
+
     return output
