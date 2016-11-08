@@ -55,7 +55,6 @@ trimmed_ac, trimmed_sys, trimmed_env, results = steady_state_flight_trimmer(
     aircraft, system, environment, TAS=TAS, controls_0=not_trimmed_controls,
     controls2trim=controls2trim, gamma=gamma0, turn_rate=turn_rate, verbose=1)
 
-np.set_printoptions(precision=2)
 print()
 print('delta_elev = ', "%8.4f" % np.rad2deg(results['delta_elevator']), 'deg')
 print('delta_aile = ', "%8.4f" % np.rad2deg(results['delta_aileron']), 'deg')
