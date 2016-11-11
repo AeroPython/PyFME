@@ -36,10 +36,10 @@ environment = Environment(atmosphere, gravity, wind)
 
 # Initial conditions.
 TAS = 45  # m/s
-h0 = 2000  # m
+h0 = 3000  # m
 psi0 = 1.0  # rad
 x0, y0 = 0, 0  # m
-turn_rate = 0.05  # rad/s
+turn_rate = 0.25  # rad/s
 gamma0 = 0.05  # rad
 
 system = EulerFlatEarth(lat=0, lon=0, h=h0, psi=psi0, x_earth=x0, y_earth=y0)
@@ -81,7 +81,7 @@ print()
 
 my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
-tfin = 20  # seconds
+tfin = 80  # seconds
 N = tfin * 100 + 1
 time = np.linspace(0, tfin, N)
 initial_controls = trimmed_ac.controls
