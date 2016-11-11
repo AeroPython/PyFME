@@ -8,7 +8,7 @@ PyFME
 :Version: 0.2.dev0
 
 .. |travisci| image:: https://img.shields.io/travis/AeroPython/PyFME/master.svg?style=flat-square
-   :target: https://travis-ci.org/poliastro/poliastro
+   :target: https://travis-ci.org/AeroPython/PyFME
 
 .. |codecov| image:: https://img.shields.io/codecov/c/github/AeroPython/PyFME.svg?style=flat-square
    :target: https://codecov.io/gh/AeroPython/PyFME?branch=master
