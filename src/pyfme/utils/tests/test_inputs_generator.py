@@ -54,8 +54,8 @@ def test_step_offset():
     time = np.linspace(0, 10, 11)
     offset = 2.6
 
-    expected_input = np.zeros([11]) + offset
-    expected_input[0:6] += A
+    expected_input = np.zeros([11])
+    expected_input[0:6] += A + offset
 
     step_input = step(t_init, T, A, time, offset=offset, var=None)
 
@@ -87,8 +87,8 @@ def test_step_var_and_offset():
     var = np.ones_like(time)
     var[0::2] = -1
 
-    expected_input = var + offset
-    expected_input[0:6] += A
+    expected_input = var
+    expected_input[0:6] += A + offset
 
     step_input = step(t_init, T, A, time, offset=offset, var=var)
 
@@ -105,7 +105,7 @@ def test_step_wrong_size_var():
     with pytest.raises(ValueError) as excinfo:
         step(t_init, T, A, time, offset=0, var=var)
     assert ("ValueError: var and time must have the same size"
-                in excinfo.exconly())
+            in excinfo.exconly())
 
 
 def test_step_wrong_not_scalar_offset():
@@ -157,9 +157,9 @@ def test_doublet_offset():
     time = np.linspace(0, 10, 11)
     offset = 2.6
 
-    expected_input = np.zeros([11]) + offset
-    expected_input[0:3] += A/2
-    expected_input[3:6] += -A/2
+    expected_input = np.zeros([11])
+    expected_input[0:3] += A/2 + offset
+    expected_input[3:6] += -A/2 + offset
 
     doublet_input = doublet(t_init, T, A, time, offset=offset, var=None)
 
@@ -192,9 +192,9 @@ def test_doublet_var_and_offset():
     var = np.ones_like(time)
     var[0::2] = -1
 
-    expected_input = var + offset
-    expected_input[0:3] += A/2
-    expected_input[3:6] += -A/2
+    expected_input = var
+    expected_input[0:3] += A/2 + offset
+    expected_input[3:6] += -A/2 + offset
 
     doublet_input = doublet(t_init, T, A, time, offset=offset, var=var)
 
@@ -211,7 +211,7 @@ def test_doublet_wrong_size_var():
     with pytest.raises(ValueError) as excinfo:
         doublet(t_init, T, A, time, offset=0, var=var)
     assert ("ValueError: var and time must have the same size"
-                in excinfo.exconly())
+            in excinfo.exconly())
 
 
 def test_doublet_wrong_not_scalar_offset():
@@ -247,8 +247,8 @@ def test_ramp_offset():
     time = np.linspace(0, 10, 11)
     offset = 1
 
-    expected_input = np.zeros([11]) + offset
-    expected_input[0:5] += np.array([0, A/4, A/2, 3*A/4, A])
+    expected_input = np.zeros([11])
+    expected_input[0:5] += np.array([0, A/4, A/2, 3*A/4, A]) + offset
 
     ramp_input = ramp(t_init, T, A, time, offset=offset, var=None)
 
@@ -280,8 +280,8 @@ def test_ramp_var_and_offset():
     var = np.ones_like(time)
     var[0::2] = -1
 
-    expected_input = var + offset
-    expected_input[0:5] += np.array([0, A/4, A/2, 3*A/4, A])
+    expected_input = var
+    expected_input[0:5] += np.array([0, A/4, A/2, 3*A/4, A]) + offset
 
     ramp_input = ramp(t_init, T, A, time, offset=offset, var=var)
 
@@ -298,7 +298,7 @@ def test_ramp_wrong_size_var():
     with pytest.raises(ValueError) as excinfo:
         doublet(t_init, T, A, time, offset=0, var=var)
     assert ("ValueError: var and time must have the same size"
-                in excinfo.exconly())
+            in excinfo.exconly())
 
 
 def test_ramp_wrong_not_scalar_offset():
@@ -334,8 +334,8 @@ def test_sinusoid_offset():
     time = np.linspace(0, 10, 11)
     offset = 1
 
-    expected_input = np.zeros([11]) + offset
-    expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0])
+    expected_input = np.zeros([11])
+    expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0]) + offset
 
     sinusoid_input = sinusoid(t_init, T, A, time, offset=offset)
 
@@ -347,7 +347,7 @@ def test_sinusoid_phase():
     T = 4.
     A = 3.
     time = np.linspace(0, 10, 11)
-    phase= np.pi/2
+    phase = np.pi/2
 
     expected_input = np.zeros([11])
     expected_input[0:5] += np.array([A/2, 0, -A/2, 0, A/2])
@@ -382,8 +382,8 @@ def test_sinusoid_var_and_offset():
     var = np.ones_like(time)
     var[0::2] = -1
 
-    expected_input = var + offset
-    expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0])
+    expected_input = var
+    expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0]) + offset
 
     sinusoid_input = sinusoid(t_init, T, A, time, offset=offset, var=var)
 
@@ -400,7 +400,7 @@ def test_sinusoid_wrong_size_var():
     with pytest.raises(ValueError) as excinfo:
         sinusoid(t_init, T, A, time, offset=0, var=var)
     assert ("ValueError: var and time must have the same size"
-                in excinfo.exconly())
+            in excinfo.exconly())
 
 
 def test_sinusoid_wrong_not_scalar_offset():
@@ -425,7 +425,8 @@ def test_harmonic():
     expected_input = np.zeros([11])
     expected_input[0:5] = np.array([0, A/2, 0, -A/2, 0])
 
-    harmonic_input =  harmonic(t_init, T, A, time, f, phase=0, offset=0, var=None)
+    harmonic_input = harmonic(t_init, T, A, time, f, phase=0,
+                              offset=0, var=None)
 
     assert_almost_equal(harmonic_input, expected_input)
 
@@ -438,8 +439,8 @@ def test_harmonic_offset():
     offset = 1
     f = 0.25
 
-    expected_input = np.zeros([11]) + offset
-    expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0])
+    expected_input = np.zeros([11])
+    expected_input[0:5] += np.array([0, A/2, 0, -A/2, 0]) + offset
 
     harmonic_input = harmonic(t_init, T, A, time, f, offset=offset)
 
@@ -451,7 +452,7 @@ def test_harmonic_phase():
     T = 4.
     A = 3.
     time = np.linspace(0, 10, 11)
-    phase= np.pi/2
+    phase = np.pi/2
     f = 0.25
 
     expected_input = np.zeros([11])
@@ -489,8 +490,8 @@ def test_harmonic_var_and_offset():
     var[0::2] = -1
     f = 0.25
 
-    expected_input = var + offset
-    expected_input[0:5] += np.array([0, A/2.0, 0, -A/2, 0])
+    expected_input = var
+    expected_input[0:5] += np.array([0, A/2.0, 0, -A/2, 0]) + offset
 
     harmonic_input = harmonic(t_init, T, A, time, f, offset=offset, var=var)
 
@@ -508,7 +509,7 @@ def test_harmonic_wrong_size_var():
     with pytest.raises(ValueError) as excinfo:
         harmonic(t_init, T, A, time, f, offset=0, var=var)
     assert ("ValueError: var and time must have the same size"
-                in excinfo.exconly())
+            in excinfo.exconly())
 
 
 def test_harmonic_wrong_not_scalar_offset():
