@@ -4,14 +4,16 @@ Python Flight Mechanics Engine (PyFME).
 Copyright (c) AeroPython Development Team.
 Distributed under the terms of the MIT License.
 
-Example
+Example 006
 -------
 
 Cessna 172, ISA1976 integrated with Flat Earth (Euler angles).
 
-Evolution of the aircraft after a pitch perturbation (delta doublet 
-applied on the elevator).
-Trimmed in stationary, horizontal, symmetric, wings level flight.
+Evolution of the aircraft after a pitch perturbation (delta doublet
+applied to the elevator) at t=1.
+
+Initially trimmed to a stationary, horizontal, symmetric, wings level
+flight.
 """
 
 import numpy as np
@@ -55,29 +57,22 @@ trimmed_ac, trimmed_sys, trimmed_env, results = steady_state_flight_trimmer(
     aircraft, system, environment, TAS=TAS, controls_0=not_trimmed_controls,
     controls2trim=controls2trim, gamma=gamma0, turn_rate=turn_rate, verbose=1)
 
-#print(results)
-
 print()
-print('delta_elevator = ',"%8.4f" % np.rad2deg(results['delta_elevator']), 'deg')
-print('delta_aileron = ', "%8.4f" % np.rad2deg(results['delta_aileron']), 'deg')
-print('delta_rudder = ', "%8.4f" % np.rad2deg(results['delta_rudder']), 'deg')
-print('delta_t = ', "%8.4f" % results['delta_t'], '%')
-print()
+print('delta_elev = ', "%8.4f" % np.rad2deg(results['delta_elevator']), 'deg')
+print('delta_aile = ', "%8.4f" % np.rad2deg(results['delta_aileron']), 'deg')
+print('delta_rud = ', "%8.4f" % np.rad2deg(results['delta_rudder']), 'deg')
+print('delta_t = ', "%8.4f" % results['delta_t'], '%', '\n')
 print('alpha = ', "%8.4f" % np.rad2deg(results['alpha']), 'deg')
-print('beta = ', "%8.4f" % np.rad2deg(results['beta']), 'deg')
-print()
+print('beta = ', "%8.4f" % np.rad2deg(results['beta']), 'deg', '\n')
 print('u = ', "%8.4f" % results['u'], 'm/s')
 print('v = ', "%8.4f" % results['v'], 'm/s')
-print('w = ', "%8.4f" % results['w'], 'm/s')
-print()
+print('w = ', "%8.4f" % results['w'], 'm/s', '\n')
 print('psi = ', "%8.4f" % np.rad2deg(psi0), 'deg')
 print('theta = ', "%8.4f" % np.rad2deg(results['theta']), 'deg')
-print('phi = ', "%8.4f" % np.rad2deg(results['phi']), 'deg')
-print()
+print('phi = ', "%8.4f" % np.rad2deg(results['phi']), 'deg', '\n')
 print('p =', "%8.4f" % results['p'], 'rad/s')
 print('q =', "%8.4f" % results['q'], 'rad/s')
 print('r =', "%8.4f" % results['r'], 'rad/s')
-print()
 
 my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
@@ -90,8 +85,8 @@ controls = {}
 for control_name, control_value in initial_controls.items():
     controls[control_name] = np.ones_like(time) * control_value
 
-# Elevator doublet 
-# Elevator travel: +28º/-26º
+# Elevator doublet
+# Elevator max travel: +28º/-26º
 amplitude = np.deg2rad(20)
 controls['delta_elevator'] = doublet(t_init=2,
                                      T=1,
@@ -104,10 +99,10 @@ my_simulation.set_controls(time, controls)
 par_list = ['x_earth', 'y_earth', 'height',
             'psi', 'theta', 'phi',
             'u', 'v', 'w',
-#            'v_north', 'v_east', 'v_down',
+            'v_north', 'v_east', 'v_down',
             'p', 'q', 'r',
             'alpha', 'beta', 'TAS',
-#            'F_xb', 'F_yb', 'F_zb',
+            'F_xb', 'F_yb', 'F_zb',
             'M_xb', 'M_yb', 'M_zb']
 
 my_simulation.set_par_dict(par_list)

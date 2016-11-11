@@ -36,14 +36,14 @@ def step(t_init, T, A, time, offset=0, var=None):
     """
 
     if var is None:
-        step_input = np.ones_like(time) * float(offset)
+        step_input = np.zeros_like(time)
     else:
         if np.size(var) == np.size(time):
-            step_input = float(offset) + var
+            step_input = var
         else:
             raise ValueError('var and time must have the same size')
 
-    step_input[(time >= t_init) & (time <= t_init + T)] += A
+    step_input[(time >= t_init) & (time <= t_init + T)] += A + float(offset)
 
     return step_input
 
@@ -73,18 +73,19 @@ def doublet(t_init, T, A, time, offset=0, var=None):
     """
 
     if var is None:
-        doublet_input = np.ones_like(time) * float(offset)
+        doublet_input = np.zeros_like(time)
     else:
         if np.size(var) == np.size(time):
-            doublet_input = float(offset) + var
+            doublet_input = var
         else:
             raise ValueError('var and time must have the same size')
 
     part_1 = (time >= t_init) & (time <= t_init + T / 2)
-    doublet_input[part_1] += A / 2
+    doublet_input[part_1] += A / 2 + float(offset)
 
     part_2 = (time > t_init + T / 2) & (time <= t_init + T)
-    doublet_input[part_2] += - A / 2
+    doublet_input[part_2] += - A / 2 + float(offset)
+
     return doublet_input
 
 
@@ -113,16 +114,17 @@ def ramp(t_init, T, A, time, offset=0, var=None):
     """
 
     if var is None:
-        ramp_input = np.ones_like(time) * float(offset)
+        ramp_input = np.zeros_like(time)
     else:
         if np.size(var) == np.size(time):
-            ramp_input = var + offset
+            ramp_input = var
         else:
             raise ValueError('var and time must have the same size')
 
     time_input = time[(time >= t_init) & (time <= t_init + T)]
     condition = (time >= t_init) & (time <= t_init + T)
-    ramp_input[condition] += (A / T) * (time_input - t_init)
+    ramp_input[condition] += (A / T) * (time_input - t_init) + float(offset)
+
     return ramp_input
 
 
@@ -156,14 +158,17 @@ def harmonic(t_init, T, A, time, f, phase=0, offset=0, var=None):
     time_input = time[(time >= t_init) & (time <= t_init + T)]
 
     if var is None:
-        harmonic_input = np.ones_like(time) * float(offset)
+        harmonic_input = np.zeros_like(time)
     else:
         if np.size(var) == np.size(time):
-            harmonic_input = var + float(offset)
+            harmonic_input = var
         else:
             raise ValueError('var and time must have the same size')
+
     harmonic_input[(time >= t_init) & (time <= t_init + T)] += \
-        A / 2 * np.sin(2 * np.pi * f * (time_input - t_init) + phase)
+        A / 2 * np.sin(2 * np.pi * f * (time_input - t_init) + phase) + \
+        float(offset)
+
     return harmonic_input
 
 
@@ -194,4 +199,5 @@ def sinusoid(t_init, T, A, time, phase=0, offset=0, var=None):
     """
     output = harmonic(t_init, T, A, time, f=1/T, phase=phase, offset=offset,
                       var=var)
+
     return output

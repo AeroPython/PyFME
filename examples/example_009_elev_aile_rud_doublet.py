@@ -4,14 +4,18 @@ Python Flight Mechanics Engine (PyFME).
 Copyright (c) AeroPython Development Team.
 Distributed under the terms of the MIT License.
 
-Example 000
+Example 009
 -------
 
 Cessna 172, ISA1976 integrated with Flat Earth (Euler angles).
 
-Evolution of the aircraft with no deflecion of control surfaces.
+Evolution of the aircraft after a pitch perturbation (delta doublet
+applied to the elevator) at t=2, a roll perturbation (delta doublet
+applied to the ailerons) at t=5 and a yaw perturbation (delta doublet
+applied to the rudder) at t=10.
 
-Initially trimmed.
+Initially trimmed to a stationary, horizontal, symmetric, wings level
+flight.
 """
 
 import numpy as np
@@ -37,14 +41,14 @@ environment = Environment(atmosphere, gravity, wind)
 # Initial conditions.
 TAS = 45  # m/s
 h0 = 2000  # m
-psi0 = 1.0  # rad
+psi0 = 1  # rad
 x0, y0 = 0, 0  # m
 turn_rate = 0.0  # rad/s
-gamma0 = 0.0  # rad
+gamma0 = 0.00  # rad
 
 system = EulerFlatEarth(lat=0, lon=0, h=h0, psi=psi0, x_earth=x0, y_earth=y0)
 
-not_trimmed_controls = {'delta_elevator': 0.05,
+not_trimmed_controls = {'delta_elevator': 0.0,
                         'delta_aileron': 0.01 * np.sign(turn_rate),
                         'delta_rudder': 0.01 * np.sign(turn_rate),
                         'delta_t': 0.5}
@@ -54,6 +58,8 @@ controls2trim = ['delta_elevator', 'delta_aileron', 'delta_rudder', 'delta_t']
 trimmed_ac, trimmed_sys, trimmed_env, results = steady_state_flight_trimmer(
     aircraft, system, environment, TAS=TAS, controls_0=not_trimmed_controls,
     controls2trim=controls2trim, gamma=gamma0, turn_rate=turn_rate, verbose=1)
+
+# print(results)
 
 print()
 print('delta_elev = ', "%8.4f" % np.rad2deg(results['delta_elevator']), 'deg')
@@ -72,22 +78,43 @@ print('p =', "%8.4f" % results['p'], 'rad/s')
 print('q =', "%8.4f" % results['q'], 'rad/s')
 print('r =', "%8.4f" % results['r'], 'rad/s')
 
-no_controls = {'delta_elevator': 0.0,
-               'delta_aileron': 0.0,
-               'delta_rudder': 0.0,
-               'delta_t': 0.0}
-
 my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
 
-tfin = 20  # seconds
+tfin = 15  # seconds
 N = tfin * 100 + 1
 time = np.linspace(0, tfin, N)
-
-initial_controls = no_controls
+initial_controls = trimmed_ac.controls
 
 controls = {}
 for control_name, control_value in initial_controls.items():
     controls[control_name] = np.ones_like(time) * control_value
+
+# Elevator, aileron and rudder doublets
+# Elevator max travel: +28º/-26º
+# Aileron max travel: +20º/-15º
+# Rudder max travel: +16º/-16º
+
+amplitude_elev = np.deg2rad(26)
+controls['delta_elevator'] = initial_controls['delta_elevator'] + \
+                             doublet(t_init=2,
+                                     T=2,
+                                     A=amplitude_elev,
+                                     time=time,
+                                     offset=np.deg2rad(0.0))
+
+amplitude_aile = np.deg2rad(15)
+controls['delta_aileron'] = doublet(t_init=5,
+                                    T=2,
+                                    A=amplitude_aile,
+                                    time=time,
+                                    offset=np.deg2rad(0.0))
+
+amplitude_rud = np.deg2rad(32)
+controls['delta_rudder'] = doublet(t_init=10,
+                                   T=2,
+                                   A=amplitude_rud,
+                                   time=time,
+                                   offset=np.deg2rad(0.0))
 
 my_simulation.set_controls(time, controls)
 
@@ -115,17 +142,17 @@ for ii in range(len(par_list) // 3):
         ax[jj].set_ylabel(par)
         ax[jj].set_xlabel('time (s)')
 
-fig = plt.figure()
-ax = Axes3D(fig)
-ax.plot(my_simulation.par_dict['x_earth'],
-        my_simulation.par_dict['y_earth'],
-        my_simulation.par_dict['height'])
+# fig = plt.figure()
+# ax = Axes3D(fig)
+# ax.plot(my_simulation.par_dict['x_earth'],
+#        my_simulation.par_dict['y_earth'],
+#        my_simulation.par_dict['height'])
 
-ax.plot(my_simulation.par_dict['x_earth'],
-        my_simulation.par_dict['y_earth'],
-        my_simulation.par_dict['height'] * 0)
-ax.set_xlabel('x_earth')
-ax.set_ylabel('y_earth')
-ax.set_zlabel('z_earth')
+# ax.plot(my_simulation.par_dict['x_earth'],
+#        my_simulation.par_dict['y_earth'],
+#        my_simulation.par_dict['height'] * 0)
+# ax.set_xlabel('x_earth')
+# ax.set_ylabel('y_earth')
+# ax.set_zlabel('z_earth')
 
 plt.show()
