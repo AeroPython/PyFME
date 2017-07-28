@@ -33,8 +33,26 @@ class EulerFlatEarth(DynamicSystem):
                          callback=callback,
                          **integrator_params)
 
-    def dynamic_system_state_to_full_system_state(self):
-        pass
+    def dynamic_system_state_to_full_system_state(self, mass, inertia,forces, moments):
+        full_system_state = {}
+
+        t = self.time
+        y = self.state
+        y_dot = self.dynamic_system_equations(t, y, mass, inertia, forces, moments)
+
+        full_system_state['geodetic_coordinates'] = np.zeros(3)
+        full_system_state['geocentric_coordinates'] = np.zeros(3)
+        full_system_state['earth_coordinates'] = y[9:12]
+        full_system_state['euler_angles'] = y[6:9]
+        full_system_state['quaternions'] = np.zeros(4)
+        full_system_state['vel_body'] = y[0:3]
+        full_system_state['vel_NED'] = y_dot[9:12]
+        full_system_state['vel_ang'] = y[3:6]
+        full_system_state['accel_body'] = y_dot[0:3]
+        full_system_state['accel_NED'] = np.zeros(3)
+        full_system_state['accel_ang'] = y_dot[6:9]
+
+        return full_system_state
 
     @staticmethod
     def dynamic_system_equations(time, state_vector, mass, inertia, forces,

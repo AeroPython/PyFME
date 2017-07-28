@@ -15,10 +15,22 @@ from scipy.integrate import ode
 
 class System(object):
 
-    def __init__(self, dynamic_system):
+    full_system_state_names = ('geodetic_coordinates',
+                               'geocentric_coordinates',
+                               'earth_coordinates',
+                               'euler_angles',
+                               'quaternions',
+                               'vel_body',
+                               'vel_NED',
+                               'vel_ang',
+                               'accel_body',
+                               'accel_NED',
+                               'accel_ang')
+
+    def __init__(self, model):
 
         # Dynamic system
-        self._dynamic_system = dynamic_system
+        self.model = model
 
         # POSITION
         # Geodetic coordinates: (geodetic lat, lon, height above ellipsoid)
@@ -138,7 +150,14 @@ class System(object):
 
     @property
     def time(self):
-        return self._dynamic_system.time
+        return self.model.time
+
+    def set_full_system_state(self, mass, inertia, forces, moments):
+        rv = self.model.dynamic_system_state_to_full_system_state(
+            mass, inertia, forces, moments)
+
+        for name in self.full_system_state_names:
+            self.__setattr__(name, rv[name])
 
 
 class DynamicSystem(object):
@@ -185,7 +204,7 @@ class DynamicSystem(object):
             return self.state
 
     @abstractmethod
-    def dynamic_system_state_to_full_system_state(self):
+    def dynamic_system_state_to_full_system_state(self, mass, inertia,forces, moments):
         raise NotImplementedError
 
     @abstractstaticmethod
