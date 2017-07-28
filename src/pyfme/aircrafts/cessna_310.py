@@ -137,9 +137,6 @@ class Cessna310(Aircraft):
         # Angles
         self.alpha = 0  # Angle of attack (AOA).
         self.beta = 0  # Angle of sideslip (AOS).
-        # Not present in this model:
-        self.Dalpha_Dt = 0  # Rate of change of AOA.
-        self.Dbeta_Dt = 0  # Rate of change of AOS.
 
     def _calculate_aero_lon_forces_moments_coeffs(self):
 
@@ -179,11 +176,15 @@ class Cessna310(Aircraft):
         return Ft
 
 
-    def calculate_forces_and_moments(self):
+    def calculate_forces_and_moments(self, system, environment, controls):
+
+        # Update controls and aerodynamics
+        super().calculate_forces_and_moments(system, environment, controls)
 
         Ft = self._calculate_thrust_forces_moments()
         L, D, Y, l, m, n = self._calculate_aero_forces_moments()
-        Fg = self.gravity_force
+
+        Fg = environment.gravity_body * self.mass
         # FIXME: is it necessary to use wind2body conversion?
         Fa = np.array([-D, Y, -L])
 
