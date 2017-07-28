@@ -7,91 +7,86 @@ Dynamic Systems
 ---------------
 
 """
-from abc import abstractmethod
+from abc import abstractmethod, abstractstaticmethod
 
 import numpy as np
 from scipy.integrate import ode
 
-from pyfme.utils.coordinates import body2hor
-
 
 class System(object):
-    """Generic system class contains the state vector and other derived
-    variables related to the system's state.
-    """
 
-    def __init__(self, lat, lon, h, psi=0, x_earth=0, y_earth=0):
+    def __init__(self, dynamic_system):
 
-        # ABOUT UNITS: assume international system units unless otherwise
-        # indicated. (meters, kilograms, seconds, kelvin, Newtons, Pascal,
-        # radians...)
+        # Dynamic system
+        self._dynamic_system = dynamic_system
+
         # POSITION
-        # Geographic coordinates: (geodetic lat, lon, height above ellipsoid)
-        self.coord_geographic = np.array([lat, lon, h], dtype=float)
+        # Geodetic coordinates: (geodetic lat, lon, height above ellipsoid)
+        self.geodetic_coordinates = np.zeros(3)  # rad
         # Geocentric coordinates (rotating with Earth): (x_geo, y_geo, z_geo)
-        # TODO: implement geographic2geocentric conversion:
-        # self.coord_geocentric = np.zeros_like([3], dtype=float)
+        self.geocentric_coordinates = np.zeros(3)  # m
+        # Earth coordinates (x_earth, y_earth, z_earth)
+        self.earth_coordinates = np.zeros(3)  # m
 
-        # Earth coordinates (Axis parallel to local horizon NED at h=0 at
-        # the initial position of the airplane): (x_earth, y_earth, z_earth)
-        self.coord_earth = np.array([x_earth, y_earth, -h], dtype=float)
-
-        # ATTITUDE (psi, theta, phi).
-        self.euler_angles = np.zeros([3], dtype=float)
-        self.euler_angles[0] = psi
-        # TODO: convert to quaternions
-        # self.quaternions = np.zeros([4], dtype=float)
+        # ATTITUDE
+        # Euler angles (psi, theta, phi)
+        self.euler_angles = np.zeros(3)  # rad
+        # Quaternions (q0, q1, q2, q3)
+        self.quaternions = np.zeros(4)
 
         # ABSOLUTE VELOCITY.
-        # Body:
-        self.vel_body = np.zeros_like([3], dtype=float)
-        # Local horizon (NED):
-        self.vel_NED = np.zeros_like([3], dtype=float)
+        # Body axis
+        self.vel_body = np.zeros(3)  # m/s
+        # Local horizon (NED)
+        self.vel_NED = np.zeros(3)  # m/s
 
         # ANGULAR VELOCITY: (p, q, r)
-        self.vel_ang = np.zeros_like([3], dtype=float)
+        self.vel_ang = np.zeros(3)  # rad/s
 
-        # Last time step dt
-        self.dt = None
+        # ABSOLUTE ACCELERATION
+        # Body axis
+        self.accel_body = np.zeros(3)  # m/s²
+        # Local horizon (NED)
+        self.accel_NED = np.zeros(3)  # m/s²
 
-    # TODO: guarantee that if euler angles change <--> quaternions change
-    # TODO: guarantee that if geographic change <-->  geocentric change
-    # TODO: guarantee that if body vels change <-->  horizon vels change
+        # ANGULAR ACCELERATION
+        self.accel_ang = np.zeros(3)  # rad/s²
+
     @property
     def lat(self):
-        return self.coord_geographic[0]
+        return self.geodetic_coordinates[0]
 
     @property
     def lon(self):
-        return self.coord_geographic[1]
+        return self.geodetic_coordinates[1]
 
     @property
     def height(self):
-        return self.coord_geographic[2]
+        return self.geodetic_coordinates[2]
 
     @property
     def x_geo(self):
-        return self.coord_geocentric[0]
+        return self.geocentric_coordinates[0]
 
     @property
     def y_geo(self):
-        return self.coord_geocentric[1]
+        return self.geocentric_coordinates[1]
 
     @property
     def z_geo(self):
-        return self.coord_geocentric[2]
+        return self.geocentric_coordinates[2]
 
     @property
     def x_earth(self):
-        return self.coord_earth[0]
+        return self.earth_coordinates[0]
 
     @property
     def y_earth(self):
-        return self.coord_earth[1]
+        return self.earth_coordinates[1]
 
     @property
     def z_earth(self):
-        return self.coord_earth[2]
+        return self.earth_coordinates[2]
 
     @property
     def psi(self):
@@ -141,153 +136,65 @@ class System(object):
     def r(self):
         return self.vel_ang[2]
 
-    @abstractmethod
-    def _propagate_state_vector(self, aircraft, dt):
-        pass
-
-    @abstractmethod
-    def set_initial_state_vector(self):
-        pass
-
-    def propagate(self, aircraft, environment, dt=0.01):
-        pass
+    @property
+    def time(self):
+        return self._dynamic_system.time
 
 
-class EulerFlatEarth(System):
-    """Euler flat Earth equations system"""
+class DynamicSystem(object):
 
-    def __init__(self, lat, lon, h, psi=0, x_earth=0, y_earth=0,
-                 integrator='dopri5', use_jac=False, **integrator_params):
-        """Initialize the equations of the chosen model and selects the
-        integrator. Check `scipy.integrate.ode` to see available integrators.
+    def __init__(self, state, use_jacobian=None, integrator=None,
+                 callback=None, **integrator_params):
 
-        If use_jac = True the jacobian of the equations is used for the
-        integration.
+        self.state = state
 
-        Parameters
-        ----------
-        lat, lon, h: float
-            Latitude, longitude and height (rad, rad, m).
-        psi, x_earth, y_earth: float, opt
-            Yaw angle and initial Earth position (rad, m, m).
-        integrator: str, optional
-            Any allowed integrator for `ode` class: "vode", "zvode", "lsoda",
-            "dopri5", "dop853".
-        use_jac : bool, optional
-            Use analytical jacobians of system equations.
-        """
-        super().__init__(lat, lon, h, psi, x_earth, y_earth)
-        # State vector must be initialized with set_initial_state_vector() method
-        self.state_vector = None
+        self._equations = self.dynamic_system_equations
 
-        from pyfme.models.euler_flat_earth import lamceq, kaeq, kleq
-        self.lamceq = lamceq
-
-        if use_jac:
-            from pyfme.models.euler_flat_earth import lamceq_jac, kaeq_jac
-            jac_LM_and_AM = lamceq_jac
-            jac_att = kaeq_jac
-            jac_nav = None  # not implemented
+        if use_jacobian:
+            self._jacobian = self.dynamic_system_jacobian
         else:
-            jac_LM_and_AM = None
-            jac_att = None
-            jac_nav = None
+            self._jacobian = None
 
-        self._ode_lamceq = ode(lamceq, jac=jac_LM_and_AM)
-        self._ode_kaqeq = ode(kaeq, jac=jac_att)
-        self._ode_kleq = ode(kleq, jac=jac_nav)
+        self._ode = ode(self._equations, self._jacobian)
 
-        self._ode_lamceq.set_integrator(integrator, **integrator_params)
-        self._ode_kaqeq.set_integrator(integrator, **integrator_params)
-        self._ode_kleq.set_integrator(integrator, **integrator_params)
+        if integrator is None:
+            integrator = 'dopri5'
+
+        self._ode.set_integrator(integrator, **integrator_params)
+        self._ode.set_initial_value(self.state)
+
+        if callback:
+            self._ode.set_solout(callback)
 
     @property
-    def height(self):
-        return -self.coord_earth[2]
+    def time(self):
+        return self._ode.t
 
-    def set_initial_state_vector(self):
-        """
-        Set the initial values of the state vector for system integration
-        once the values for the involved variables have been assigned or the
-        system has been trimmed.
-        """
+    def propagate(self, dt, mass, inertia, forces, moments):
 
-        self.vel_NED = body2hor(self.vel_body, theta=self.theta,
-                                phi=self.phi, psi=self.psi)
-        self.state_vector = np.array([
-            self.u, self.v, self.w,
-            self.p, self.q, self.r,
-            self.theta, self.phi, self.psi,
-            self.x_earth, self.y_earth, self.z_earth
-        ])
+        t = self._ode.t + dt
 
-        self._ode_lamceq.set_initial_value(y=self.state_vector[0:6])
-        self._ode_kaqeq.set_initial_value(y=self.state_vector[6:9])
-        self._ode_kleq.set_initial_value(y=self.state_vector[9:12])
+        self._ode.set_f_params(mass, inertia, forces, moments)
 
-    def _propagate_state_vector(self, aircraft, dt):
-        """
-        Performs integration step for actual_time + dt and returns the state
-        vector
-        """
-        mass = aircraft.mass
-        inertia = aircraft.inertia
-        forces = aircraft.total_forces
-        moments = aircraft.total_moments
+        if self._ode.jac:
+            self._ode.set_jac_params(mass, inertia, forces, moments)
 
-        t = self._ode_lamceq.t + dt
+        self.state = self._ode.integrate(t)
 
-        self._ode_lamceq.set_f_params(mass, inertia, forces, moments)
-        velocities = self._ode_lamceq.integrate(t)
+        if self._ode.successful():
+            return self.state
 
-        if self._ode_lamceq.successful():
-            self._ode_kaqeq.set_f_params(velocities[3:])
-            attitude_angles = self._ode_kaqeq.integrate(t)
-        else:
-            raise RuntimeError('Integration of Linear and angular momentum \
-                                equations was not successful')
+    @abstractmethod
+    def dynamic_system_state_to_full_system_state(self):
+        raise NotImplementedError
 
-        if self._ode_kaqeq.successful():
-            self._ode_kleq.set_f_params(velocities[0:3], attitude_angles)
-            position = self._ode_kleq.integrate(t)
-        else:
-            raise RuntimeError('Integration of attitude equations was not \
-                                successful')
+    @abstractstaticmethod
+    def dynamic_system_equations(time, state_vector, mass, inertia, forces,
+                                 moments):
+        raise NotImplementedError
 
-        if self._ode_kleq.successful():
-            self.state_vector[0:6] = velocities[:]
-            self.state_vector[6:9] = attitude_angles[:]
-            self.state_vector[9:12] = position[:]
-        else:
-            raise RuntimeError('Integration of navigation equations was not \
-                                successful')
+    @abstractstaticmethod
+    def dynamic_system_jacobian(state_vector, mass, inertia, forces, moments):
+        raise NotImplementedError
 
-        return self.state_vector
 
-    def propagate(self, aircraft, dt=0.01):
-        """Propagate the state vector and update the rest of variables.
-
-        Parameters
-        ----------
-        aircraft : Aircraft
-            Aircraft model for simulation is used to get forces.
-        """
-        self.dt = dt
-        self._propagate_state_vector(aircraft, dt)
-
-        # TODO: update the rest of variables.
-        self.vel_body = self.state_vector[0:3]
-        self.vel_ang = self.state_vector[3:6]
-        self.euler_angles[0] = self.state_vector[8]  # psi
-        self.euler_angles[1] = self.state_vector[6]  # theta
-        self.euler_angles[2] = self.state_vector[7]  # phi
-        self.coord_earth = self.state_vector[9:12]
-
-        # Set psi between 0 and 2*pi
-        # FIXME: check the conversion to keep angle between 0 and 2pi again
-        self.euler_angles[0] = np.arctan2(np.sin(self.psi), np.cos(
-            self.psi)) % (2*np.pi)
-        self.euler_angles[2] = np.arctan2(np.sin(self.phi), np.cos(self.phi))
-
-        self.vel_NED = body2hor(self.vel_body, theta=self.theta, phi=self.phi,
-                                psi=self.psi)
