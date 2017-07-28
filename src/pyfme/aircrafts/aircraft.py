@@ -83,8 +83,7 @@ class Aircraft(object):
     def _calculate_aerodynamics(self, system, environment):
 
         # Velocity relative to air: aerodynamic velocity.
-        # TODO: calculate aerodynamic velocity using wind
-        aero_vel = system.vel_body  # - environment.body_wind
+        aero_vel = system.vel_body - environment.body_wind
 
         self.alpha, self.beta, self.TAS = calculate_alpha_beta_TAS(
             u=aero_vel[0], v=aero_vel[1], w=aero_vel[2]
