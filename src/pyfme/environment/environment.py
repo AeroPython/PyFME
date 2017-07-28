@@ -51,11 +51,11 @@ class Environment(object):
 
     @property
     def body_wind(self):
-        return self.wind.body_wind
+        return self.wind.body
 
     @property
     def horizon_wind(self):
-        return self.wind.horizon_wind
+        return self.wind.horizon
 
     def update(self, system):
         self.atmosphere.update(system)
