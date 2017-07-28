@@ -19,9 +19,21 @@ class Gravity(object):
     """Generic gravity model"""
 
     def __init__(self):
-        self.magnitude = None
-        self.unitary_vector = np.zeros([3])  # Body axis
-        self.vector = np.zeros([3])  # Body axis
+        self._magnitude = None
+        self._versor = np.zeros([3])  # Body axis
+        self._vector = np.zeros([3])  # Body axis
+
+    @property
+    def magnitude(self):
+        return self._magnitude
+
+    @property
+    def versor(self):
+        return self._versor
+
+    @property
+    def vector(self):
+        return self._vector
 
     @abstractmethod
     def update(self, system):
@@ -33,16 +45,17 @@ class VerticalConstant(Gravity):
     """
 
     def __init__(self):
-        Gravity.__init__(self)
-        self.magnitude = GRAVITY
+        self._magnitude = GRAVITY
         self._z_horizon = np.array([0, 0, 1], dtype=float)
 
     def update(self, system):
-        self.unitary_vector = hor2body(self._z_horizon,
-                                       theta=system.theta,
-                                       phi=system.phi,
-                                       psi=system.psi)
-        self.vector = self.magnitude * self.unitary_vector
+        self._versor = hor2body(self._z_horizon,
+                                theta=system.theta,
+                                phi=system.phi,
+                                psi=system.psi
+                                )
+
+        self._vector = self.magnitude * self.versor
 
 
 class VerticalNewton(Gravity):
@@ -51,17 +64,17 @@ class VerticalNewton(Gravity):
     """
 
     def __init__(self):
-        Gravity.__init__(self)
         self._z_horizon = np.array([0, 0, 1], dtype=float)
 
     def update(self, system):
         r_squared = system.coord_geocentric @ system.coord_geocentric
-        self.magnitude = STD_GRAVITATIONAL_PARAMETER / r_squared
-        self.unitary_vector = hor2body(self._z_horizon,
-                                       theta=system.theta,
-                                       phi=system.phi,
-                                       psi=system.psi)
-        self.vector = self.magnitude * self.unitary_vector
+        self._magnitude = STD_GRAVITATIONAL_PARAMETER / r_squared
+        self._versor = hor2body(self._z_horizon,
+                                theta=system.theta,
+                                phi=system.phi,
+                                psi=system.psi
+                                )
+        self._vector = self.magnitude * self._vector
 
 
 class LatitudeModel(Gravity):
