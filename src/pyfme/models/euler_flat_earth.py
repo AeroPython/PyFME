@@ -23,23 +23,23 @@ from pyfme.models.systems import DynamicSystem
 
 class EulerFlatEarth(DynamicSystem):
 
-    def __init__(self, state, integrator=None, callback=None,
-                 use_jacobian=False, **integrator_params):
+    n_states = 12
+
+    def __init__(self, use_jacobian=None, integrator=None, callback=None,
+                 **integrator_params):
 
         # TODO: use jacobian when it is calculated
-        super().__init__(state=state,
-                         use_jacobian=use_jacobian,
-                         integrator=integrator,
-                         callback=callback,
-                         **integrator_params)
+        super().__init__(n_states=self.n_states, use_jacobian=use_jacobian,
+                         integrator=integrator, callback=callback)
 
-    def dynamic_system_state_to_full_system_state(self, mass, inertia,forces, moments):
+    def dynamic_system_state_to_full_system_state(self, mass, inertia, forces, moments):
         full_system_state = {}
 
         t = self.time
         y = self.state
         y_dot = self.dynamic_system_equations(t, y, mass, inertia, forces, moments)
 
+        # TODO: define the rest of conversions
         full_system_state['geodetic_coordinates'] = np.zeros(3)
         full_system_state['geocentric_coordinates'] = np.zeros(3)
         full_system_state['earth_coordinates'] = y[9:12]

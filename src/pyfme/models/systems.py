@@ -152,6 +152,10 @@ class System(object):
     def time(self):
         return self.model.time
 
+    def set_initial_state(self, state, mass, inertia, forces, moments):
+        self.model.set_initial_state(state)
+        self.set_full_system_state(mass, inertia, forces, moments)
+
     def set_full_system_state(self, mass, inertia, forces, moments):
         rv = self.model.dynamic_system_state_to_full_system_state(
             mass, inertia, forces, moments)
@@ -162,10 +166,11 @@ class System(object):
 
 class DynamicSystem(object):
 
-    def __init__(self, state, use_jacobian=None, integrator=None,
-                 callback=None, **integrator_params):
+    def __init__(self, n_states, use_jacobian=None, integrator=None,
+                 callback=None,
+                 **integrator_params):
 
-        self.state = state
+        self.state = np.empty(n_states)
 
         self._equations = self.dynamic_system_equations
 
@@ -180,7 +185,6 @@ class DynamicSystem(object):
             integrator = 'dopri5'
 
         self._ode.set_integrator(integrator, **integrator_params)
-        self._ode.set_initial_value(self.state)
 
         if callback:
             self._ode.set_solout(callback)
@@ -188,6 +192,10 @@ class DynamicSystem(object):
     @property
     def time(self):
         return self._ode.t
+
+    def set_initial_state(self, state):
+        self.state = state
+        self._ode.set_initial_value(self.state)
 
     def propagate(self, dt, mass, inertia, forces, moments):
 

@@ -18,7 +18,7 @@ def test_simulation():
     aircraft = Cessna310()
     # XXX: this initial condition does not set the full system state
     x0 = np.array([100, 0, 1, 0, 0, 0, 0.05, 0.02, 0, 0, 0, 1000])
-    system = System(model=EulerFlatEarth(x0, callback=foo))
+    system = System(model=EulerFlatEarth(callback=foo))
     environment = Environment(ISA1976(), VerticalConstant(), NoWind())
 
     simulation = Simulation(aircraft, system, environment)
@@ -30,5 +30,7 @@ def test_simulation():
                 'delta_t': 0.5}
 
     environment.update(system)
+
+    simulation.set_initial_state(x0, controls)
 
     simulation.propagate(10, controls)

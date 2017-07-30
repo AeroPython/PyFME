@@ -44,6 +44,17 @@ class Simulation(object):
 
         self.system.model.propagate(time, mass0, inertia0, forces, moments)
 
+    def set_initial_state(self, state, controls):
+        forces, moments = self.aircraft.calculate_forces_and_moments(
+            self.system, self.environment, controls)
+
+        self.system.set_initial_state(state=state,
+                                      mass=self.aircraft.mass,
+                                      inertia=self.aircraft.inertia,
+                                      forces=forces,
+                                      moments=moments
+                                      )
+
     def time_step(self, dt):
         """
         Performs a simulation time step.
