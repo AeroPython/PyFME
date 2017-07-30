@@ -15,7 +15,7 @@ def test_euler_flat_earth_dummy_integration_with_callback():
         system.model.state = y
         print(t, y)
         print(system.model.time)
-        print(system.set_full_system_state())
+        print(system.set_full_system_state(mass, inertia, forces, moments))
         print({name: system.__getattribute__(name) for name in
                system.full_system_state_names})
 

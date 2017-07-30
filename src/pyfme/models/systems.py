@@ -204,7 +204,8 @@ class DynamicSystem(object):
             return self.state
 
     @abstractmethod
-    def dynamic_system_state_to_full_system_state(self, mass, inertia,forces, moments):
+    def dynamic_system_state_to_full_system_state(self, mass, inertia,
+                                                  forces, moments):
         raise NotImplementedError
 
     @abstractstaticmethod

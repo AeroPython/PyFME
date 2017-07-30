@@ -34,40 +34,15 @@ class Simulation(object):
         self.aircraft = aircraft
         self.system = system
         self.environment = environment
-        self._time_step = 0
-        self.PAR_KEYS = {'T': self.environment.T,  # env
-                         'pressure': self.environment.p,
-                         'rho': self.environment.rho,
-                         'a': self.environment.a,
-                         'TAS': self.aircraft.TAS,  # aircraft
-                         'Mach': self.aircraft.Mach,
-                         'q_inf': self.aircraft.q_inf,
-                         'alpha': self.aircraft.alpha,
-                         'beta': self.aircraft.beta,
-                         'x_earth': self.system.x_earth,  # system
-                         'y_earth': self.system.y_earth,
-                         'z_earth': self.system.z_earth,
-                         'psi': self.system.psi,
-                         'theta': self.system.theta,
-                         'phi': self.system.phi,
-                         'u': self.system.u,
-                         'v': self.system.v,
-                         'w': self.system.w,
-                         'v_north': self.system.v_north,
-                         'v_east': self.system.v_east,
-                         'v_down': self.system.v_down,
-                         'p': self.system.p,
-                         'q': self.system.q,
-                         'r': self.system.r,
-                         'height': self.system.height,
-                         'F_xb': self.aircraft.total_forces[0],
-                         'F_yb': self.aircraft.total_forces[1],
-                         'F_zb': self.aircraft.total_forces[2],
-                         'M_xb': self.aircraft.total_moments[0],
-                         'M_yb': self.aircraft.total_moments[1],
-                         'M_zb': self.aircraft.total_moments[2]
-                         }
-        self.par_dict = {}
+
+    def propagate(self, time, controls):
+
+        controls0 = controls
+        mass0, inertia0 = self.aircraft.mass, self.aircraft.inertia
+        forces, moments = self.aircraft.calculate_forces_and_moments(
+            self.system, self.environment, controls0)
+
+        self.system.model.propagate(time, mass0, inertia0, forces, moments)
 
     def time_step(self, dt):
         """
@@ -79,24 +54,14 @@ class Simulation(object):
             Time step (s).
         """
 
-        self.save_current_par_dict()
-        self._time_step += 1
         self.system.propagate(self.aircraft, dt)
         self.environment.update(self.system)
-        controls = self._get_current_controls(self._time_step)
+        controls = self._get_current_controls(self.system.time)
         self.aircraft.update(controls, self.system, self.environment)
         self.aircraft.calculate_forces_and_moments()
 
     @abstractmethod
     def _get_current_controls(self, ii):
-        return
-
-    @abstractmethod
-    def set_par_dict(self, par_list):
-        return
-
-    @abstractmethod
-    def save_current_par_dict(self):
         return
 
 

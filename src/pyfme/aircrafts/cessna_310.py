@@ -184,7 +184,7 @@ class Cessna310(Aircraft):
         Ft = self._calculate_thrust_forces_moments()
         L, D, Y, l, m, n = self._calculate_aero_forces_moments()
 
-        Fg = environment.gravity_body * self.mass
+        Fg = environment.gravity_vector * self.mass
         # FIXME: is it necessary to use wind2body conversion?
         Fa = np.array([-D, Y, -L])
 
