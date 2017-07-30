@@ -8,196 +8,128 @@ Inputs generator
 ----------------
 Provides some typical inputs signals such as: step, doublet, ramp, harmonic.
 """
-import numpy as np
+from abc import abstractmethod
+
+from numpy import sin, pi
 
 
-def step(t_init, T, A, time, offset=0, var=None):
-    """ Step input.
+# TODO: documentation
+class Control(object):
 
-    Parameters
-    ----------
-    t_init : float
-        Initial time (s).
-    T : float
-        Input signal length (s).
-    A : float
-        Peak to peak amplitude.
-    time : array_like
-        Time simulation vector (s).
-    offset : float
-        Signal offset.
-    var : array_like, opt
-        Array containing previous perturbations. Signal will be added to
-        this one.
+    def __init__(self):
+        self._fun = None
 
-    Returns
-    -------
-    step_input : array_like
-    """
+    @abstractmethod
+    def __call__(self, t):
+        raise NotImplementedError
 
-    if var is None:
-        step_input = np.zeros_like(time)
-    else:
-        if np.size(var) == np.size(time):
-            step_input = var
-        else:
-            raise ValueError('var and time must have the same size')
+    def __add__(self, other):
+        control = Control()
+        control._fun = lambda t: self(t) + other(t)
+        return control
 
-    step_input[(time >= t_init) & (time <= t_init + T)] += A + float(offset)
+    def __sub__(self, other):
+        control = Control()
+        control._fun = lambda t: self(t) - other(t)
+        return control
 
-    return step_input
+    def __mul__(self, other):
+        control = Control()
+        control._fun = lambda t: self(t) * other(t)
+        return control
+
+    def __truediv__(self, other):
+        control = Control()
+        control._fun = lambda t: self(t) / other(t)
+        return control
 
 
-def doublet(t_init, T, A, time, offset=0, var=None):
-    """ Doublet input.
+class Constant(Control):
 
-    Parameters
-    ----------
-    t_init : float
-        Initial time (s).
-    T : float
-        Input signal length (s).
-    A : float
-        Peak to peak amplitude.
-    time : array_like
-        Time simulation vector (s).
-    offset : float
-        Signal offset.
-    var : array_like, opt
-        Array containing previous perturbations. Signal will be added to
-        this one.
+    def __init__(self, offset=0):
+        super().__init__()
+        self.offset = offset
 
-    Returns
-    -------
-    doublet_input : array_like
-    """
-
-    if var is None:
-        doublet_input = np.zeros_like(time)
-    else:
-        if np.size(var) == np.size(time):
-            doublet_input = var
-        else:
-            raise ValueError('var and time must have the same size')
-
-    part_1 = (time >= t_init) & (time <= t_init + T / 2)
-    doublet_input[part_1] += A / 2 + float(offset)
-
-    part_2 = (time > t_init + T / 2) & (time <= t_init + T)
-    doublet_input[part_2] += - A / 2 + float(offset)
-
-    return doublet_input
+    def __call__(self, t):
+        return self.offset
 
 
-def ramp(t_init, T, A, time, offset=0, var=None):
-    """ Ramp input
+class Step(Control):
 
-    Parameters
-    ----------
-    t_init : float
-        Initial time (s).
-    T : float
-        Input signal length (s).
-    A : float
-        Peak to peak amplitude.
-    time : array_like
-        Time simulation vector (s).
-    offset : float
-        Signal offset.
-    var : array_like, opt
-        Array containing previous perturbations. Signal will be added to
-        this one.
+    def __init__(self, t_init, T, A, offset=0):
+        super().__init__()
+        self.t_init = t_init
+        self.T = T
+        self.A = A
+        self.offset = offset
 
-    Returns
-    -------
-    ramp_input : array_like
-    """
+        self.t_fin = self.t_init + self.T
 
-    if var is None:
-        ramp_input = np.zeros_like(time)
-    else:
-        if np.size(var) == np.size(time):
-            ramp_input = var
-        else:
-            raise ValueError('var and time must have the same size')
-
-    time_input = time[(time >= t_init) & (time <= t_init + T)]
-    condition = (time >= t_init) & (time <= t_init + T)
-    ramp_input[condition] += (A / T) * (time_input - t_init) + float(offset)
-
-    return ramp_input
+    def __call__(self, t):
+        value = self.offset
+        if self.t_init <= t <= self.t_fin:
+            value += self.A
+        return value
 
 
-def harmonic(t_init, T, A, time, f, phase=0, offset=0, var=None):
-    """ Sinusoid input.
+class Doublet(Control):
 
-    Parameters
-    ----------
-    t_init : float
-        Initial time (s).
-    T : float
-        Input signal length (s).
-    A : float
-        Peak to peak amplitude.
-    time : array_like
-        Time simulation vector (s).
-    f : float
-        Sinusoidal frequency (s).
-    phase : float
-        Sinusoidal phase (rad).
-    offset : float
-        Signal offset.
-    var : array_like, opt
-        Array containing previous perturbations. Signal will be added to
-        this one.
+    def __init__(self, t_init, T, A, offset=0):
+        super().__init__()
+        self.t_init = t_init
+        self.T = T
+        self.A = A
+        self.offset = offset
 
-    Returns
-    -------
-    harmonic_input : array_like
-    """
-    time_input = time[(time >= t_init) & (time <= t_init + T)]
+        self.t_fin1 = self.t_init + self.T / 2
+        self.t_fin2 = self.t_init + self.T
 
-    if var is None:
-        harmonic_input = np.zeros_like(time)
-    else:
-        if np.size(var) == np.size(time):
-            harmonic_input = var
-        else:
-            raise ValueError('var and time must have the same size')
+    def __call__(self, t):
+        value = self.offset
 
-    harmonic_input[(time >= t_init) & (time <= t_init + T)] += \
-        A / 2 * np.sin(2 * np.pi * f * (time_input - t_init) + phase) + \
-        float(offset)
-
-    return harmonic_input
+        if self.t_init <= t < self.t_fin1:
+            value += self.A / 2
+        elif self.t_fin1 < t <= self.t_fin2:
+            value -= self.A / 2
+        return value
 
 
-def sinusoid(t_init, T, A, time, phase=0, offset=0, var=None):
-    """ Sinusoid input.
+class Ramp(Control):
 
-    Parameters
-    ----------
-    t_init : float
-        Initial time (s).
-    T : float
-        Input signal length (s).
-    A : float
-        Peak to peak amplitude.
-    phase : float
-        sinusoidal phase (rad).
-    time : array_like
-        Time simulation vector (s).
-    offset : float
-        Signal offset.
-    var : array_like, opt
-        Array containing previous perturbations. Signal will be added to
-        this one.
+    def __init__(self, t_init, T, A, offset=0):
+        super().__init__()
+        self.t_init = t_init
+        self.T = T
+        self.A = A
+        self.offset = offset
 
-    Returns
-    -------
-    sinusoide_input : array_like
-    """
-    output = harmonic(t_init, T, A, time, f=1/T, phase=phase, offset=offset,
-                      var=var)
+        self.slope = self.A / self.T
+        self.t_fin = self.t_init + self.T
 
-    return output
+    def __call__(self, t):
+        value = self.offset
+        if self.t_init <= t <= self.t_fin:
+            value += self.slope * (t - self.t_init)
+
+        return value
+
+
+class Harmonic(Control):
+
+    def __init__(self, t_init, t_fin, A, freq, phase, offset=0):
+        super().__init__()
+        self.t_init = t_init
+        self.t_fin = t_fin
+        self.A = A
+        self.freq = freq
+        self.phase = phase
+        self.offset = offset
+
+    def __call__(self, t):
+        value = self.offset
+
+        if self.t_init <= t <= self.t_fin:
+            value += self.A/2 * sin(2 * pi * self.freq * (t - self.t_init) +
+                                    self.phase)
+
+        return  value

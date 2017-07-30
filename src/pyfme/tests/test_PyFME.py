@@ -9,9 +9,10 @@ from pyfme.models import EulerFlatEarth
 from pyfme.models.systems import System
 from pyfme.simulator import Simulation
 
+from pyfme.utils.input_generator import Constant, Harmonic
+
 
 def test_simulation():
-
     aircraft = Cessna310()
     system = System(model=EulerFlatEarth())
     environment = Environment(ISA1976(), VerticalConstant(), NoWind())
@@ -24,12 +25,12 @@ def test_simulation():
         euler_angles=np.array([0.01, 0.0, np.pi])
     )
 
-    controls = {'delta_elevator': 0.1,
-                'hor_tail_incidence': 0.2,
-                'delta_aileron': 0.1,
-                'delta_rudder': 0.3,
-                'delta_t': 0.5}
+    simulation.controls = {'delta_elevator': Constant(0.1),
+                           'hor_tail_incidence': Harmonic(1, 3, 1, 2, 0),
+                           'delta_aileron': Constant(0.2),
+                           'delta_rudder': Constant(0.3),
+                           'delta_t': Constant(0.5)}
 
     environment.update(system)
 
-    simulation.propagate(10, controls)
+    simulation.propagate(10)

@@ -39,9 +39,13 @@ class Simulation(object):
         self.aircraft = aircraft
         self.environment = environment
 
-    def propagate(self, time, controls):
+        self.controls = {}
 
-        controls0 = controls
+    def propagate(self, time):
+
+        t0 = self.system.time
+
+        controls0 = self.get_current_controls(t0)
         mass0, inertia0 = self.aircraft.mass, self.aircraft.inertia
         forces, moments = self.aircraft.calculate_forces_and_moments(
             self.system, self.environment, controls0)
@@ -72,14 +76,8 @@ class Simulation(object):
         print(time, state)
 
     def get_current_controls(self, time):
-
-        # TODO: evaluate control interpolation functions
-        controls = {'delta_elevator': 0.1,
-                    'hor_tail_incidence': 0.2,
-                    'delta_aileron': 0.1,
-                    'delta_rudder': 0.3,
-                    'delta_t': 0.5}
-        return controls
+        c = {c_name: c_fun(time) for c_name, c_fun in self.controls.items()}
+        return c
 
 
 class BatchSimulation(Simulation):
