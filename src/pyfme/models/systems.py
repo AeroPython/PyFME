@@ -152,9 +152,103 @@ class System(object):
     def time(self):
         return self.model.time
 
-    def set_initial_state(self, state, mass, inertia, forces, moments):
+    # TODO: break in several methods: position, attitude...
+    def set_initial_state(self, geodetic_coordinates=None,
+            geocentric_coordinates=None, euler_angles=None, quaternions=None,
+            vel_body=None, vel_NED=None,  vel_ang=None, accel_body=None,
+            accel_NED=None, accel_ang=None):
+
+        # Set position
+        if (geodetic_coordinates is not None) and (geocentric_coordinates is
+                                                   not None):
+            # TODO: complete error (two values given)
+            raise ValueError()
+
+        elif geodetic_coordinates is not None:
+            self.geodetic_coordinates = geodetic_coordinates
+            # TODO: geodetic to geocentric (cartopy?)
+            # self.geocentric_coordinates = transformation
+        elif geocentric_coordinates is not None:
+            self.geocentric_coordinates = geocentric_coordinates
+            # TODO: geocentric to geodetic (cartopy?)
+        else:
+            # no values for position
+            self.geodetic_coordinates = np.zeros(3)
+            # TODO: geodetic to geocentric (cartopy?)
+            # self.geocentric_coordinates = transformation
+            pass
+
+        self.earth_coordinates[2] = self.geodetic_coordinates[2]
+
+        # Set attitude
+        if (quaternions is not None) and (euler_angles is not None):
+            # TODO: complete error (two values given)
+            raise ValueError()
+        elif quaternions is not None:
+            self.quaternions = quaternions
+            # TODO: quaternions to euler
+            # self.euler = transformation
+        elif euler_angles is not None:
+            self.euler_angles = euler_angles
+            # TODO: euler angles to quaternions
+            # self.quaternions = transformation
+        else:
+            self.euler_angles = np.zeros(3)
+            # TODO: euler angles to quaternions
+            # self.quaternions = transformation
+
+        # Set velocity
+        if (vel_body is not None) and (vel_NED is not None):
+            # TODO: complete error (two values given)
+            raise ValueError()
+        elif vel_body is not None:
+            self.vel_body = vel_body
+            # TODO: body to horizon
+            # self.vel_NED = transformation
+        elif vel_NED is not None:
+            self.vel_NED = vel_NED
+            # TODO: horizon to body
+            # self.vel_body = transformation
+        else:
+            self.vel_body = np.zeros(3)
+            self.vel_NED = np.zeros(3)
+
+        # Set angular velocity
+        if vel_ang is not None:
+            self.vel_ang = vel_ang
+        else:
+            self.vel_ang = np.zeros(3)
+
+        # Set accelerations
+        if (accel_body is not None) and (accel_NED is not None):
+            # TODO: complete error (two values given)
+            raise ValueError()
+        elif accel_body is not None:
+            self.accel_body = accel_body
+            # TODO: body to horizon
+            # self.acc_NED = transformation
+        elif accel_NED is not None:
+            self.accel_NED = accel_NED
+            # TODO: horizon to body
+            # self.acc_body = transformation
+        else:
+            self.accel_body = np.zeros(3)
+            self.accel_NED = np.zeros(3)
+
+        # Set angular velocity
+        if vel_ang is not None:
+            self.vel_ang = vel_ang
+        else:
+            self.vel_ang = np.zeros(3)
+
+        # Set angular accelerations
+        if accel_ang is not None:
+            self.accel_ang = accel_ang
+        else:
+            self.accel_ang = np.zeros(3)
+
+        state = self.model.full_system_state_to_dynamic_system_state(self)
         self.model.set_initial_state(state)
-        self.set_full_system_state(mass, inertia, forces, moments)
 
     def set_full_system_state(self, mass, inertia, forces, moments):
         rv = self.model.dynamic_system_state_to_full_system_state(
@@ -184,7 +278,7 @@ class DynamicSystem(object):
         if integrator is None:
             integrator = 'dopri5'
 
-        self._ode.set_integrator(integrator, **integrator_params)
+        self._ode.set_integrator(integrator, nsteps=10000, **integrator_params)
 
         if callback:
             self._ode.set_solout(callback)
@@ -197,6 +291,9 @@ class DynamicSystem(object):
         self.state = state
         self._ode.set_initial_value(self.state)
 
+    def set_forcing_terms(self, mass, inertia, forces, moments):
+        self._ode.set_f_params(mass, inertia, forces, moments)
+
     def propagate(self, dt, mass, inertia, forces, moments):
 
         t = self._ode.t + dt
@@ -204,7 +301,7 @@ class DynamicSystem(object):
         self._ode.set_f_params(mass, inertia, forces, moments)
 
         if self._ode.jac:
-            self._ode.set_jac_params(mass, inertia, forces, moments)
+            self.set_forcing_terms(mass, inertia, forces, moments)
 
         self.state = self._ode.integrate(t)
 
@@ -214,6 +311,10 @@ class DynamicSystem(object):
     @abstractmethod
     def dynamic_system_state_to_full_system_state(self, mass, inertia,
                                                   forces, moments):
+        raise NotImplementedError
+
+    @abstractmethod
+    def full_system_state_to_dynamic_system_state(self, full_system):
         raise NotImplementedError
 
     @abstractstaticmethod

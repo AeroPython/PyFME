@@ -31,8 +31,12 @@ class Simulation(object):
         environment : Environment
             Environment.
         """
-        self.aircraft = aircraft
         self.system = system
+
+        callback = lambda time, state: self.time_step(time, state)
+        self.system.model._ode.set_solout(callback)
+
+        self.aircraft = aircraft
         self.environment = environment
 
     def propagate(self, time, controls):
@@ -44,36 +48,38 @@ class Simulation(object):
 
         self.system.model.propagate(time, mass0, inertia0, forces, moments)
 
-    def set_initial_state(self, state, controls):
-        forces, moments = self.aircraft.calculate_forces_and_moments(
-            self.system, self.environment, controls)
+    def time_step(self, time, state):
+        forces = self.aircraft.total_forces
+        moments = self.aircraft.total_moments
+        mass = self.aircraft.mass
+        inertia = self.aircraft.inertia
 
-        self.system.set_initial_state(state=state,
-                                      mass=self.aircraft.mass,
-                                      inertia=self.aircraft.inertia,
-                                      forces=forces,
-                                      moments=moments
-                                      )
+        self.system.model.state = state
+        self.system.set_full_system_state(mass, inertia, forces, moments)
 
-    def time_step(self, dt):
-        """
-        Performs a simulation time step.
-
-        Parameters
-        ----------
-        dt : float
-            Time step (s).
-        """
-
-        self.system.propagate(self.aircraft, dt)
         self.environment.update(self.system)
-        controls = self._get_current_controls(self.system.time)
-        self.aircraft.update(controls, self.system, self.environment)
-        self.aircraft.calculate_forces_and_moments()
 
-    @abstractmethod
-    def _get_current_controls(self, ii):
-        return
+        controls = self.get_current_controls(time)
+
+        forces, moment = self.aircraft.calculate_forces_and_moments(
+            self.system,
+            self.environment,
+            controls
+        )
+
+        self.system.model.set_forcing_terms(mass, inertia, forces, moments)
+
+        print(time, state)
+
+    def get_current_controls(self, time):
+
+        # TODO: evaluate control interpolation functions
+        controls = {'delta_elevator': 0.1,
+                    'hor_tail_incidence': 0.2,
+                    'delta_aileron': 0.1,
+                    'delta_rudder': 0.3,
+                    'delta_t': 0.5}
+        return controls
 
 
 class BatchSimulation(Simulation):

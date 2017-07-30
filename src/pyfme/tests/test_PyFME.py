@@ -12,16 +12,17 @@ from pyfme.simulator import Simulation
 
 def test_simulation():
 
-    def foo(t, y):
-        print(t, y)
-
     aircraft = Cessna310()
-    # XXX: this initial condition does not set the full system state
-    x0 = np.array([100, 0, 1, 0, 0, 0, 0.05, 0.02, 0, 0, 0, 1000])
-    system = System(model=EulerFlatEarth(callback=foo))
+    system = System(model=EulerFlatEarth())
     environment = Environment(ISA1976(), VerticalConstant(), NoWind())
 
     simulation = Simulation(aircraft, system, environment)
+
+    simulation.system.set_initial_state(
+        geodetic_coordinates=np.array([0., 0., 1000.]),
+        vel_body=np.array([100, 0.2, 1]),
+        euler_angles=np.array([0.01, 0.0, np.pi])
+    )
 
     controls = {'delta_elevator': 0.1,
                 'hor_tail_incidence': 0.2,
@@ -30,7 +31,5 @@ def test_simulation():
                 'delta_t': 0.5}
 
     environment.update(system)
-
-    simulation.set_initial_state(x0, controls)
 
     simulation.propagate(10, controls)

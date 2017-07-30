@@ -19,6 +19,6 @@ def test_euler_flat_earth_dummy_integration_with_callback():
         print({name: system.__getattribute__(name) for name in
                system.full_system_state_names})
 
-    model = EulerFlatEarth(callback=foo, callback=foo)
+    model = EulerFlatEarth(callback=foo)
     system = System(model=model)
     system.model.propagate(10, mass, inertia, forces, moments)

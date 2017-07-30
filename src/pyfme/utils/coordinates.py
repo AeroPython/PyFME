@@ -76,7 +76,7 @@ def body2hor(body_coords, theta, phi, psi):
         2012
     """
 
-    check_theta_phi_psi_range(theta, phi, psi)
+    # check_theta_phi_psi_range(theta, phi, psi)
 
     # Transformation matrix from body to local horizon
     Lhb = np.array([
@@ -142,7 +142,7 @@ def hor2body(hor_coords, theta, phi, psi):
         2012
     """
 
-    check_theta_phi_psi_range(theta, phi, psi)
+    # check_theta_phi_psi_range(theta, phi, psi)
 
     # Transformation matrix local horizon to body
     Lbh = np.array([

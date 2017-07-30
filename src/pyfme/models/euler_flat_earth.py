@@ -40,19 +40,30 @@ class EulerFlatEarth(DynamicSystem):
         y_dot = self.dynamic_system_equations(t, y, mass, inertia, forces, moments)
 
         # TODO: define the rest of conversions
-        full_system_state['geodetic_coordinates'] = np.zeros(3)
-        full_system_state['geocentric_coordinates'] = np.zeros(3)
+        full_system_state['geodetic_coordinates'] = np.array([0., 0., y[11]])  # implement
+        full_system_state['geocentric_coordinates'] = np.zeros(3)  # implement
         full_system_state['earth_coordinates'] = y[9:12]
         full_system_state['euler_angles'] = y[6:9]
-        full_system_state['quaternions'] = np.zeros(4)
+        full_system_state['quaternions'] = np.zeros(4)  # implement
         full_system_state['vel_body'] = y[0:3]
         full_system_state['vel_NED'] = y_dot[9:12]
         full_system_state['vel_ang'] = y[3:6]
         full_system_state['accel_body'] = y_dot[0:3]
-        full_system_state['accel_NED'] = np.zeros(3)
+        full_system_state['accel_NED'] = np.zeros(3)  # implement
         full_system_state['accel_ang'] = y_dot[6:9]
 
         return full_system_state
+
+    def full_system_state_to_dynamic_system_state(self, full_system_state):
+
+        state = np.zeros(self.n_states)
+
+        state[0:3] = full_system_state.__getattribute__('vel_body')
+        state[3:6] = full_system_state.__getattribute__('vel_ang')
+        state[6:9] = full_system_state.__getattribute__('euler_angles')
+        state[9:12] = full_system_state.__getattribute__('earth_coordinates')
+
+        return state
 
     @staticmethod
     def dynamic_system_equations(time, state_vector, mass, inertia, forces,
@@ -148,7 +159,6 @@ class EulerFlatEarth(DynamicSystem):
 
         return np.array([du_dt, dv_dt, dw_dt, dp_dt, dq_dt, dr_dt, dtheta_dt,
                          dphi_dt, dpsi_dt, dx_dt, dy_dt, dz_dt])
-
     @staticmethod
     def dynamic_system_jacobian(state_vector, mass, inertia, forces, moments):
         # TODO: calculate jacobians

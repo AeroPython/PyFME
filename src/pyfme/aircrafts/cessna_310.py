@@ -175,7 +175,6 @@ class Cessna310(Aircraft):
         Ft = np.array([q * Sw * self.Ct, 0, 0])
         return Ft
 
-
     def calculate_forces_and_moments(self, system, environment, controls):
 
         # Update controls and aerodynamics
