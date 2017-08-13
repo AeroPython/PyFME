@@ -7,7 +7,7 @@ Simulation class
 ----------------
 
 """
-from abc import abstractmethod
+import operator
 import numpy as np
 from scipy.optimize import least_squares
 
@@ -43,6 +43,9 @@ class Simulation(object):
         self.environment = environment
 
         self.controls = {}
+
+        self.vars_to_save = {'h': 'system.height'}
+        self.results = {name: [] for name in self.vars_to_save}
 
     def propagate(self, time):
 
