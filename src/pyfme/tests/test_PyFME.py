@@ -31,6 +31,98 @@ def test_simulation():
                            'delta_rudder': Constant(0.3),
                            'delta_t': Constant(0.5)}
 
-    environment.update(system)
+    simulation.propagate(10)
+
+    print(simulation.results)
+
+
+def test_trimmer_00():
+    aircraft = Cessna310()
+    system = System(model=EulerFlatEarth())
+    environment = Environment(ISA1976(), VerticalConstant(), NoWind())
+
+    simulation = Simulation(aircraft, system, environment)
+
+    initial_controls = {'delta_elevator': 0,
+                        'hor_tail_incidence': 0,
+                        'delta_aileron': 0,
+                        'delta_rudder': 0,
+                        'delta_t': 0}
+
+    simulation.trim_aircraft(geodetic_initial_pos=(0, 0, 1000),
+                             TAS=100,
+                             gamma=0.0,
+                             turn_rate=0.0,
+                             initial_controls=initial_controls,
+                             exclude_controls=['hor_tail_incidence'])
+
+    simulation.propagate(10)
+
+
+def test_trimmer_01():
+    aircraft = Cessna310()
+    system = System(model=EulerFlatEarth())
+    environment = Environment(ISA1976(), VerticalConstant(), NoWind())
+
+    simulation = Simulation(aircraft, system, environment)
+
+    initial_controls = {'delta_elevator': 0,
+                        'hor_tail_incidence': 0,
+                        'delta_aileron': 0,
+                        'delta_rudder': 0,
+                        'delta_t': 0}
+
+    simulation.trim_aircraft(geodetic_initial_pos=(0, 0, 1000),
+                             TAS=60,
+                             gamma=0.05,
+                             turn_rate=0.0,
+                             initial_controls=initial_controls,
+                             exclude_controls=['hor_tail_incidence'])
+
+    simulation.propagate(10)
+
+
+def test_trimmer_02():
+    aircraft = Cessna310()
+    system = System(model=EulerFlatEarth())
+    environment = Environment(ISA1976(), VerticalConstant(), NoWind())
+
+    simulation = Simulation(aircraft, system, environment)
+
+    initial_controls = {'delta_elevator': 0,
+                        'hor_tail_incidence': 0,
+                        'delta_aileron': 0,
+                        'delta_rudder': 0,
+                        'delta_t': 0}
+
+    simulation.trim_aircraft(geodetic_initial_pos=(0, 0, 1000),
+                             TAS=60,
+                             gamma=0.00,
+                             turn_rate=0.05,
+                             initial_controls=initial_controls,
+                             exclude_controls=['hor_tail_incidence'])
+
+    simulation.propagate(10)
+
+
+def test_trimmer_03():
+    aircraft = Cessna310()
+    system = System(model=EulerFlatEarth())
+    environment = Environment(ISA1976(), VerticalConstant(), NoWind())
+
+    simulation = Simulation(aircraft, system, environment)
+
+    initial_controls = {'delta_elevator': 0,
+                        'hor_tail_incidence': 0,
+                        'delta_aileron': 0,
+                        'delta_rudder': 0,
+                        'delta_t': 0}
+
+    simulation.trim_aircraft(geodetic_initial_pos=(0, 0, 1000),
+                             TAS=60,
+                             gamma=0.05,
+                             turn_rate=0.05,
+                             initial_controls=initial_controls,
+                             exclude_controls=['hor_tail_incidence'])
 
     simulation.propagate(10)
