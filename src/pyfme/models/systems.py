@@ -317,6 +317,10 @@ class DynamicSystem(object):
     def full_system_state_to_dynamic_system_state(self, full_system):
         raise NotImplementedError
 
+    @abstractmethod
+    def trim_system_to_dynamic_system_state(self, full_system):
+        raise NotImplementedError
+
     @abstractstaticmethod
     def dynamic_system_equations(time, state_vector, mass, inertia, forces,
                                  moments):

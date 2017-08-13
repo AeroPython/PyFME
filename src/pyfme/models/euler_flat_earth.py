@@ -65,6 +65,16 @@ class EulerFlatEarth(DynamicSystem):
 
         return state
 
+    def trim_system_to_dynamic_system_state(self, phi, theta, p, q, r, u, v, w):
+
+        state = self.state.copy()
+
+        state[0:3] = np.array([u, v, w])
+        state[3:6] = np.array([p, q, r])
+        state[6:8] = np.array([theta, phi])
+
+        return state
+
     @staticmethod
     def dynamic_system_equations(time, state_vector, mass, inertia, forces,
                                  moments):
@@ -159,6 +169,7 @@ class EulerFlatEarth(DynamicSystem):
 
         return np.array([du_dt, dv_dt, dw_dt, dp_dt, dq_dt, dr_dt, dtheta_dt,
                          dphi_dt, dpsi_dt, dx_dt, dy_dt, dz_dt])
+
     @staticmethod
     def dynamic_system_jacobian(state_vector, mass, inertia, forces, moments):
         # TODO: calculate jacobians
