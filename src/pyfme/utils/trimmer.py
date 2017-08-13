@@ -21,6 +21,7 @@ import numpy as np
 from pyfme.utils.coordinates import wind2body
 from pyfme.models.constants import GRAVITY
 
+
 def turn_coord_cons(turn_rate, alpha, beta, TAS, gamma=0):
     """Calculates phi for coordinated turn.
     """
