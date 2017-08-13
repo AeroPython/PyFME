@@ -67,6 +67,30 @@ class Aircraft(object):
     def Izz(self):
         return self.inertia[2, 2]
 
+    @property
+    def Fx(self):
+        return self.total_forces[0]
+
+    @property
+    def Fy(self):
+        return self.total_forces[1]
+
+    @property
+    def Fz(self):
+        return self.total_forces[2]
+
+    @property
+    def Mx(self):
+        return self.total_moments[0]
+
+    @property
+    def My(self):
+        return self.total_moments[1]
+
+    @property
+    def Mz(self):
+        return self.total_moments[2]
+
     def _set_current_controls(self, controls):
 
         # If a control is not given, the previous value is assigned.
