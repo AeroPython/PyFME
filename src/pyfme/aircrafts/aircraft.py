@@ -95,6 +95,17 @@ class Aircraft(object):
         self.Mach = self.TAS / environment.a
         self.q_inf = 0.5 * environment.rho * self.TAS ** 2
 
+    def _calculate_aerodynamics_2(self, TAS, alpha, beta, environment):
+
+        self.alpha, self.beta, self.TAS = alpha, beta, TAS
+
+        # Setting velocities & dynamic pressure
+        self.CAS = tas2cas(self.TAS, environment.p, environment.rho)
+        self.EAS = tas2eas(self.TAS, environment.rho)
+        self.Mach = self.TAS / environment.a
+        self.q_inf = 0.5 * environment.rho * self.TAS ** 2
+
+
     @abstractmethod
     def calculate_forces_and_moments(self, system, environment, controls):
 
