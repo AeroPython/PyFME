@@ -33,7 +33,8 @@ def test_simulation():
 
     simulation.propagate(10)
 
-    print(simulation.results)
+    for n, v in simulation.results.items():
+        print("{}: {}".format(n, v))
 
 
 def test_trimmer_00():
