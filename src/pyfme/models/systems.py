@@ -259,9 +259,37 @@ class System(object):
 
 
 class DynamicSystem(object):
+    """Dynamic system abstract class.
 
-    def __init__(self, n_states, use_jacobian=None, integrator=None,
+    Attributes
+    ----------
+    state : ndarray
+        State vector.
+    time : float
+        Current time of the simulation.
+    _ode : scipy.integrate.ode
+        Ordinary Differential Equation based on function definded in
+        `dynamic_system_equations` method and jacobian in
+        `dynamic_system_jacobian` method.
+    """
+
+    def __init__(self, n_states, use_jacobian=False, integrator=None,
                  **integrator_params):
+        """Dynamic system initialization
+
+        Parameters
+        ----------
+        n_states : int
+            Number of states of the dynamical system.
+        use_jacobian: bool, opt
+            Whether to use jacobian of the system's model during the
+            integration or not.
+        integrator : str, opt
+            Integrator to use by scipy.integrate.ode. By default, dopri5 is
+            used. Check scipy doc in order to list all possibilities.
+        **integrator_params : dict, opt
+            Other integrator params passed as kwargs.
+        """
 
         # Allocate state vector
         self.state = np.empty(n_states)
@@ -288,6 +316,13 @@ class DynamicSystem(object):
         return self._ode.t
 
     def set_initial_state(self, state):
+        """Sets the initial state for the integration
+
+        Parameters
+        ----------
+        state : ndarray
+            State vector
+        """
         self.state = state
         self._ode.set_initial_value(self.state)
 
@@ -302,10 +337,45 @@ class DynamicSystem(object):
         self._set_jac_forcing_terms(mass, inertia, forces, moments)
 
     def set_solout(self, fun):
+        """Set callback for scipy.integrate.ode solver
+
+        Parameters
+        ----------
+        fun : callable
+            Function to be called at each time step during the integration.
+            It must be in charge of updating the whole system, environment,
+            controls, forces, moments, mass, inertia...
+        """
         self._ode.set_solout(fun)
 
     def propagate(self, dt, mass, inertia, forces, moments):
+        """ Perform the integration from the current time step during time dt.
 
+        Parameters
+        ----------
+        dt : float
+            Time for the integration.
+        mass : float
+            Current aircraft mass (initial time step).
+        inertia : ndarray, shape (3, 3)
+            Current aircraft inertia (initial time step).
+        forces : ndarray, shape(3)
+            Current aircraft forces (initial time step).
+        moments : ndarray, shape(3)
+            Current aircraft moments (initial time step).
+
+        Returns
+        -------
+        state : ndarray
+            Final state if integration is successful.
+
+        Raises
+        ------
+        RunTimeError if integration is not successful.
+        """
+
+        # Checks that a callback for updating environment and aircraft has
+        # been defined previous to integration
         if not self._ode._integrator.solout:
             raise ValueError("A callback to the model must be given in order "
                              "to update the system, environment and aircraft "
@@ -320,6 +390,7 @@ class DynamicSystem(object):
         # mass, inertia, forces and moments
         self.set_forcing_terms(mass, inertia, forces, moments)
 
+        # Perform the integration
         self.state = self._ode.integrate(t)
 
         if self._ode.successful():
