@@ -60,6 +60,7 @@ class Simulation(object):
         'x_earth': 'system.x_earth',  # system
         'y_earth': 'system.y_earth',
         'z_earth': 'system.z_earth',
+        'height': 'system.height',
         'psi': 'system.psi',
         'theta': 'system.theta',
         'phi': 'system.phi',
@@ -162,7 +163,7 @@ class Simulation(object):
         are calculated.
         * the selected variables are saved.
         """
-        self.system.time = time
+        self.system.model.time = time
 
         forces = self.aircraft.total_forces
         moments = self.aircraft.total_moments
