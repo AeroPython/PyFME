@@ -261,19 +261,16 @@ class System(object):
 class DynamicSystem(object):
 
     def __init__(self, n_states, use_jacobian=None, integrator=None,
-                 callback=None,
-                 **integrator_params):
+                 callback=None, **integrator_params):
 
         self.state = np.empty(n_states)
-
-        self._equations = self.dynamic_system_equations
 
         if use_jacobian:
             self._jacobian = self.dynamic_system_jacobian
         else:
             self._jacobian = None
 
-        self._ode = ode(self._equations, self._jacobian)
+        self._ode = ode(self.dynamic_system_equations, self._jacobian)
 
         if integrator is None:
             integrator = 'dopri5'
