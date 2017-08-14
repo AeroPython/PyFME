@@ -20,7 +20,7 @@ def test_simulation():
     simulation = Simulation(aircraft, system, environment)
 
     simulation.system.set_initial_state(
-        geodetic_coordinates=np.array([0., 0., 1000.]),
+        geodetic_coord=np.array([0., 0., 1000.]),
         vel_body=np.array([100, 0.2, 1]),
         euler_angles=np.array([0.01, 0.0, np.pi])
     )
@@ -58,6 +58,9 @@ def test_trimmer_00():
                              exclude_controls=['hor_tail_incidence'])
 
     simulation.propagate(10)
+
+    for n, v in simulation.results.items():
+        print("{}: {}".format(n, v))
 
 
 def test_trimmer_01():

@@ -272,7 +272,7 @@ class Simulation(object):
 
         # Initialize state
         system.set_initial_state(
-            geodetic_coordinates=geodetic_initial_pos,
+            geodetic_coord=geodetic_initial_pos,
             euler_angles=np.array([0, 0, psi])
                                  )
         # Update environment for the current state

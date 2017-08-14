@@ -6,14 +6,56 @@ Distributed under the terms of the MIT License.
 Dynamic Systems
 ---------------
 
+Dynamic system implements an abstract class to be inherited by all the
+models.
+
+System is a more generic object that wraps every system and keeps updated
+variables that may not be present in the dynamic system but may be used by
+other members of the simulation, such as the environment or the aircraft.
 """
 from abc import abstractmethod, abstractstaticmethod
 
 import numpy as np
 from scipy.integrate import ode
 
+from pyfme.utils.coordinates import body2hor, hor2body
+
 
 class System(object):
+    """Generic system object containing and wrapping a model that keeps updated
+    variables that may not be present in the model but may be inferred from it.
+    
+    Attributes
+    ----------
+    model : DynamicSystem
+        System's model containing the equations and state vector.
+    full_system_state_names : tuple of str
+        Names of all variables that are tracked in the system. All of them 
+        are listed as class attributes below.
+    geodetic_coordinates : ndarray, shape(3)
+        (lat [rad], lon [rad], height [m])
+    geocentric_coordinates : ndarray, shape(3)
+        (x_geo [m], y_geo [m], z_geo [m])
+    earth_coordinates : ndarray, shape(3)
+        (x_earth [m], y_earth [m], z_earth [m])
+    euler_angles : ndarray, shape(3)
+        (theta [rad], phi [rad], psi [rad])
+    quaternions : ndarray, shape(4)
+        (q0, q1, q2, q3)
+    vel_body : ndarray, shape(3)
+        (u [m/s], v [m/s], w [m/s])
+    vel_NED : ndarray, shape(3)
+        (v_north [m/s], v_east [m/s], v_down [m/s])
+    vel_ang : ndarray, shape(3)
+        (p [rad/s], q [rad/s], r [rad/s])
+    accel_body : ndarray, shape(3)
+        (u_dot [m/s²], v_dot [m/s²], w_dot [m/s²])
+    accel_NED : ndarray, shape(3)
+        (VN_dot [m/s²], VE_dot [m/s²], VD_dot [m/s²])
+    accel_ang : ndarray, shape(3)
+        (p_dot [rad/s²], q_dot [rad/s²], r_dot [rad/s²])
+
+    """
 
     full_system_state_names = ('geodetic_coordinates',
                                'geocentric_coordinates',
@@ -28,6 +70,13 @@ class System(object):
                                'accel_ang')
 
     def __init__(self, model):
+        """System
+
+        Parameters
+        ----------
+        model : DynamicSystem
+        System's model containing the equations and state vector.
+        """
 
         # Dynamic system
         self.model = model
@@ -149,27 +198,100 @@ class System(object):
         return self.vel_ang[2]
 
     @property
+    def u_dot(self):
+        return self.accel_body[0]
+
+    @property
+    def v_dot(self):
+        return self.accel_body[1]
+
+    @property
+    def w_dot(self):
+        return self.accel_body[2]
+
+    @property
+    def v_north_dot(self):
+        return self.accel_NED[0]
+
+    @property
+    def v_east_dot(self):
+        return self.accel_NED[1]
+
+    @property
+    def v_down_dot(self):
+        return self.accel_NED[2]
+
+    @property
+    def p_dot(self):
+        return self.accel_ang[0]
+
+    @property
+    def q_dot(self):
+        return self.accel_ang[1]
+
+    @property
+    def r_dot(self):
+        return self.accel_ang[2]
+
+    @property
     def time(self):
         return self.model.time
 
-    # TODO: break in several methods: position, attitude...
-    def set_initial_state(self, geodetic_coordinates=None,
-            geocentric_coordinates=None, euler_angles=None, quaternions=None,
-            vel_body=None, vel_NED=None,  vel_ang=None, accel_body=None,
-            accel_NED=None, accel_ang=None):
+    @time.setter
+    def time(self, value):
+        self.model.time = value
+
+    def set_initial_state(self,
+                          geodetic_coord=None, geocentric_coord=None,
+                          euler_angles=None,
+                          quaternions=None,
+                          vel_body=None, vel_NED=None,
+                          vel_ang=None,
+                          accel_body=None, accel_NED=None,
+                          accel_ang=None):
+        """Initialize the system state and the model state.
+
+        Parameters
+        ----------
+        geodetic_coord : ndarray, shape(3), opt
+            (lat [rad], lon [rad], height [m]). Only if geodetic_coord are
+            not given.
+        geocentric_coord : ndarray, shape(3), opt
+            (x_geo [m], y_geo [m], z_geo [m]). Only if geocentric_coord are
+            not given.
+        euler_angles : ndarray, shape(3), opt
+            (psi [rad], theta [rad], phi [rad]). Only if quaternions are not
+            given.
+        quaternions : ndarray, shape(4), opt
+            (q0, q1, q2, q3). Only if euler_angles are not given.
+        vel_body : ndarray, shape(3), opt
+            (u [m/s], v [m/s], w [m/s]). Only if vel_NED is not given.
+        vel_NED : ndarray, shape(3), opt
+            (v_north [m/s], v_east [m/s], v_down [m/s]). Only if vel_body is
+            not given.
+        vel_ang : ndarray, shape(3), opt
+            (p [rad/s], q [rad/s], r [rad/s])
+        accel_body : ndarray, shape(3), opt
+            (u_dot [m/s²], v_dot [m/s²], w_dot [m/s²]). Only if accel_NED is
+            not given.
+        accel_NED : ndarray, shape(3), opt
+            (VN_dot [m/s²], VE_dot [m/s²], VD_dot [m/s²]). Only if
+            accel_body is not given.
+        accel_ang : ndarray, shape(3), opt
+            (p_dot [rad/s²], q_dot [rad/s²], r_dot [rad/s²])
+        """
 
         # Set position
-        if (geodetic_coordinates is not None) and (geocentric_coordinates is
-                                                   not None):
-            # TODO: complete error (two values given)
-            raise ValueError()
+        if (geodetic_coord is not None) and (geocentric_coord is not None):
+            raise ValueError("Provide only geodetic or geocentric, not both "
+                             "at the same time")
 
-        elif geodetic_coordinates is not None:
-            self.geodetic_coordinates = geodetic_coordinates
+        elif geodetic_coord is not None:
+            self.geodetic_coordinates = geodetic_coord
             # TODO: geodetic to geocentric (cartopy?)
             # self.geocentric_coordinates = transformation
-        elif geocentric_coordinates is not None:
-            self.geocentric_coordinates = geocentric_coordinates
+        elif geocentric_coord is not None:
+            self.geocentric_coordinates = geocentric_coord
             # TODO: geocentric to geodetic (cartopy?)
         else:
             # no values for position
@@ -182,8 +304,8 @@ class System(object):
 
         # Set attitude
         if (quaternions is not None) and (euler_angles is not None):
-            # TODO: complete error (two values given)
-            raise ValueError()
+            raise ValueError("Provide only euler angles or quaternions, "
+                             "not both at the same time")
         elif quaternions is not None:
             self.quaternions = quaternions
             # TODO: quaternions to euler
@@ -199,16 +321,14 @@ class System(object):
 
         # Set velocity
         if (vel_body is not None) and (vel_NED is not None):
-            # TODO: complete error (two values given)
-            raise ValueError()
+            raise ValueError("Provide only vel_body or vel_NED, not both at "
+                             "the same time")
         elif vel_body is not None:
             self.vel_body = vel_body
-            # TODO: body to horizon
-            # self.vel_NED = transformation
+            self.vel_NED = body2hor(vel_body, self.theta, self.phi, self.psi)
         elif vel_NED is not None:
             self.vel_NED = vel_NED
-            # TODO: horizon to body
-            # self.vel_body = transformation
+            self.vel_body = hor2body(vel_NED, self.theta, self.phi, self.psi)
         else:
             self.vel_body = np.zeros(3)
             self.vel_NED = np.zeros(3)
@@ -221,16 +341,16 @@ class System(object):
 
         # Set accelerations
         if (accel_body is not None) and (accel_NED is not None):
-            # TODO: complete error (two values given)
-            raise ValueError()
+            raise ValueError("Provide only accel_body or accel_NED, not both "
+                             "at the same time")
         elif accel_body is not None:
             self.accel_body = accel_body
-            # TODO: body to horizon
-            # self.acc_NED = transformation
+            self.accel_NED = body2hor(accel_body, self.theta, self.phi,
+                                      self.psi)
         elif accel_NED is not None:
             self.accel_NED = accel_NED
-            # TODO: horizon to body
-            # self.acc_body = transformation
+            self.accel_body = hor2body(accel_NED, self.theta, self.phi,
+                                       self.psi)
         else:
             self.accel_body = np.zeros(3)
             self.accel_NED = np.zeros(3)
@@ -250,7 +370,22 @@ class System(object):
         state = self.model.full_system_state_to_dynamic_system_state(self)
         self.model.set_initial_state(state)
 
+    # TODO: it's more explicit to pass the state vector here instead of
+    # depending on its update in the model before.
     def set_full_system_state(self, mass, inertia, forces, moments):
+        """ Updates the full system update based on the current state vector
+
+        Parameters
+        ----------
+        mass : float
+            Aircraft mass
+        inertia : ndarray, shape(3, 3)
+            Inertia tensor of the aircraft
+        forces : ndarray, shape(3)
+            Aircraft forces
+        moments : ndarray, shape(3)
+            Aircraft moments
+        """
         rv = self.model.dynamic_system_state_to_full_system_state(
             mass, inertia, forces, moments)
 
