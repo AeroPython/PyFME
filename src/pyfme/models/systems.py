@@ -324,6 +324,8 @@ class DynamicSystem(object):
 
         if self._ode.successful():
             return self.state
+        else:
+            raise RuntimeError("Error during integration")
 
     @abstractmethod
     def dynamic_system_state_to_full_system_state(self, mass, inertia,
