@@ -1,6 +1,6 @@
 import numpy as np
 
-from pyfme.aircrafts import Cessna310
+from pyfme.aircrafts import Cessna310, Cessna172
 from pyfme.environment.atmosphere import ISA1976
 from pyfme.environment.environment import Environment
 from pyfme.environment.gravity import VerticalConstant
@@ -111,6 +111,29 @@ def test_trimmer_02():
 
 def test_trimmer_03():
     aircraft = Cessna310()
+    system = System(model=EulerFlatEarth())
+    environment = Environment(ISA1976(), VerticalConstant(), NoWind())
+
+    simulation = Simulation(aircraft, system, environment)
+
+    initial_controls = {'delta_elevator': 0,
+                        'hor_tail_incidence': 0,
+                        'delta_aileron': 0,
+                        'delta_rudder': 0,
+                        'delta_t': 0}
+
+    simulation.trim_aircraft(geodetic_initial_pos=(0, 0, 1000),
+                             TAS=60,
+                             gamma=0.05,
+                             turn_rate=0.05,
+                             initial_controls=initial_controls,
+                             exclude_controls=['hor_tail_incidence'])
+
+    simulation.propagate(10)
+
+
+def test_simulator_cessna_172():
+    aircraft = Cessna172()
     system = System(model=EulerFlatEarth())
     environment = Environment(ISA1976(), VerticalConstant(), NoWind())
 

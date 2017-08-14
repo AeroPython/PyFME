@@ -54,7 +54,6 @@ class Aircraft(object):
         self.beta = 0  # Angle of sideslip (AOS).
         self.alpha_dot = 0  # Rate of change of AOA.
 
-
     @property
     def Ixx(self):
         return self.inertia[0, 0]
@@ -128,7 +127,6 @@ class Aircraft(object):
         self.EAS = tas2eas(self.TAS, environment.rho)
         self.Mach = self.TAS / environment.a
         self.q_inf = 0.5 * environment.rho * self.TAS ** 2
-
 
     @abstractmethod
     def calculate_forces_and_moments(self, system, environment, controls):

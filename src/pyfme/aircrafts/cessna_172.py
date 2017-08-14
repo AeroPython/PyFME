@@ -178,10 +178,9 @@ class Cessna172(Aircraft):
         # Thrust Coefficient
         self.Ct = 0
 
-        self.gravity_force = np.zeros(3)
         self.total_forces = np.zeros(3)
         self.total_moments = np.zeros(3)
-        self.load_factor = 0
+        # self.load_factor = 0
 
         # Velocities
         self.TAS = 0  # True Air Speed.
@@ -190,25 +189,17 @@ class Cessna172(Aircraft):
         self.Mach = 0  # Mach number
         self.q_inf = 0  # Dynamic pressure at infinity (Pa)
 
-        # Angular velocities
-        self.p = 0  # rad/s
-        self.q = 0  # rad/s
-        self.r = 0  # rad/s
-
         # Angles
         self.alpha = 0  # rad
         self.beta = 0  # rad
         self.alpha_dot = 0  # rad/s
 
-        # Environment
-        self.rho = 0  # kg/m3
-
-    def _calculate_aero_lon_forces_moments_coeffs(self):
+    def _calculate_aero_lon_forces_moments_coeffs(self, system):
         delta_elev = np.rad2deg(self.controls['delta_elevator'])  # deg
         alpha_DEG = np.rad2deg(self.alpha)  # deg
         c = self.chord  # m
         V = self.TAS  # m/s
-        p, q, r = self.p, self.q, self.r  # rad/s
+        p, q, r = system.p, system.q, system.r  # rad/s
         alpha_dot = self.alpha_dot
 
         CD_alpha_interp = np.interp(alpha_DEG, self.alpha_data, self.CD_data)
@@ -241,13 +232,13 @@ class Cessna172(Aircraft):
         )
         # FIXME: CM_q multiplicado por 2 hasta que alpha_dot pueda ser calculado
 
-    def _calculate_aero_lat_forces_moments_coeffs(self):
+    def _calculate_aero_lat_forces_moments_coeffs(self, system):
         delta_aile = np.rad2deg(self.controls['delta_aileron'])  # deg
         delta_rud_RAD = self.controls['delta_rudder']  # rad
         alpha_DEG = np.rad2deg(self.alpha)  # deg
         b = self.span
         V = self.TAS
-        p, q, r = self.p, self.q, self.r
+        p, q, r = system.p, system.q, system.r
 
         CY_beta = np.interp(alpha_DEG, self.alpha_data, self.CY_beta_data)
         CY_p = np.interp(alpha_DEG, self.alpha_data, self.CY_p_data)
@@ -289,14 +280,14 @@ class Cessna172(Aircraft):
             b/(2 * V) * (CN_p * p + CN_r * r)
         )
 
-    def _calculate_aero_forces_moments(self):
+    def _calculate_aero_forces_moments(self, system):
         q = self.q_inf
         Sw = self.Sw
         c = self.chord
         b = self.span
 
-        self._calculate_aero_lon_forces_moments_coeffs()
-        self._calculate_aero_lat_forces_moments_coeffs()
+        self._calculate_aero_lon_forces_moments_coeffs(system)
+        self._calculate_aero_lat_forces_moments_coeffs(system)
 
         L = q * Sw * self.CL
         D = q * Sw * self.CD
@@ -307,9 +298,9 @@ class Cessna172(Aircraft):
 
         return L, D, Y, l, m, n
 
-    def _calculate_thrust_forces_moments(self):
+    def _calculate_thrust_forces_moments(self, environment):
         delta_t = self.controls['delta_t']
-        rho = self.rho
+        rho = environment.rho
         V = self.TAS
         prop_rad = self.propeller_radius
 
@@ -330,10 +321,13 @@ class Cessna172(Aircraft):
 
         return Ft
 
-    def calculate_forces_and_moments(self):
-        Ft = self._calculate_thrust_forces_moments()
-        L, D, Y, l, m, n = self._calculate_aero_forces_moments()
-        Fg = self.gravity_force
+    def calculate_forces_and_moments(self, system, environment, controls):
+        # Update controls and aerodynamics
+        super().calculate_forces_and_moments(system, environment, controls)
+
+        Ft = self._calculate_thrust_forces_moments(environment)
+        L, D, Y, l, m, n = self._calculate_aero_forces_moments(system)
+        Fg = environment.gravity_vector * self.mass
 
         Fa_wind = np.array([-D, Y, -L])
         Fa_body = wind2body(Fa_wind, self.alpha, self.beta)
