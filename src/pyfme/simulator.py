@@ -21,23 +21,79 @@ class Simulation(object):
     Simulation class stores the simulation configuration, aircraft, system and
     environment. It provides methods for simulation running and results
     storing.
+
+    Attributes
+    ----------
+    system : System
+        System object with mathematical model of the dynamic system and
+        integrator (ie. EulerFlatEarth)
+    aircraft : Aircraft
+        Aircraft model, where aerodynamics and forces are calculated
+    environment : Environment
+        Environment containing the atmosphere, gravity and wind models.
+    controls : dict of callable
+        Dictionary containing the control names as keys and functions of
+        time as values.
+    results : dict of lists
+        Dictionary containing the variables that have been set to be saved
+        during the simulation.
     """
 
-    def __init__(self, aircraft, system, environment):
+    _default_save_vars = {
+        'T': 'environment.T',  # env
+        'pressure': 'environment.p',
+        'rho': 'environment.rho',
+        'a': 'environment.a',
+        'h': 'system.height',
+        'Fx': 'aircraft.Fx',
+        'Fy': 'aircraft.Fy',
+        'Fz': 'aircraft.Fz',
+        'Mx': 'aircraft.Mx',
+        'My': 'aircraft.My',
+        'Mz': 'aircraft.Mz',
+        'TAS': 'aircraft.TAS',  # aircraft
+        'Mach': 'aircraft.Mach',
+        'q_inf': 'aircraft.q_inf',
+        'alpha': 'aircraft.alpha',
+        'beta': 'aircraft.beta',
+        'x_earth': 'system.x_earth',  # system
+        'y_earth': 'system.y_earth',
+        'z_earth': 'system.z_earth',
+        'psi': 'system.psi',
+        'theta': 'system.theta',
+        'phi': 'system.phi',
+        'u': 'system.u',
+        'v': 'system.v',
+        'w': 'system.w',
+        'v_north': 'system.v_north',
+        'v_east': 'system.v_east',
+        'v_down': 'system.v_down',
+        'p': 'system.p',
+        'q': 'system.q',
+        'r': 'system.r'
+    }
+
+    def __init__(self, aircraft, system, environment, save_vars=None):
         """
-        Simulation objects.
+        Simulation object
 
         Parameters
         ----------
         aircraft : Aircraft
-            Aircraft.
+            Aircraft model
         system : System
-            System.
+            System model
         environment : Environment
-            Environment.
+            Environment model.
+        save_vars : dict, opt
+            Dictionary containing the names of the variables to be saved and
+            the object and attribute where it is calculated. If not given, the
+            ones set in `_defaul_save_vars` are used.
         """
         self.system = system
 
+        # This wrap is necessary in order the respect the arguments passed
+        # by the integration method: time, state (without self).
         callback = lambda time, state: self._time_step(time, state)
         self.system.model.set_solout(callback)
 
@@ -46,43 +102,13 @@ class Simulation(object):
 
         self.controls = {}
 
-        self.vars_to_save = {
-            'T': 'environment.T',  # env
-            'pressure': 'environment.p',
-            'rho': 'environment.rho',
-            'a': 'environment.a',
-            'h': 'system.height',
-            'Fx': 'aircraft.Fx',
-            'Fy': 'aircraft.Fy',
-            'Fz': 'aircraft.Fz',
-            'Mx': 'aircraft.Mx',
-            'My': 'aircraft.My',
-            'Mz': 'aircraft.Mz',
-            'TAS': 'aircraft.TAS',  # aircraft
-            'Mach': 'aircraft.Mach',
-            'q_inf': 'aircraft.q_inf',
-            'alpha': 'aircraft.alpha',
-            'beta': 'aircraft.beta',
-            'x_earth': 'system.x_earth',  # system
-            'y_earth': 'system.y_earth',
-            'z_earth': 'system.z_earth',
-            'psi': 'system.psi',
-            'theta': 'system.theta',
-            'phi': 'system.phi',
-            'u': 'system.u',
-            'v': 'system.v',
-            'w': 'system.w',
-            'v_north': 'system.v_north',
-            'v_east': 'system.v_east',
-            'v_down': 'system.v_down',
-            'p': 'system.p',
-            'q': 'system.q',
-            'r': 'system.r'
-        }
-        self.results = {name: [] for name in self.vars_to_save}
+        if not save_vars:
+            self._save_vars = self._default_save_vars
+        # Initialize results structure
+        self.results = {name: [] for name in self._save_vars}
 
     def propagate(self, time):
-        """Run the simulation by integrating the system
+        """Run the simulation by integrating the system until time t.
 
         Parameters
         ----------
@@ -106,6 +132,13 @@ class Simulation(object):
             self.system, self.environment, controls0)
 
         self.system.model.propagate(time, mass0, inertia0, forces, moments)
+
+        # self.results is a dictionary of lists in order to append results
+        # of each time step. Due to dense output of the integrator,
+        # the number of time steps cannot be known in advance.
+        # Once the integration has finished it can be transformed into a
+        # dict of ndarrays
+        self.results = {n: np.asarray(v) for n, v in self.results.items()}
 
     def _time_step(self, time, state):
         """Actions performed at each time step. This method is used as
@@ -132,12 +165,14 @@ class Simulation(object):
         moments = self.aircraft.total_moments
         mass = self.aircraft.mass
         inertia = self.aircraft.inertia
-
         self.system.model.state = state
         self.system.set_full_system_state(mass, inertia, forces, moments)
 
         self.environment.update(self.system)
 
+        # TODO: take into account that if the controls are not time
+        # functions (ie. control system or AP are activated) the function
+        # signature must be changed.
         controls = self._get_current_controls(time)
 
         forces, moment = self.aircraft.calculate_forces_and_moments(
@@ -148,18 +183,16 @@ class Simulation(object):
 
         self.system.model.set_forcing_terms(mass, inertia, forces, moments)
 
-        print(time, state)
-
         self._save_time_step()
 
     def _save_time_step(self):
         """Saves the selected variables for the current system, environment
         and aircraft.
         """
-
-        for var_name, value_pointer in self.vars_to_save.items():
-            self.results[var_name].append(operator.attrgetter(value_pointer)(
-                self))
+        for var_name, value_pointer in self._save_vars.items():
+            self.results[var_name].append(
+                operator.attrgetter(value_pointer)(self)
+            )
 
     def _get_current_controls(self, time):
         """Get the control values for the current time step for the given
@@ -174,6 +207,12 @@ class Simulation(object):
         -------
         controls : dict
             Control value for each control
+
+        Notes
+        -----
+        Current controls are only a function of time in this kind of
+        simulation (predefined inputs). However, if the AP is active,
+        controls will be also function of the system state and environment.
         """
         c = {c_name: c_fun(time) for c_name, c_fun in self.controls.items()}
         return c
