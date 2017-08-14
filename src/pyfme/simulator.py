@@ -39,7 +39,7 @@ class Simulation(object):
         self.system = system
 
         callback = lambda time, state: self._time_step(time, state)
-        self.system.model._ode.set_solout(callback)
+        self.system.model.set_solout(callback)
 
         self.aircraft = aircraft
         self.environment = environment

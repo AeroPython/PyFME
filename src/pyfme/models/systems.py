@@ -261,24 +261,26 @@ class System(object):
 class DynamicSystem(object):
 
     def __init__(self, n_states, use_jacobian=None, integrator=None,
-                 callback=None, **integrator_params):
+                 **integrator_params):
 
+        # Allocate state vector
         self.state = np.empty(n_states)
 
+        # Set the jacobian if it is implemented in the model
         if use_jacobian:
             self._jacobian = self.dynamic_system_jacobian
         else:
             self._jacobian = None
 
+        # ODE setup
         self._ode = ode(self.dynamic_system_equations, self._jacobian)
 
         if integrator is None:
             integrator = 'dopri5'
 
+        # TODO: carefully review integrator parameters such as nsteps
         self._ode.set_integrator(integrator, nsteps=10000, **integrator_params)
 
-        if callback:
-            self._ode.set_solout(callback)
 
     @property
     def time(self):
@@ -290,6 +292,9 @@ class DynamicSystem(object):
 
     def set_forcing_terms(self, mass, inertia, forces, moments):
         self._ode.set_f_params(mass, inertia, forces, moments)
+
+    def set_callback(self, fun):
+        self._ode.set_solout(fun)
 
     def propagate(self, dt, mass, inertia, forces, moments):
 
