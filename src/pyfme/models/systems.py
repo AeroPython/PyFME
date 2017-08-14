@@ -269,8 +269,10 @@ class DynamicSystem(object):
         # Set the jacobian if it is implemented in the model
         if use_jacobian:
             self._jacobian = self.dynamic_system_jacobian
+            self.set_forcing_terms = self._set_fun_and_jac_forcing_terms
         else:
             self._jacobian = None
+            self.set_forcing_terms = self._set_fun_forcing_terms
 
         # ODE setup
         self._ode = ode(self.dynamic_system_equations, self._jacobian)
@@ -281,7 +283,6 @@ class DynamicSystem(object):
         # TODO: carefully review integrator parameters such as nsteps
         self._ode.set_integrator(integrator, nsteps=10000, **integrator_params)
 
-
     @property
     def time(self):
         return self._ode.t
@@ -290,20 +291,34 @@ class DynamicSystem(object):
         self.state = state
         self._ode.set_initial_value(self.state)
 
-    def set_forcing_terms(self, mass, inertia, forces, moments):
+    def _set_fun_forcing_terms(self, mass, inertia, forces, moments):
         self._ode.set_f_params(mass, inertia, forces, moments)
 
-    def set_callback(self, fun):
+    def _set_jac_forcing_terms(self, mass, inertia, forces, moments):
+        self._ode.set_jac_params(mass, inertia, forces, moments)
+
+    def _set_fun_and_jac_forcing_terms(self, mass, inertia, forces, moments):
+        self._set_fun_and_jac_forcing_terms(mass, inertia, forces, moments)
+        self._set_jac_forcing_terms(mass, inertia, forces, moments)
+
+    def set_solout(self, fun):
         self._ode.set_solout(fun)
 
     def propagate(self, dt, mass, inertia, forces, moments):
 
+        if not self._ode._integrator.solout:
+            raise ValueError("A callback to the model must be given in order "
+                             "to update the system, environment and aircraft "
+                             "at each time step. Also to save the results."
+                             )
+
+        # Sets the final time of the integration
         t = self._ode.t + dt
 
-        self._ode.set_f_params(mass, inertia, forces, moments)
-
-        if self._ode.jac:
-            self.set_forcing_terms(mass, inertia, forces, moments)
+        # This only affects the first time step: this update will be done by
+        # the callback function at every integration step after updating
+        # mass, inertia, forces and moments
+        self.set_forcing_terms(mass, inertia, forces, moments)
 
         self.state = self._ode.integrate(t)
 
@@ -331,5 +346,3 @@ class DynamicSystem(object):
     @abstractstaticmethod
     def dynamic_system_jacobian(state_vector, mass, inertia, forces, moments):
         raise NotImplementedError
-
-

@@ -25,19 +25,21 @@ class EulerFlatEarth(DynamicSystem):
 
     n_states = 12
 
-    def __init__(self, use_jacobian=None, integrator=None, callback=None,
+    def __init__(self, use_jacobian=None, integrator=None,
                  **integrator_params):
 
         # TODO: use jacobian when it is calculated
         super().__init__(n_states=self.n_states, use_jacobian=use_jacobian,
-                         integrator=integrator, callback=callback)
+                         integrator=integrator)
 
-    def dynamic_system_state_to_full_system_state(self, mass, inertia, forces, moments):
+    def dynamic_system_state_to_full_system_state(self, mass, inertia, forces,
+                                                  moments):
         full_system_state = {}
 
         t = self.time
         y = self.state
-        y_dot = self.dynamic_system_equations(t, y, mass, inertia, forces, moments)
+        y_dot = self.dynamic_system_equations(t, y, mass, inertia, forces,
+                                              moments)
 
         # TODO: define the rest of conversions
         full_system_state['geodetic_coordinates'] = np.array([0., 0., y[11]])  # implement
