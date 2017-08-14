@@ -102,15 +102,15 @@ class System(object):
 
     @property
     def psi(self):
-        return self.euler_angles[0]
+        return self.euler_angles[2]
 
     @property
     def theta(self):
-        return self.euler_angles[1]
+        return self.euler_angles[0]
 
     @property
     def phi(self):
-        return self.euler_angles[2]
+        return self.euler_angles[1]
 
     @property
     def u(self):
