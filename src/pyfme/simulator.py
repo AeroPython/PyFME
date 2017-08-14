@@ -40,6 +40,7 @@ class Simulation(object):
     """
 
     _default_save_vars = {
+        'time': 'system.time',
         'T': 'environment.T',  # env
         'pressure': 'environment.p',
         'rho': 'environment.rho',
@@ -161,6 +162,8 @@ class Simulation(object):
         are calculated.
         * the selected variables are saved.
         """
+        self.system.time = time
+
         forces = self.aircraft.total_forces
         moments = self.aircraft.total_moments
         mass = self.aircraft.mass

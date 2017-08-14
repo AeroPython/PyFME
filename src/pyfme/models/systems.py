@@ -291,6 +291,7 @@ class DynamicSystem(object):
             Other integrator params passed as kwargs.
         """
 
+        self.time = 0.
         # Allocate state vector
         self.state = np.empty(n_states)
 
@@ -310,10 +311,6 @@ class DynamicSystem(object):
 
         # TODO: carefully review integrator parameters such as nsteps
         self._ode.set_integrator(integrator, nsteps=10000, **integrator_params)
-
-    @property
-    def time(self):
-        return self._ode.t
 
     def set_initial_state(self, state):
         """Sets the initial state for the integration
