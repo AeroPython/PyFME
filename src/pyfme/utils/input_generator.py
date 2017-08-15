@@ -25,7 +25,17 @@ class Control(object):
         raise NotImplementedError
 
     def __call__(self, t):
-        return self._vec_fun(t)
+        r = self._vec_fun(t)
+        # NumPy vecotrize returns an numpy.ndarray object with size 1 and no
+        # shape if the input is scalar, however in this case, a float is
+        # expected.
+        # TODO:
+        # Numba vectorize does return a scalar, however it does not deal
+        # with function methods.
+        if r.size == 1:
+            return float(r)
+        else:
+            return r
 
     def __add__(self, other):
         control = Control()

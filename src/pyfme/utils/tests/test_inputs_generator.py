@@ -15,6 +15,12 @@ from numpy.testing import assert_almost_equal
 from pyfme.utils.input_generator import (Step, Doublet, Ramp, Harmonic,
                                          Constant)
 
+def test_input_scalar_output_scalar():
+    control = Constant(1.5)
+    control_value = control(1.5)
+
+    assert isinstance(control_value, float)
+
 
 def test_step():
     t_init = 0
