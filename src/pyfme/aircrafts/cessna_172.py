@@ -194,6 +194,22 @@ class Cessna172(Aircraft):
         self.beta = 0  # rad
         self.alpha_dot = 0  # rad/s
 
+    @property
+    def delta_elevator(self):
+        return self.controls['delta_elevator']
+
+    @property
+    def delta_rudder(self):
+        return self.controls['delta_rudder']
+
+    @property
+    def delta_aileron(self):
+        return self.controls['delta_aileron']
+
+    @property
+    def delta_t(self):
+        return self.controls['delta_t']
+
     def _calculate_aero_lon_forces_moments_coeffs(self, system):
         delta_elev = np.rad2deg(self.controls['delta_elevator'])  # deg
         alpha_DEG = np.rad2deg(self.alpha)  # deg

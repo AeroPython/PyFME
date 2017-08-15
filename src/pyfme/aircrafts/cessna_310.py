@@ -138,6 +138,22 @@ class Cessna310(Aircraft):
         self.alpha = 0  # Angle of attack (AOA).
         self.beta = 0  # Angle of sideslip (AOS).
 
+    @property
+    def delta_elevator(self):
+        return self.controls['delta_elevator']
+
+    @property
+    def delta_rudder(self):
+        return self.controls['delta_rudder']
+
+    @property
+    def delta_aileron(self):
+        return self.controls['delta_aileron']
+
+    @property
+    def delta_t(self):
+        return self.controls['delta_t']
+
     def _calculate_aero_lon_forces_moments_coeffs(self):
 
         self._long_inputs[1] = self.alpha
