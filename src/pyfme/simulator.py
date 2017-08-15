@@ -10,7 +10,9 @@ model), environment and aircraft.
 
 """
 import operator
+
 import numpy as np
+import pandas as pd
 from scipy.optimize import least_squares
 
 from pyfme.utils.trimmer import trimming_cost_func
@@ -143,8 +145,10 @@ class Simulation(object):
         # of each time step. Due to dense output of the integrator,
         # the number of time steps cannot be known in advance.
         # Once the integration has finished it can be transformed into a
-        # dict of ndarrays
-        self.results = {n: np.asarray(v) for n, v in self.results.items()}
+        # DataFrame
+        time = self.results.pop('time')
+        self.results = pd.DataFrame(self.results, index=time)
+        self.results.index.name = 'time'
 
     def _time_step(self, time, state):
         """Actions performed at each time step. This method is used as

@@ -4,3 +4,4 @@ dependencies:
   - scipy >=0.17.0
   - matplotlib >= 1.5
   - pytest >= 2.9
+  - pandas >= 0.20
