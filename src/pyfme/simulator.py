@@ -57,6 +57,10 @@ class Simulation(object):
         'q_inf': 'aircraft.q_inf',
         'alpha': 'aircraft.alpha',
         'beta': 'aircraft.beta',
+        'rudder': 'aircraft.delta_rudder',
+        'aileron': 'aircraft.delta_aileron',
+        'elevator': 'aircraft.delta_elevator',
+        'thrust': 'aircraft.delta_t',
         'x_earth': 'system.x_earth',  # system
         'y_earth': 'system.y_earth',
         'z_earth': 'system.z_earth',
