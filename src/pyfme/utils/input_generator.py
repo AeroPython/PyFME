@@ -10,6 +10,7 @@ Provides some typical inputs signals such as: step, doublet, ramp, harmonic.
 """
 from abc import abstractmethod
 
+from numpy import vectorize, float64
 from numpy import sin, pi
 
 
@@ -17,30 +18,31 @@ from numpy import sin, pi
 class Control(object):
 
     def __init__(self):
-        self._fun = None
+        self._vec_fun = vectorize(self._fun, otypes=[float64])
 
     @abstractmethod
-    def __call__(self, t):
+    def _fun(self, t):
         raise NotImplementedError
+
+    def __call__(self, t):
+        return self._vec_fun(t)
 
     def __add__(self, other):
         control = Control()
         control._fun = lambda t: self(t) + other(t)
+        control._vec_fun = vectorize(control._fun, otypes=[float64])
         return control
 
     def __sub__(self, other):
         control = Control()
         control._fun = lambda t: self(t) - other(t)
+        control._vec_fun = vectorize(control._fun, otypes=[float64])
         return control
 
     def __mul__(self, other):
         control = Control()
         control._fun = lambda t: self(t) * other(t)
-        return control
-
-    def __truediv__(self, other):
-        control = Control()
-        control._fun = lambda t: self(t) / other(t)
+        control._vec_fun = vectorize(control._fun, otypes=[float64])
         return control
 
 
@@ -50,7 +52,7 @@ class Constant(Control):
         super().__init__()
         self.offset = offset
 
-    def __call__(self, t):
+    def _fun(self, t):
         return self.offset
 
 
@@ -65,7 +67,7 @@ class Step(Control):
 
         self.t_fin = self.t_init + self.T
 
-    def __call__(self, t):
+    def _fun(self, t):
         value = self.offset
         if self.t_init <= t <= self.t_fin:
             value += self.A
@@ -84,7 +86,7 @@ class Doublet(Control):
         self.t_fin1 = self.t_init + self.T / 2
         self.t_fin2 = self.t_init + self.T
 
-    def __call__(self, t):
+    def _fun(self, t):
         value = self.offset
 
         if self.t_init <= t < self.t_fin1:
@@ -106,7 +108,7 @@ class Ramp(Control):
         self.slope = self.A / self.T
         self.t_fin = self.t_init + self.T
 
-    def __call__(self, t):
+    def _fun(self, t):
         value = self.offset
         if self.t_init <= t <= self.t_fin:
             value += self.slope * (t - self.t_init)
@@ -116,20 +118,20 @@ class Ramp(Control):
 
 class Harmonic(Control):
 
-    def __init__(self, t_init, t_fin, A, freq, phase, offset=0):
+    def __init__(self, t_init, T, A, freq, phase, offset=0):
         super().__init__()
         self.t_init = t_init
-        self.t_fin = t_fin
+        self.t_fin = t_init + T
         self.A = A
         self.freq = freq
         self.phase = phase
         self.offset = offset
 
-    def __call__(self, t):
+    def _fun(self, t):
         value = self.offset
 
         if self.t_init <= t <= self.t_fin:
             value += self.A/2 * sin(2 * pi * self.freq * (t - self.t_init) +
                                     self.phase)
 
-        return  value
+        return value
