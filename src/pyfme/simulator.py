@@ -102,8 +102,11 @@ class Simulation(object):
 
         # This wrap is necessary in order the respect the arguments passed
         # by the integration method: time, state (without self).
-        callback = lambda time, state: self._time_step(time, state)
-        self.system.model.set_solout(callback)
+        update_fun = lambda time, state: self._time_step(time, state)
+        self.system.model.set_forcing_terms(update_fun)
+
+        save_fun = lambda time, state: self._save_time_step()
+        self.system.model.set_solout(save_fun)
 
         self.aircraft = aircraft
         self.environment = environment
@@ -187,15 +190,15 @@ class Simulation(object):
         # signature must be changed.
         controls = self._get_current_controls(time)
 
-        forces, moment = self.aircraft.calculate_forces_and_moments(
+        forces, moments = self.aircraft.calculate_forces_and_moments(
             self.system,
             self.environment,
             controls
         )
 
-        self.system.model.set_forcing_terms(mass, inertia, forces, moments)
+        # self._save_time_step()
 
-        self._save_time_step()
+        return mass, inertia, forces, moments
 
     def _save_time_step(self):
         """Saves the selected variables for the current system, environment

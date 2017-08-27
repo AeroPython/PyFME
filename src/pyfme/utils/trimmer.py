@@ -108,7 +108,7 @@ def trimming_cost_func(trimmed_params, system, ac, env, controls2trim,
 
     forces, moments = ac.calculate_forces_and_moments(system, env, new_controls)
 
-    output = system.model.dynamic_system_equations(
+    output = system.model._dynamic_system_equations(
         time=0,
         state_vector=state,
         mass=ac.mass,

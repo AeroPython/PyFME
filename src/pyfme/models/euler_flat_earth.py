@@ -38,7 +38,7 @@ class EulerFlatEarth(DynamicSystem):
 
         t = self.time
         y = self.state
-        y_dot = self.dynamic_system_equations(t, y, mass, inertia, forces,
+        y_dot = self._dynamic_system_equations(t, y, mass, inertia, forces,
                                               moments)
 
         # TODO: define the rest of conversions
@@ -77,8 +77,17 @@ class EulerFlatEarth(DynamicSystem):
 
         return state
 
+    def dynamic_system_equations(self, time, state_vector, update_fun):
+
+        mass, inertia, forces, moments = update_fun(time, state_vector)
+
+        rv = self._dynamic_system_equations(time, state_vector, mass, inertia,
+                                      forces, moments)
+
+        return rv
+
     @staticmethod
-    def dynamic_system_equations(time, state_vector, mass, inertia, forces,
+    def _dynamic_system_equations(time, state_vector, mass, inertia, forces,
                                  moments):
         """Euler flat earth equations: linear momentum equations, angular
         momentum equations, angular kinematic equations, linear kinematic

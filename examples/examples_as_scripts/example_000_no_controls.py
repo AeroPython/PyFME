@@ -18,15 +18,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from pyfme.aircrafts import Cessna172
+from pyfme.aircrafts import Cessna172, Cessna310
 from pyfme.environment.environment import Environment
 from pyfme.environment.atmosphere import ISA1976
 from pyfme.environment.gravity import VerticalConstant
 from pyfme.environment.wind import NoWind
-from pyfme.models.systems import EulerFlatEarth
-from pyfme.simulator import BatchSimulation
-from pyfme.utils.trimmer import steady_state_flight_trimmer
-from pyfme.utils.input_generator import doublet
+from pyfme.models import EulerFlatEarth
+from pyfme.models.systems import System
+from pyfme.simulator import Simulation
+
+from pyfme.utils.input_generator import Constant, Harmonic, Doublet, Step, Ramp
 
 aircraft = Cessna172()
 atmosphere = ISA1976()
@@ -42,90 +43,87 @@ x0, y0 = 0, 0  # m
 turn_rate = 0.0  # rad/s
 gamma0 = 0.0  # rad
 
-system = EulerFlatEarth(lat=0, lon=0, h=h0, psi=psi0, x_earth=x0, y_earth=y0)
+system = System(EulerFlatEarth())
+
+simulation = Simulation(aircraft, system, environment)
 
 not_trimmed_controls = {'delta_elevator': 0.05,
+                        'hor_tail_incidence': 0.0,
                         'delta_aileron': 0.01 * np.sign(turn_rate),
                         'delta_rudder': 0.01 * np.sign(turn_rate),
                         'delta_t': 0.5}
+simulation.trim_aircraft((0, 0, h0), TAS, gamma0, turn_rate,
+                         not_trimmed_controls, psi0)
 
-controls2trim = ['delta_elevator', 'delta_aileron', 'delta_rudder', 'delta_t']
+trimmed_controls = simulation.aircraft.controls
 
-trimmed_ac, trimmed_sys, trimmed_env, results = steady_state_flight_trimmer(
-    aircraft, system, environment, TAS=TAS, controls_0=not_trimmed_controls,
-    controls2trim=controls2trim, gamma=gamma0, turn_rate=turn_rate, verbose=1)
-
-print()
-print('delta_elev = ', "%8.4f" % np.rad2deg(results['delta_elevator']), 'deg')
-print('delta_aile = ', "%8.4f" % np.rad2deg(results['delta_aileron']), 'deg')
-print('delta_rud = ', "%8.4f" % np.rad2deg(results['delta_rudder']), 'deg')
-print('delta_t = ', "%8.4f" % results['delta_t'], '%', '\n')
-print('alpha = ', "%8.4f" % np.rad2deg(results['alpha']), 'deg')
-print('beta = ', "%8.4f" % np.rad2deg(results['beta']), 'deg', '\n')
-print('u = ', "%8.4f" % results['u'], 'm/s')
-print('v = ', "%8.4f" % results['v'], 'm/s')
-print('w = ', "%8.4f" % results['w'], 'm/s', '\n')
-print('psi = ', "%8.4f" % np.rad2deg(psi0), 'deg')
-print('theta = ', "%8.4f" % np.rad2deg(results['theta']), 'deg')
-print('phi = ', "%8.4f" % np.rad2deg(results['phi']), 'deg', '\n')
-print('p =', "%8.4f" % results['p'], 'rad/s')
-print('q =', "%8.4f" % results['q'], 'rad/s')
-print('r =', "%8.4f" % results['r'], 'rad/s')
-
-no_controls = {'delta_elevator': 0.0,
-               'delta_aileron': 0.0,
-               'delta_rudder': 0.0,
-               'delta_t': 0.0}
-
-my_simulation = BatchSimulation(trimmed_ac, trimmed_sys, trimmed_env)
+simulation.controls = {'delta_elevator':
+                           Doublet(
+                               2, 0.5, 0.1,
+                               trimmed_controls['delta_elevator']
+                           ),
+                       'delta_aileron':
+                           Constant(trimmed_controls['delta_aileron']),
+                       'delta_rudder':
+                           Constant(trimmed_controls['delta_rudder']),
+                       'delta_t':
+                           Constant(trimmed_controls['delta_t'])
+                       }
 
 tfin = 20  # seconds
-N = tfin * 100 + 1
-time = np.linspace(0, tfin, N)
 
-initial_controls = no_controls
+simulation.propagate(tfin)
 
-controls = {}
-for control_name, control_value in initial_controls.items():
-    controls[control_name] = np.ones_like(time) * control_value
+kwargs = {'marker':'.'}
 
-my_simulation.set_controls(time, controls)
+simulation.results.plot(y=['x_earth', 'y_earth', 'height'],
+                        subplots=True,
+                        layout=(3, 1),
+                        sharex=True,
+                        **kwargs)
 
-par_list = ['x_earth', 'y_earth', 'height',
-            'psi', 'theta', 'phi',
-            'u', 'v', 'w',
-            'v_north', 'v_east', 'v_down',
-            'p', 'q', 'r',
-            'alpha', 'beta', 'TAS',
-            'F_xb', 'F_yb', 'F_zb',
-            'M_xb', 'M_yb', 'M_zb']
+simulation.results.plot(y=['psi', 'theta', 'phi'],
+                        subplots=True,
+                        layout=(3, 1),
+                        sharex=True,
+                        **kwargs)
 
-my_simulation.set_par_dict(par_list)
-my_simulation.run_simulation()
+simulation.results.plot(y=['v_north', 'v_east', 'v_down'],
+                        subplots=True,
+                        layout=(3, 1),
+                        sharex=True,
+                        **kwargs)
 
-# print(my_simulation.par_dict)
+simulation.results.plot(y=['p', 'q', 'r'],
+                        subplots=True,
+                        layout=(3, 1),
+                        sharex=True,
+                        **kwargs)
 
-plt.style.use('ggplot')
+simulation.results.plot(y=['alpha', 'beta', 'TAS'],
+                        subplots=True,
+                        layout=(3, 1),
+                        sharex=True,
+                        **kwargs)
 
-for ii in range(len(par_list) // 3):
-    three_params = par_list[3 * ii:3 * ii + 3]
-    fig, ax = plt.subplots(3, 1, sharex=True)
-    for jj, par in enumerate(three_params):
-        ax[jj].plot(time, my_simulation.par_dict[par])
-        ax[jj].set_ylabel(par)
-        ax[jj].set_xlabel('time (s)')
+simulation.results.plot(y=['Fx', 'Fy', 'Fz'],
+                        subplots=True,
+                        layout=(3, 1),
+                        sharex=True,
+                        **kwargs)
 
-fig = plt.figure()
-ax = Axes3D(fig)
-ax.plot(my_simulation.par_dict['x_earth'],
-        my_simulation.par_dict['y_earth'],
-        my_simulation.par_dict['height'])
+simulation.results.plot(y=['Mx', 'My', 'Mz'],
+                        subplots=True,
+                        layout=(3, 1),
+                        sharex=True,
+                        **kwargs)
 
-ax.plot(my_simulation.par_dict['x_earth'],
-        my_simulation.par_dict['y_earth'],
-        my_simulation.par_dict['height'] * 0)
-ax.set_xlabel('x_earth')
-ax.set_ylabel('y_earth')
-ax.set_zlabel('z_earth')
+simulation.results.plot(y=['elevator', 'aileron', 'rudder', 'thrust'],
+                        subplots=True,
+                        layout=(4, 1),
+                        sharex=True,
+                        **kwargs)
+
+print(simulation.results)
 
 plt.show()

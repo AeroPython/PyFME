@@ -439,7 +439,10 @@ class DynamicSystem(object):
             self.set_forcing_terms = self._set_fun_forcing_terms
 
         # ODE setup
-        self._ode = ode(self.dynamic_system_equations, self._jacobian)
+        f = (lambda time, state_vector, update_fun:
+            self.dynamic_system_equations(time, state_vector, update_fun))
+
+        self._ode = ode(f, self._jacobian)
 
         if integrator is None:
             integrator = 'dopri5'
@@ -458,8 +461,8 @@ class DynamicSystem(object):
         self.state = state
         self._ode.set_initial_value(self.state)
 
-    def _set_fun_forcing_terms(self, mass, inertia, forces, moments):
-        self._ode.set_f_params(mass, inertia, forces, moments)
+    def _set_fun_forcing_terms(self, update_f):
+        self._ode.set_f_params(update_f)
 
     def _set_jac_forcing_terms(self, mass, inertia, forces, moments):
         self._ode.set_jac_params(mass, inertia, forces, moments)
@@ -508,11 +511,11 @@ class DynamicSystem(object):
 
         # Checks that a callback for updating environment and aircraft has
         # been defined previous to integration
-        if not self._ode._integrator.solout:
-            raise ValueError("A callback to the model must be given in order "
-                             "to update the system, environment and aircraft "
-                             "at each time step. Also to save the results."
-                             )
+        # if not self._ode._integrator.solout:
+        #     raise ValueError("A callback to the model must be given in order "
+        #                      "to update the system, environment and aircraft "
+        #                      "at each time step. Also to save the results."
+        #                      )
 
         # Sets the final time of the integration
         t = self._ode.t + dt
@@ -520,7 +523,7 @@ class DynamicSystem(object):
         # This only affects the first time step: this update will be done by
         # the callback function at every integration step after updating
         # mass, inertia, forces and moments
-        self.set_forcing_terms(mass, inertia, forces, moments)
+        # self.set_forcing_terms(mass, inertia, forces, moments)
 
         # Perform the integration
         self.state = self._ode.integrate(t)
