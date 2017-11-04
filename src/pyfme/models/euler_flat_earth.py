@@ -21,8 +21,6 @@ from pyfme.models.dynamic_system import DynamicSystem
 
 class EulerFlatEarth(DynamicSystem):
 
-    n_states = 12
-
     def __init__(self, t0, x0, update, method='Rk45', options=None):
 
         # TODO: use jacobian when it is calculated and implemented in
