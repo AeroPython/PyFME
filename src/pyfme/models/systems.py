@@ -3,163 +3,250 @@ Python Flight Mechanics Engine (PyFME).
 Copyright (c) AeroPython Development Team.
 Distributed under the terms of the MIT License.
 
-Dynamic Systems
----------------
+State elements
+--------------
 
-Dynamic system implements an abstract class to be inherited by all the
-models.
+The aircraft state has always the same elements even if they are expressed
+in a different way. For example, attitude can be expressed with Euler angles
+or quaternions, position with geodetic coordinates or Earth coordinates...
 
-System is a more generic object that wraps every system and keeps updated
-variables that may not be present in the dynamic system but may be used by
-other members of the simulation, such as the environment or the aircraft.
+This module provides class to represent:
+  * position
+  * attitude
+  * velocity
+  * angular velocity
+  * acceleration
+  * angular acceleration
+
 """
-from abc import abstractmethod, abstractstaticmethod
-
 import numpy as np
-from scipy.integrate import ode
 
 from pyfme.utils.coordinates import body2hor, hor2body
 
 
-class System(object):
-    """Generic system object containing and wrapping a model that keeps updated
-    variables that may not be present in the model but may be inferred from it.
-    
+class Position:
+    """Position
+
     Attributes
     ----------
-    model : DynamicSystem
-        System's model containing the equations and state vector.
-    full_system_state_names : tuple of str
-        Names of all variables that are tracked in the system. All of them 
-        are listed as class attributes below.
+
     geodetic_coordinates : ndarray, shape(3)
         (lat [rad], lon [rad], height [m])
+    lat
+    lon
+    height
     geocentric_coordinates : ndarray, shape(3)
         (x_geo [m], y_geo [m], z_geo [m])
+    x_geo
+    y_geo
+    z_geo
     earth_coordinates : ndarray, shape(3)
         (x_earth [m], y_earth [m], z_earth [m])
-    euler_angles : ndarray, shape(3)
-        (theta [rad], phi [rad], psi [rad])
-    quaternions : ndarray, shape(4)
-        (q0, q1, q2, q3)
-    vel_body : ndarray, shape(3)
-        (u [m/s], v [m/s], w [m/s])
-    vel_NED : ndarray, shape(3)
-        (v_north [m/s], v_east [m/s], v_down [m/s])
-    vel_ang : ndarray, shape(3)
-        (p [rad/s], q [rad/s], r [rad/s])
-    accel_body : ndarray, shape(3)
-        (u_dot [m/s²], v_dot [m/s²], w_dot [m/s²])
-    accel_NED : ndarray, shape(3)
-        (VN_dot [m/s²], VE_dot [m/s²], VD_dot [m/s²])
-    accel_ang : ndarray, shape(3)
-        (p_dot [rad/s²], q_dot [rad/s²], r_dot [rad/s²])
-
+    x_earth
+    y_earth
+    z_earth
     """
 
-    full_system_state_names = ('geodetic_coordinates',
-                               'geocentric_coordinates',
-                               'earth_coordinates',
-                               'euler_angles',
-                               'quaternions',
-                               'vel_body',
-                               'vel_NED',
-                               'vel_ang',
-                               'accel_body',
-                               'accel_NED',
-                               'accel_ang')
-
-    def __init__(self, model):
-        """System
-
-        Parameters
-        ----------
-        model : DynamicSystem
-        System's model containing the equations and state vector.
-        """
-
-        # Dynamic system
-        self.model = model
-
-        # POSITION
+    def __init__(self):
         # Geodetic coordinates: (geodetic lat, lon, height above ellipsoid)
-        self.geodetic_coordinates = np.zeros(3)  # rad
+        self._geodetic_coordinates = np.zeros(3)  # rad
         # Geocentric coordinates (rotating with Earth): (x_geo, y_geo, z_geo)
-        self.geocentric_coordinates = np.zeros(3)  # m
+        self._geocentric_coordinates = np.zeros(3)  # m
         # Earth coordinates (x_earth, y_earth, z_earth)
-        self.earth_coordinates = np.zeros(3)  # m
-
-        # ATTITUDE
-        # Euler angles (psi, theta, phi)
-        self.euler_angles = np.zeros(3)  # rad
-        # Quaternions (q0, q1, q2, q3)
-        self.quaternions = np.zeros(4)
-
-        # ABSOLUTE VELOCITY.
-        # Body axis
-        self.vel_body = np.zeros(3)  # m/s
-        # Local horizon (NED)
-        self.vel_NED = np.zeros(3)  # m/s
-
-        # ANGULAR VELOCITY: (p, q, r)
-        self.vel_ang = np.zeros(3)  # rad/s
-
-        # ABSOLUTE ACCELERATION
-        # Body axis
-        self.accel_body = np.zeros(3)  # m/s²
-        # Local horizon (NED)
-        self.accel_NED = np.zeros(3)  # m/s²
-
-        # ANGULAR ACCELERATION
-        self.accel_ang = np.zeros(3)  # rad/s²
+        self._earth_coordinates = np.zeros(3)  # m
 
     @property
-    def lat(self):
-        return self.geodetic_coordinates[0]
+    def geocentric_coordinates(self):
+        return self._geocentric_coordinates
 
-    @property
-    def lon(self):
-        return self.geodetic_coordinates[1]
-
-    @property
-    def height(self):
-        return self.geodetic_coordinates[2]
+    @geocentric_coordinates.setter
+    def geocentric_coordinates(self, value):
+        self._geocentric_coordinates[:] = value
+        # TODO: make transformation from geocentric to geodetic:
+        self._geocentric_coordinates = np.zeros(3)  # m
+        # TODO: Assuming round earth use changes in lat & lon to calculate
+        # new x_earth and y_earth. z_earth is -height:
+        self._earth_coordinates = np.zeros(3)  # m
 
     @property
     def x_geo(self):
-        return self.geocentric_coordinates[0]
+        return self._geocentric_coordinates[0]
 
     @property
     def y_geo(self):
-        return self.geocentric_coordinates[1]
+        return self._geocentric_coordinates[1]
 
     @property
     def z_geo(self):
-        return self.geocentric_coordinates[2]
+        return self._geocentric_coordinates[2]
+
+    @property
+    def geodetic_coordinates(self):
+        return self._geodetic_coordinates
+
+    @geodetic_coordinates.setter
+    def geodetic_coordinates(self, value):
+        self._geodetic_coordinates[:] = value  # rad
+        # TODO: make transformation from geodetic to geocentric:
+        self._geocentric_coordinates = np.zeros(3)  # m
+        # TODO: Assuming round earth use changes in lat & lon to calculate
+        # new x_earth and y_earth. z_earth is -height:
+        self._earth_coordinates = np.zeros(3)  # m
+
+    @property
+    def lat(self):
+        return self._geodetic_coordinates[0]
+
+    @property
+    def lon(self):
+        return self._geodetic_coordinates[1]
+
+    @property
+    def height(self):
+        return self._geodetic_coordinates[2]
+
+    @property
+    def earth_coordinates(self):
+        return self._earth_coordinates
+
+    @earth_coordinates.setter
+    def earth_coordinates(self, value):
+        self._earth_coordinates[:] = value
+        # TODO: Assuming round earth use changes in x & y to calculate
+        # new lat and lon. z_earth is -height:
+        self._earth_coordinates = np.zeros(3)  # m
+        # TODO: make transformation from geodetic to geocentric:
+        self._geocentric_coordinates = np.zeros(3)  # m
 
     @property
     def x_earth(self):
-        return self.earth_coordinates[0]
+        return self._earth_coordinates[0]
 
     @property
     def y_earth(self):
-        return self.earth_coordinates[1]
+        return self._earth_coordinates[1]
 
     @property
     def z_earth(self):
-        return self.earth_coordinates[2]
+        return self._earth_coordinates[2]
+
+
+class Attitude:
+    """Attitude
+
+    Attributes
+    ----------
+
+    euler_angles : ndarray, shape(3)
+        (theta [rad], phi [rad], psi [rad])
+    theta
+    phi
+    psi
+    quaternions : ndarray, shape(4)
+        (q0, q1, q2, q3)
+    q0
+    q1
+    q2
+    q3
+    """
+
+    def __init__(self):
+        # Euler angles (psi, theta, phi)
+        self._euler_angles = np.zeros(3)  # rad
+        # Quaternions (q0, q1, q2, q3)
+        self._quaternions = np.zeros(4)
+
+    @property
+    def euler_angles(self):
+        return self._euler_angles
+
+    @euler_angles.setter
+    def euler_angles(self, value):
+        self._euler_angles[:] = value
+        # TODO: transform quaternions to Euler angles
+        self._quaternions = np.zeros(4)
 
     @property
     def psi(self):
-        return self.euler_angles[2]
+        return self._euler_angles[2]
 
     @property
     def theta(self):
-        return self.euler_angles[0]
+        return self._euler_angles[0]
 
     @property
     def phi(self):
-        return self.euler_angles[1]
+        return self._euler_angles[1]
+
+    @property
+    def quaternions(self):
+        return self._quaternions
+
+    @quaternions.setter
+    def quaternions(self, value):
+        self._quaternions = value
+        # TODO: transform quaternion to Euler
+        self._euler_angles = np.zeros(3)  # rad
+
+    @property
+    def q0(self):
+        return self._quaternions[0]
+
+    @property
+    def q1(self):
+        return self._quaternions[1]
+
+    @property
+    def q2(self):
+        return self._quaternions[2]
+
+    @property
+    def q3(self):
+        return self._quaternions[3]
+
+
+class Velocity:
+    """Velocity
+
+    Attributes
+    ----------
+
+    vel_body : ndarray, shape(3)
+        (u [m/s], v [m/s], w [m/s])
+    u
+    v
+    w
+    vel_NED : ndarray, shape(3)
+        (v_north [m/s], v_east [m/s], v_down [m/s])
+    v_north
+    v_east
+    v_down
+    """
+
+    def __init__(self):
+        # Body axis
+        self._vel_body = np.zeros(3)  # m/s
+        # Local horizon (NED)
+        self._vel_NED = np.zeros(3)  # m/s
+
+    def set_velocity(self, attitude, vel_body=None, vel_NED=None):
+        if vel_body is not None and vel_NED is not None:
+            raise ValueError("Only values for vel_NED or vel_body can be "
+                             "given")
+        elif vel_NED is None:
+            self._vel_body[:] = vel_body
+            # TODO: transform body vel to horizon vel using attitude
+            self._vel_NED = np.zeros(3)  # m/s
+        elif vel_body is None:
+            self._vel_NED[:] = vel_NED
+            # TODO: transform horizon vel to body vel using attitude
+            self._vel_body = np.zeros(3)  # m/s
+        else:
+            raise ValueError("vel_NED or vel_body must be given")
+
+    @property
+    def vel_body(self):
+        return self._vel_body
 
     @property
     def u(self):
@@ -174,383 +261,236 @@ class System(object):
         return self.vel_body[2]
 
     @property
+    def vel_NED(self):
+        return self._vel_NED
+
+    @property
     def v_north(self):
-        return self.vel_NED[0]
+        return self._vel_NED[0]
 
     @property
     def v_east(self):
-        return self.vel_NED[1]
+        return self._vel_NED[1]
 
     @property
     def v_down(self):
-        return self.vel_NED[2]
+        return self._vel_NED[2]
+
+
+class AngularVelocity:
+    """Angular velocity
+
+    vel_ang : ndarray, shape(3)
+        (p [rad/s], q [rad/s], r [rad/s])
+    p
+    q
+    r
+    euler_ang_rates : ndarray, shape(3)
+        (theta_dot [rad/s], phi_dot [rad/s], psi_dot [rad/s])
+    theta
+    phi
+    psi
+    """
+
+    def __init__(self):
+        # ANGULAR VELOCITY: (p, q, r)
+        self._vel_ang_body = np.zeros(3)  # rad/s
+        # EULER ANGLE RATES (theta_dot, phi_dot, psi_dot)
+        self._euler_ang_rate = np.zeros(3)  # rad/s
+
+    def set_angular_velocity(self, attitude, vel_ang_body=None,
+                             euler_ang_rates=None):
+
+        if vel_ang_body is not None and euler_ang_rates is not None:
+            raise ValueError("Only values for vel_ang_body or euler_ang_rates"
+                             " can be given")
+        elif vel_ang_body is not None:
+            self._vel_ang_body[:] = vel_ang_body
+            # TODO: transform angular velocity in body axis to euler angles
+            # rates
+            self._euler_ang_rate = np.zeros(3)  # rad/s
+        elif euler_ang_rates is not None:
+            self._euler_ang_rate[:] = euler_ang_rates
+            # TODO: transform euler angles rates to angular velocity in body
+            #  axis
+            self._vel_ang_body[:] = np.zeros(3)  # rad/s
+        else:
+            raise ValueError("vel_ang_body or euler_angles must be given")
+
+    @property
+    def vel_ang_body(self):
+        return self._vel_ang_body
 
     @property
     def p(self):
-        return self.vel_ang[0]
+        return self._vel_ang_body[0]
 
     @property
     def q(self):
-        return self.vel_ang[1]
+        return self._vel_ang_body[1]
 
     @property
     def r(self):
-        return self.vel_ang[2]
+        return self._vel_ang_body[2]
 
     @property
-    def u_dot(self):
-        return self.accel_body[0]
+    def euler_ang_rate(self):
+        return self._euler_ang_rate
 
     @property
-    def v_dot(self):
-        return self.accel_body[1]
+    def theta_dot(self):
+        return self._euler_ang_rate[0]
 
     @property
-    def w_dot(self):
-        return self.accel_body[2]
+    def phi_dot(self):
+        return self._euler_ang_rate[1]
 
     @property
-    def v_north_dot(self):
-        return self.accel_NED[0]
-
-    @property
-    def v_east_dot(self):
-        return self.accel_NED[1]
-
-    @property
-    def v_down_dot(self):
-        return self.accel_NED[2]
-
-    @property
-    def p_dot(self):
-        return self.accel_ang[0]
-
-    @property
-    def q_dot(self):
-        return self.accel_ang[1]
-
-    @property
-    def r_dot(self):
-        return self.accel_ang[2]
-
-    @property
-    def time(self):
-        return self.model.time
-
-    @time.setter
-    def time(self, value):
-        self.model.time = value
-
-    def set_initial_state(self,
-                          geodetic_coord=None, geocentric_coord=None,
-                          euler_angles=None,
-                          quaternions=None,
-                          vel_body=None, vel_NED=None,
-                          vel_ang=None,
-                          accel_body=None, accel_NED=None,
-                          accel_ang=None):
-        """Initialize the system state and the model state.
-
-        Parameters
-        ----------
-        geodetic_coord : ndarray, shape(3), opt
-            (lat [rad], lon [rad], height [m]). Only if geodetic_coord are
-            not given.
-        geocentric_coord : ndarray, shape(3), opt
-            (x_geo [m], y_geo [m], z_geo [m]). Only if geocentric_coord are
-            not given.
-        euler_angles : ndarray, shape(3), opt
-            (psi [rad], theta [rad], phi [rad]). Only if quaternions are not
-            given.
-        quaternions : ndarray, shape(4), opt
-            (q0, q1, q2, q3). Only if euler_angles are not given.
-        vel_body : ndarray, shape(3), opt
-            (u [m/s], v [m/s], w [m/s]). Only if vel_NED is not given.
-        vel_NED : ndarray, shape(3), opt
-            (v_north [m/s], v_east [m/s], v_down [m/s]). Only if vel_body is
-            not given.
-        vel_ang : ndarray, shape(3), opt
-            (p [rad/s], q [rad/s], r [rad/s])
-        accel_body : ndarray, shape(3), opt
-            (u_dot [m/s²], v_dot [m/s²], w_dot [m/s²]). Only if accel_NED is
-            not given.
-        accel_NED : ndarray, shape(3), opt
-            (VN_dot [m/s²], VE_dot [m/s²], VD_dot [m/s²]). Only if
-            accel_body is not given.
-        accel_ang : ndarray, shape(3), opt
-            (p_dot [rad/s²], q_dot [rad/s²], r_dot [rad/s²])
-        """
-
-        # Set position
-        if (geodetic_coord is not None) and (geocentric_coord is not None):
-            raise ValueError("Provide only geodetic or geocentric, not both "
-                             "at the same time")
-
-        elif geodetic_coord is not None:
-            self.geodetic_coordinates = geodetic_coord
-            # TODO: geodetic to geocentric (cartopy?)
-            # self.geocentric_coordinates = transformation
-        elif geocentric_coord is not None:
-            self.geocentric_coordinates = geocentric_coord
-            # TODO: geocentric to geodetic (cartopy?)
-        else:
-            # no values for position
-            self.geodetic_coordinates = np.zeros(3)
-            # TODO: geodetic to geocentric (cartopy?)
-            # self.geocentric_coordinates = transformation
-            pass
-
-        self.earth_coordinates[2] = self.geodetic_coordinates[2]
-
-        # Set attitude
-        if (quaternions is not None) and (euler_angles is not None):
-            raise ValueError("Provide only euler angles or quaternions, "
-                             "not both at the same time")
-        elif quaternions is not None:
-            self.quaternions = quaternions
-            # TODO: quaternions to euler
-            # self.euler = transformation
-        elif euler_angles is not None:
-            self.euler_angles = euler_angles
-            # TODO: euler angles to quaternions
-            # self.quaternions = transformation
-        else:
-            self.euler_angles = np.zeros(3)
-            # TODO: euler angles to quaternions
-            # self.quaternions = transformation
-
-        # Set velocity
-        if (vel_body is not None) and (vel_NED is not None):
-            raise ValueError("Provide only vel_body or vel_NED, not both at "
-                             "the same time")
-        elif vel_body is not None:
-            self.vel_body = vel_body
-            self.vel_NED = body2hor(vel_body, self.theta, self.phi, self.psi)
-        elif vel_NED is not None:
-            self.vel_NED = vel_NED
-            self.vel_body = hor2body(vel_NED, self.theta, self.phi, self.psi)
-        else:
-            self.vel_body = np.zeros(3)
-            self.vel_NED = np.zeros(3)
-
-        # Set angular velocity
-        if vel_ang is not None:
-            self.vel_ang = vel_ang
-        else:
-            self.vel_ang = np.zeros(3)
-
-        # Set accelerations
-        if (accel_body is not None) and (accel_NED is not None):
-            raise ValueError("Provide only accel_body or accel_NED, not both "
-                             "at the same time")
-        elif accel_body is not None:
-            self.accel_body = accel_body
-            self.accel_NED = body2hor(accel_body, self.theta, self.phi,
-                                      self.psi)
-        elif accel_NED is not None:
-            self.accel_NED = accel_NED
-            self.accel_body = hor2body(accel_NED, self.theta, self.phi,
-                                       self.psi)
-        else:
-            self.accel_body = np.zeros(3)
-            self.accel_NED = np.zeros(3)
-
-        # Set angular velocity
-        if vel_ang is not None:
-            self.vel_ang = vel_ang
-        else:
-            self.vel_ang = np.zeros(3)
-
-        # Set angular accelerations
-        if accel_ang is not None:
-            self.accel_ang = accel_ang
-        else:
-            self.accel_ang = np.zeros(3)
-
-        state = self.model.full_system_state_to_dynamic_system_state(self)
-        self.model.set_initial_state(state)
-
-    # TODO: it's more explicit to pass the state vector here instead of
-    # depending on its update in the model before.
-    def set_full_system_state(self, mass, inertia, forces, moments):
-        """ Updates the full system update based on the current state vector
-
-        Parameters
-        ----------
-        mass : float
-            Aircraft mass
-        inertia : ndarray, shape(3, 3)
-            Inertia tensor of the aircraft
-        forces : ndarray, shape(3)
-            Aircraft forces
-        moments : ndarray, shape(3)
-            Aircraft moments
-        """
-        rv = self.model.dynamic_system_state_to_full_system_state(
-            mass, inertia, forces, moments)
-
-        for name in self.full_system_state_names:
-            self.__setattr__(name, rv[name])
+    def psi_dot(self):
+        return self._euler_ang_rate[2]
 
 
-class DynamicSystem(object):
-    """Dynamic system abstract class.
+class Acceleration:
+    """Acceleration
 
     Attributes
     ----------
-    state : ndarray
-        State vector.
-    time : float
-        Current time of the simulation.
-    _ode : scipy.integrate.ode
-        Ordinary Differential Equation based on function definded in
-        `dynamic_system_equations` method and jacobian in
-        `dynamic_system_jacobian` method.
+    accel_body : ndarray, shape(3)
+        (u_dot [m/s²], v_dot [m/s²], w_dot [m/s²])
+    u_dot
+    v_dot
+    w_dot
+    accel_NED : ndarray, shape(3)
+        (VN_dot [m/s²], VE_dot [m/s²], VD_dot [m/s²])
+    VN_dot
+    VE_dot
+    VD_dot
     """
 
-    def __init__(self, n_states, use_jacobian=False, integrator=None,
-                 **integrator_params):
-        """Dynamic system initialization
+    def __init__(self):
+        # Body axis
+        self._accel_body = np.zeros(3)  # m/s²
+        # Local horizon (NED)
+        self._accel_NED = np.zeros(3)  # m/s²
 
-        Parameters
-        ----------
-        n_states : int
-            Number of states of the dynamical system.
-        use_jacobian: bool, opt
-            Whether to use jacobian of the system's model during the
-            integration or not.
-        integrator : str, opt
-            Integrator to use by scipy.integrate.ode. By default, dopri5 is
-            used. Check scipy doc in order to list all possibilities.
-        **integrator_params : dict, opt
-            Other integrator params passed as kwargs.
-        """
-
-        self.time = 0.
-        # Allocate state vector
-        self.state = np.empty(n_states)
-
-        # Set the jacobian if it is implemented in the model
-        if use_jacobian:
-            self._jacobian = self.dynamic_system_jacobian
-            self.set_forcing_terms = self._set_fun_and_jac_forcing_terms
+    def set_acceleration(self, attitude, accel_body=None, accel_NED=None):
+        if accel_body is not None and accel_NED is not None:
+            raise ValueError("Only values for accel_body or accel_NED can be "
+                             "given")
+        elif accel_NED is None:
+            self._accel_body[:] = accel_body
+            # TODO: transform body vel to horizon vel using attitude
+            self._accel_NED = np.zeros(3)  # m/s
+        elif accel_body is None:
+            self._accel_NED[:] = accel_NED
+            # TODO: transform horizon vel to body vel using attitude
+            self._accel_body = np.zeros(3)  # m/s
         else:
-            self._jacobian = None
-            self.set_forcing_terms = self._set_fun_forcing_terms
+            raise ValueError("accel_body or accel_NED must be given")
 
-        # ODE setup
-        f = (lambda time, state_vector, update_fun:
-            self.dynamic_system_equations(time, state_vector, update_fun))
+    @property
+    def accel_body(self):
+        return self._accel_body
 
-        self._ode = ode(f, self._jacobian)
+    @property
+    def u_dot(self):
+        return self._accel_body[0]
 
-        if integrator is None:
-            integrator = 'dopri5'
+    @property
+    def v_dot(self):
+        return self._accel_body[1]
 
-        # TODO: carefully review integrator parameters such as nsteps
-        self._ode.set_integrator(integrator, nsteps=10000, **integrator_params)
+    @property
+    def w_dot(self):
+        return self._accel_body[2]
 
-    def set_initial_state(self, state):
-        """Sets the initial state for the integration
+    @property
+    def accel_NED(self):
+        return self._accel_NED
 
-        Parameters
-        ----------
-        state : ndarray
-            State vector
-        """
-        self.state = state
-        self._ode.set_initial_value(self.state)
+    @property
+    def v_north_dot(self):
+        return self._accel_NED[0]
 
-    def _set_fun_forcing_terms(self, update_f):
-        self._ode.set_f_params(update_f)
+    @property
+    def v_east_dot(self):
+        return self._accel_NED[1]
 
-    def _set_jac_forcing_terms(self, mass, inertia, forces, moments):
-        self._ode.set_jac_params(mass, inertia, forces, moments)
+    @property
+    def v_down_dot(self):
+        return self._accel_NED[2]
 
-    def _set_fun_and_jac_forcing_terms(self, mass, inertia, forces, moments):
-        self._set_fun_and_jac_forcing_terms(mass, inertia, forces, moments)
-        self._set_jac_forcing_terms(mass, inertia, forces, moments)
 
-    def set_solout(self, fun):
-        """Set callback for scipy.integrate.ode solver
+class AngularAcceleration:
+    """Angular Accelerations
 
-        Parameters
-        ----------
-        fun : callable
-            Function to be called at each time step during the integration.
-            It must be in charge of updating the whole system, environment,
-            controls, forces, moments, mass, inertia...
-        """
-        self._ode.set_solout(fun)
+    Attributes
+    ----------
+    accel_ang : ndarray, shape(3)
+        (p_dot [rad/s²], q_dot [rad/s²], r_dot [rad/s²])
+    p_dot
+    q_dot
+    r_dot
+    euler_ang_acc : ndarray, shape(3)
+        (theta_2dot [rad/s²], phi_2dot [rad/s²], psi_2dot [rad/s²])
+    theta_2dot
+    phi_2dot
+    psi_2dot
+    """
 
-    def propagate(self, dt, mass, inertia, forces, moments):
-        """ Perform the integration from the current time step during time dt.
+    def __init__(self):
+        # ANGULAR VELOCITY: (p_dot, q_dot, r_dot)
+        self._acc_ang_body = np.zeros(3)  # rad/s
+        # EULER ANGLE RATES (theta_dot2, phi_dot2, psi_dot2)
+        self._euler_ang_acc = np.zeros(3)  # rad/s
 
-        Parameters
-        ----------
-        dt : float
-            Time for the integration.
-        mass : float
-            Current aircraft mass (initial time step).
-        inertia : ndarray, shape (3, 3)
-            Current aircraft inertia (initial time step).
-        forces : ndarray, shape(3)
-            Current aircraft forces (initial time step).
-        moments : ndarray, shape(3)
-            Current aircraft moments (initial time step).
+    def set_angular_velocity(self, attitude, acc_ang_body=None,
+                             euler_ang_acc=None):
 
-        Returns
-        -------
-        state : ndarray
-            Final state if integration is successful.
-
-        Raises
-        ------
-        RunTimeError if integration is not successful.
-        """
-
-        # Checks that a callback for updating environment and aircraft has
-        # been defined previous to integration
-        # if not self._ode._integrator.solout:
-        #     raise ValueError("A callback to the model must be given in order "
-        #                      "to update the system, environment and aircraft "
-        #                      "at each time step. Also to save the results."
-        #                      )
-
-        # Sets the final time of the integration
-        t = self._ode.t + dt
-
-        # This only affects the first time step: this update will be done by
-        # the callback function at every integration step after updating
-        # mass, inertia, forces and moments
-        # self.set_forcing_terms(mass, inertia, forces, moments)
-
-        # Perform the integration
-        self.state = self._ode.integrate(t)
-
-        if self._ode.successful():
-            return self.state
+        if acc_ang_body is not None and euler_ang_acc is not None:
+            raise ValueError("Only values for acc_ang_body or euler_ang_acc"
+                             " can be given")
+        elif acc_ang_body is not None:
+            self._acc_ang_body[:] = acc_ang_body
+            # TODO: transform angular acc in body axis to euler angles
+            # acc
+            self._euler_ang_acc = np.zeros(3)  # rad/s
+        elif euler_ang_acc is not None:
+            self._euler_ang_acc[:] = euler_ang_acc
+            # TODO: transform euler angles acc to angular acceleration in body
+            #  axis
+            self._acc_ang_body[:] = np.zeros(3)  # rad/s
         else:
-            raise RuntimeError("Error during integration")
+            raise ValueError("acc_ang_body or euler_angles must be given")
 
-    @abstractmethod
-    def dynamic_system_state_to_full_system_state(self, mass, inertia,
-                                                  forces, moments):
-        raise NotImplementedError
+    @property
+    def acc_ang_body(self):
+        return self._acc_ang_body
 
-    @abstractmethod
-    def full_system_state_to_dynamic_system_state(self, full_system):
-        raise NotImplementedError
+    @property
+    def p_dot(self):
+        return self._acc_ang_body[0]
 
-    @abstractmethod
-    def trim_system_to_dynamic_system_state(self, full_system):
-        raise NotImplementedError
+    @property
+    def q_dot(self):
+        return self._acc_ang_body[1]
 
-    @abstractstaticmethod
-    def dynamic_system_equations(time, state_vector, mass, inertia, forces,
-                                 moments):
-        raise NotImplementedError
+    @property
+    def r_dot(self):
+        return self._acc_ang_body[2]
 
-    @abstractstaticmethod
-    def dynamic_system_jacobian(state_vector, mass, inertia, forces, moments):
-        raise NotImplementedError
+    @property
+    def euler_ang_acc(self):
+        return self._euler_ang_acc
+
+    @property
+    def theta_2dot(self):
+        return self._euler_ang_acc[0]
+
+    @property
+    def phi_2dot(self):
+        return self._euler_ang_acc[1]
+
+    @property
+    def psi_2dot(self):
+        return self._euler_ang_acc[2]
