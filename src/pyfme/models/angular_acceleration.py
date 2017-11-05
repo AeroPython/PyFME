@@ -36,7 +36,7 @@ class AngularAcceleration:
         self._euler_ang_acc = np.zeros(3)  # rad/s
 
     @abstractmethod
-    def set_angular_accel(self, coords, attitude):
+    def update(self, coords, attitude):
         raise ValueError
 
     @property
@@ -76,9 +76,9 @@ class BodyAngularAcceleration(AngularAcceleration):
 
     def __init__(self, p_dot, q_dot, r_dot, attitude):
         super().__init__()
-        self.set_angular_accel(np.array([p_dot, q_dot, r_dot]), attitude)
+        self.update(np.array([p_dot, q_dot, r_dot]), attitude)
 
-    def set_angular_accel(self, coords, attitude):
+    def update(self, coords, attitude):
         self._acc_ang_body[:] = coords
         # TODO: transform angular acc in body axis to euler angles
         # acc
@@ -89,10 +89,10 @@ class EulerAngularAcceleration(AngularAcceleration):
 
     def __init__(self, theta_dot, phi_dot, psi_dot, attitude):
         super().__init__()
-        self.set_angular_accel(np.array([theta_dot, phi_dot, psi_dot]),
-                               attitude)
+        self.update(np.array([theta_dot, phi_dot, psi_dot]),
+                    attitude)
 
-    def set_angular_accel(self, coords, attitude):
+    def update(self, coords, attitude):
         self._euler_ang_acc[:] = coords
         # TODO: transform euler angles acc to angular acceleration in body
         #  axis

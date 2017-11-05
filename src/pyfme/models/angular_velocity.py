@@ -34,7 +34,7 @@ class AngularVelocity:
         self._euler_ang_rate = np.zeros(3)  # rad/s
 
     @abstractmethod
-    def set_angular_velocity(self, coords, attitude):
+    def update(self, coords, attitude):
         raise NotImplementedError
 
     @property
@@ -75,9 +75,9 @@ class BodyAngularVelocity(AngularVelocity):
     def __init__(self, p, q, r, attitude):
         # TODO: docstring
         super().__init__()
-        self.set_angular_velocity(np.array([p, q, r]), attitude)
+        self.update(np.array([p, q, r]), attitude)
 
-    def set_angular_velocity(self, coords, attitude):
+    def update(self, coords, attitude):
         self._vel_ang_body[:] = coords
         # TODO: transform angular velocity in body axis to euler angles
         # rates
@@ -89,10 +89,10 @@ class EulerAngularRates(AngularVelocity):
     def __init__(self, theta_dot, phi_dot, psi_dot, attitude):
         # TODO: docstring
         super().__init__()
-        self.set_angular_velocity(np.array([theta_dot, phi_dot, psi_dot]),
-                                  attitude)
+        self.update(np.array([theta_dot, phi_dot, psi_dot]),
+                    attitude)
 
-    def set_angular_velocity(self, coords, attitude):
+    def update(self, coords, attitude):
         self._euler_ang_rate[:] = coords
         # TODO: transform euler angles rates to angular velocity in body
         #  axis

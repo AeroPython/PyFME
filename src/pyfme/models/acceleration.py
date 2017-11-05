@@ -36,7 +36,7 @@ class Acceleration:
         self._accel_NED = np.zeros(3)  # m/s²
 
     @abstractmethod
-    def set_acceleration(self, coords, attitude):
+    def update(self, coords, attitude):
         raise NotImplementedError
 
     @property
@@ -76,9 +76,9 @@ class BodyAcceleration(Acceleration):
 
     def __init__(self, u_dot, v_dot, w_dot, attitude):
         super().__init__()
-        self.set_acceleration(np.array([u_dot, v_dot, w_dot]), attitude)
+        self.update(np.array([u_dot, v_dot, w_dot]), attitude)
 
-    def set_acceleration(self, coords, attitude):
+    def update(self, coords, attitude):
         self._accel_body[:] = coords
         # TODO: transform body vel to horizon vel using attitude
         self._accel_NED = np.zeros(3)  # m/s
@@ -88,9 +88,9 @@ class NEDAcceleration(Acceleration):
 
     def __init__(self, vn_dot, ve_dot, vd_dot, attitude):
         super().__init__()
-        self.set_acceleration(np.array([vn_dot, ve_dot, vd_dot]), attitude)
+        self.update(np.array([vn_dot, ve_dot, vd_dot]), attitude)
 
-    def set_acceleration(self, coords, attitude):
+    def update(self, coords, attitude):
         self._accel_NED[:] = coords
         # TODO: transform horizon vel to body vel using attitude
         self._accel_body = np.zeros(3)  # m/s

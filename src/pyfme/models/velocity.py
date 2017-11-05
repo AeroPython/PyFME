@@ -42,7 +42,7 @@ class Velocity:
         self._vel_NED = np.zeros(3)  # m/s
 
     @abstractmethod
-    def set_velocity(self, coords, attitude):
+    def update(self, coords, attitude):
         raise NotImplementedError
 
     @property
@@ -83,9 +83,9 @@ class BodyVelocity(Velocity):
     def __init__(self, u, v, w, attitude):
         # TODO: docstring
         super().__init__()
-        self.set_velocity(np.array([u, v, w]), attitude)
+        self.update(np.array([u, v, w]), attitude)
 
-    def set_velocity(self, value, attitude):
+    def update(self, value, attitude):
         self._vel_body[:] = value
         # TODO: transform body vel to horizon vel using attitude
         self._vel_NED = np.zeros(3)  # m/s
@@ -95,9 +95,9 @@ class NEDVelocity(Velocity):
     def __init__(self, vn, ve, vd, attitude):
         # TODO: docstring
         super().__init__()
-        self.set_velocity(np.array([vn, ve, vd]), attitude)
+        self.update(np.array([vn, ve, vd]), attitude)
 
-    def set_velocity(self, value, attitude):
+    def update(self, value, attitude):
         self._vel_NED[:] = value
         # TODO: transform horizon vel to body vel using attitude
         self._vel_body = np.zeros(3)  # m/s

@@ -48,7 +48,7 @@ class Position:
         self._earth_coordinates = np.asarray(earth)  # m
 
     @abstractmethod
-    def set_position(self, coords):
+    def update(self, coords):
         raise NotImplementedError
 
     @property
@@ -112,7 +112,7 @@ class EarthPosition(Position):
         geocentric = np.zeros(3)  # m
         super().__init__(geodetic, geocentric, earth)
 
-    def set_position(self, value):
+    def update(self, value):
         # Assuming round earth use changes in x & y to calculate
         # new lat and lon. z_earth is -height:
         delta_x, delta_y, _ = value - self.earth_coordinates
@@ -140,7 +140,7 @@ class GeodeticPosition(Position):
         geocentric = np.zeros(3)  # m
         super().__init__(geodetic, geocentric, earth)
 
-    def set_position(self, value):
+    def update(self, value):
         # Assuming round earth use changes in x & y to calculate
         # new x, y from lat and lon. z_earth is -height
         delta_lat, delta_lon, _ = self.geodetic_coordinates - value

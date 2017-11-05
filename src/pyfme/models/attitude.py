@@ -39,7 +39,7 @@ class Attitude:
         self._quaternions = np.zeros(4)
 
     @abstractmethod
-    def set_attitude(self, value):
+    def update(self, value):
         raise NotImplementedError
 
     @property
@@ -84,9 +84,9 @@ class EulerAttitude(Attitude):
     def __init__(self, theta, phi, psi):
         # TODO: docstring
         super().__init__()
-        self.set_attitude(np.array([theta, phi, psi]))
+        self.update(np.array([theta, phi, psi]))
 
-    def set_attitude(self, value):
+    def update(self, value):
         self._euler_angles[:] = value
         # TODO: transform quaternions to Euler angles
         self._quaternions = np.zeros(4)
@@ -96,9 +96,9 @@ class QuaternionAttitude(Attitude):
     def __init__(self, q0, q1, q2, q3):
         # TODO: docstring
         super().__init__()
-        self.set_attitude(np.array([q0, q1, q2, q3]))
+        self.update(np.array([q0, q1, q2, q3]))
 
-    def set_attitude(self, value):
+    def update(self, value):
         self._quaternions[:] = value
         # TODO: transform quaternions to Euler angles
         self._euler_angles = np.zeros(3)
