@@ -134,20 +134,9 @@ class Acceleration:
         # Local horizon (NED)
         self._accel_NED = np.zeros(3)  # m/s²
 
-    def set_acceleration(self, attitude, accel_body=None, accel_NED=None):
-        if accel_body is not None and accel_NED is not None:
-            raise ValueError("Only values for accel_body or accel_NED can be "
-                             "given")
-        elif accel_NED is None:
-            self._accel_body[:] = accel_body
-            # TODO: transform body vel to horizon vel using attitude
-            self._accel_NED = np.zeros(3)  # m/s
-        elif accel_body is None:
-            self._accel_NED[:] = accel_NED
-            # TODO: transform horizon vel to body vel using attitude
-            self._accel_body = np.zeros(3)  # m/s
-        else:
-            raise ValueError("accel_body or accel_NED must be given")
+    @abstractmethod
+    def set_acceleration(self, coords, attitude):
+        raise NotImplementedError
 
     @property
     def accel_body(self):
@@ -182,6 +171,30 @@ class Acceleration:
         return self._accel_NED[2]
 
 
+class BodyAcceleration(Acceleration):
+
+    def __init__(self, u_dot, v_dot, w_dot, attitude):
+        super().__init__()
+        self.set_acceleration(np.array([u_dot, v_dot, w_dot]), attitude)
+
+    def set_acceleration(self, coords, attitude):
+        self._accel_body[:] = coords
+        # TODO: transform body vel to horizon vel using attitude
+        self._accel_NED = np.zeros(3)  # m/s
+
+
+class NEDAcceleration(Acceleration):
+
+    def __init__(self, vn_dot, ve_dot, vd_dot, attitude):
+        super().__init__()
+        self.set_acceleration(np.array([vn_dot, ve_dot, vd_dot]), attitude)
+
+    def set_acceleration(self, coords, attitude):
+        self._accel_NED[:] = coords
+        # TODO: transform horizon vel to body vel using attitude
+        self._accel_body = np.zeros(3)  # m/s
+
+
 class AngularAcceleration:
     """Angular Accelerations
 
@@ -205,8 +218,8 @@ class AngularAcceleration:
         # EULER ANGLE RATES (theta_dot2, phi_dot2, psi_dot2)
         self._euler_ang_acc = np.zeros(3)  # rad/s
 
-    def set_angular_velocity(self, attitude, acc_ang_body=None,
-                             euler_ang_acc=None):
+    @abstractmethod
+    def set_angular_accel(self, coords, attitude):
 
         if acc_ang_body is not None and euler_ang_acc is not None:
             raise ValueError("Only values for acc_ang_body or euler_ang_acc"
@@ -255,3 +268,30 @@ class AngularAcceleration:
     @property
     def psi_2dot(self):
         return self._euler_ang_acc[2]
+
+
+class BodyAngularAcceleration(AngularAcceleration):
+
+    def __init__(self, p_dot, q_dot, r_dot, attitude):
+        super().__init__()
+        self.set_angular_accel(np.array([p_dot, q_dot, r_dot]), attitude)
+
+    def set_angular_accel(self, coords, attitude):
+        self._acc_ang_body[:] = coords
+        # TODO: transform angular acc in body axis to euler angles
+        # acc
+        self._euler_ang_acc = np.zeros(3)  # rad/s
+
+
+class EulerAngularAcceleration(AngularAcceleration):
+
+    def __init__(self, theta_dot, phi_dot, psi_dot, attitude):
+        super().__init__()
+        self.set_angular_accel(np.array([theta_dot, phi_dot, psi_dot]),
+                               attitude)
+
+    def set_angular_accel(self, coords, attitude):
+        self._euler_ang_acc[:] = coords
+        # TODO: transform euler angles acc to angular acceleration in body
+        #  axis
+        self._acc_ang_body[:] = np.zeros(3)  # rad/s
