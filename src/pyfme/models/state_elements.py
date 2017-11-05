@@ -19,6 +19,7 @@ This module provides class to represent:
   * angular acceleration
 
 """
+from abc import abstractmethod
 
 import numpy as np
 
@@ -48,15 +49,13 @@ class Attitude:
         # Quaternions (q0, q1, q2, q3)
         self._quaternions = np.zeros(4)
 
+    @abstractmethod
+    def set_attitude(self, value):
+        raise NotImplementedError
+
     @property
     def euler_angles(self):
         return self._euler_angles
-
-    @euler_angles.setter
-    def euler_angles(self, value):
-        self._euler_angles[:] = value
-        # TODO: transform quaternions to Euler angles
-        self._quaternions = np.zeros(4)
 
     @property
     def psi(self):
@@ -74,12 +73,6 @@ class Attitude:
     def quaternions(self):
         return self._quaternions
 
-    @quaternions.setter
-    def quaternions(self, value):
-        self._quaternions = value
-        # TODO: transform quaternion to Euler
-        self._euler_angles = np.zeros(3)  # rad
-
     @property
     def q0(self):
         return self._quaternions[0]
@@ -95,6 +88,31 @@ class Attitude:
     @property
     def q3(self):
         return self._quaternions[3]
+
+
+class EulerAttitude(Attitude):
+
+    def __init__(self, theta, phi, psi):
+        # TODO: docstring
+        super().__init__()
+        self.set_attitude(np.array([theta, phi, psi]))
+        
+    def set_attitude(self, value):
+        self._euler_angles[:] = value
+        # TODO: transform quaternions to Euler angles
+        self._quaternions = np.zeros(4)
+
+
+class QuaternionAttitude(Attitude):
+    def __init__(self, q0, q1, q2, q3):
+        # TODO: docstring
+        super().__init__()
+        self.set_attitude(np.array([q0, q1, q2, q3]))
+
+    def set_attitude(self, value):
+        self._quaternions[:] = value
+        # TODO: transform quaternions to Euler angles
+        self._euler_angles = np.zeros(3)
 
 
 class Velocity:
