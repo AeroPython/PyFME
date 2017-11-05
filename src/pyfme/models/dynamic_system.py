@@ -222,3 +222,16 @@ class AircraftDynamicSystem(DynamicSystem):
                                                   self.state_vector_dot)
 
         return self.full_state
+
+
+class AircraftState:
+
+    def __init__(self, position, attitude, velocity, angular_vel,
+                 acceleration, angular_accel):
+
+        self.position = position
+        self.attitude = attitude
+        self.velocity = velocity
+        self.angular_vel = angular_vel
+        self.acceleration = acceleration
+        self.angular_accel = angular_accel
