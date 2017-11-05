@@ -12,6 +12,7 @@ as base for implementation of dynamic systems.
 """
 from abc import abstractmethod
 
+import numpy as np
 from scipy.integrate import solve_ivp
 
 
@@ -53,6 +54,7 @@ class DynamicSystem:
         if options is None:
             options = {}
         self._state_vector = x0
+        self._state_vector_dot = np.zeros_like(x0)
         self._time = t0
 
         self._method = method
@@ -61,6 +63,10 @@ class DynamicSystem:
     @property
     def state_vector(self):
         return self._state_vector
+
+    @property
+    def state_vector_dot(self):
+        return self._state_vector_dot
 
     @property
     def time(self):
@@ -115,7 +121,8 @@ class DynamicSystem:
             True if the solver reached the interval end or a termination event
              occurred (status >= 0).
         """
-
+        # TODO: intended to return the whole integration history
+        # How dos it update the full system?
         x0 = self.state_vector
         t_ini = self.time
 
@@ -152,7 +159,8 @@ class DynamicSystem:
         method = self._method
 
         # TODO: prepare to use jacobian in case it is defined
-        sol = solve_ivp(self.fun, t_span, x0, method=method, **self._options)
+        sol = solve_ivp(self.fun_wrapped, t_span, x0, method=method,
+                        **self._options)
 
         if sol.status == -1:
             raise RuntimeError(f"Integration did not converge at t={t_ini}")
@@ -176,3 +184,41 @@ class DynamicSystem:
         (required for stiff solvers).
         """
         raise NotImplementedError
+
+    def fun_wrapped(self, t, x):
+        # First way that comes to my mind in order to store the derivates
+        # that are useful for full_state calculation
+        state_dot = self.fun(t, x)
+        self._state_vector_dot = state_dot
+        return state_dot
+
+
+class AircraftDynamicSystem(DynamicSystem):
+
+    def __init__(self, t0, full_state, update, method='Rk45', options=None):
+        x0 = self._get_state_vector_from_full_state(full_state)
+        self.full_state = self._adapt_full_state_to_dynamic_system(full_state)
+
+        super().__init__(t0, x0, method=method, options=options)
+
+        self.update_simulation = update
+
+    @abstractmethod
+    def _adapt_full_state_to_dynamic_system(self, full_state):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _update_full_system_state_from_state(self, state, state_dot):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _get_state_vector_from_full_state(self, full_state):
+        raise NotImplementedError
+
+    def time_step(self, dt):
+        super().time_step(dt)
+        # Now self.state_vector and state_vector_dot are updated
+        self._update_full_system_state_from_state(self.state_vector,
+                                                  self.state_vector_dot)
+
+        return self.full_state

@@ -16,22 +16,22 @@ Earth).
 import numpy as np
 from numpy import sin, cos
 
-from pyfme.models.dynamic_system import DynamicSystem
+from pyfme.models.acceleration import BodyAcceleration
+from pyfme.models.aircraft_state import AircraftState
+from pyfme.models.angular_acceleration import BodyAngularAcceleration
+from pyfme.models.angular_velocity import BodyAngularVelocity
+from pyfme.models.attitude import EulerAttitude
+from pyfme.models.dynamic_system import AircraftDynamicSystem
+from pyfme.models.position import EarthPosition
+from pyfme.models.velocity import BodyVelocity
 
 
-class EulerFlatEarth(DynamicSystem):
-
-    def __init__(self, t0, x0, update, method='Rk45', options=None):
-
-        # TODO: use jacobian when it is calculated and implemented in
-        # Dynamic System
-        super().__init__(t0, x0, method=method, options=options)
-
-        self.update_simulation = update
+class EulerFlatEarth(AircraftDynamicSystem):
 
     def fun(self, t, x):
 
-        updated_simulation = self.update_simulation(t, x)
+        self._update_full_system_state_from_state(x, self.state_vector_dot)
+        updated_simulation = self.update_simulation(t, self.full_state)
 
         mass = updated_simulation.aircraft.mass
         inertia = updated_simulation.aircraft.inertia
@@ -41,6 +41,71 @@ class EulerFlatEarth(DynamicSystem):
         rv = _system_equations(t, x, mass, inertia, forces, moments)
 
         return rv
+
+    def _update_full_system_state_from_state(self, state, state_dot):
+
+        self.full_state.velocity.set_velocity(state[0:3])
+        self.full_state.angular_vel.set_angular_velocity(state[3:6])
+        self.full_state.attitude.set_attitude(state[6:9])
+        self.full_state.position.set_position(state[9:12])
+
+        self.full_state.acceleration.set_acceleration(state_dot[0:3])
+        self.full_state.angular_accel.set_angular_accel(state_dot[3:6])
+
+    def _adapt_full_state_to_dynamic_system(self, full_state):
+
+        pos = EarthPosition(full_state.position.x_earth,
+                            full_state.position.y_earth,
+                            full_state.position.height,
+                            full_state.position.lat,
+                            full_state.position.lon)
+
+        att = EulerAttitude(full_state.attitude.theta,
+                            full_state.attitude.phi,
+                            full_state.attitude.psi)
+
+        vel = BodyVelocity(full_state.velocity.u,
+                           full_state.velocity.v,
+                           full_state.velocity.w,
+                           att)
+
+        ang_vel = BodyAngularVelocity(full_state.angular_vel.p,
+                                      full_state.angular_vel.q,
+                                      full_state.angular_vel.r,
+                                      att)
+
+        accel = BodyAcceleration(full_state.acceleration.u_dot,
+                                 full_state.acceleration.v_dot,
+                                 full_state.acceleration.w_dot,
+                                 att)
+
+        ang_accel = BodyAngularAcceleration(full_state.angular_accel.p_dot,
+                                            full_state.angular_accel.q_dot,
+                                            full_state.angular_accel.r_dot,
+                                            att)
+
+        full_state = AircraftState(pos, att, vel, ang_vel, accel, ang_accel)
+        return full_state
+
+    def _get_state_vector_from_full_state(self, full_state):
+
+        x0 = np.array(
+            [
+                full_state.velocity.u,
+                full_state.velocity.v,
+                full_state.velocity.w,
+                full_state.angular_vel.p,
+                full_state.angular_vel.q,
+                full_state.angular_vel.r,
+                full_state.attitude.theta,
+                full_state.attitude.phi,
+                full_state.attitude.psi,
+                full_state.position.x_earth,
+                full_state.position.y_earth,
+                full_state.position.z_eart
+            ]
+        )
+        return x0
 
 
 # TODO: numba jit
