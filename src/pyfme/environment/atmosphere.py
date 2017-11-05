@@ -31,12 +31,12 @@ class Atmosphere(object):
         self.rho = None  # Density (kg/m³).
         self.a = None  # Speed of sound (m/s).
 
-    def update(self, system):
+    def update(self, state):
         """Update atmosphere state for the given system state.
 
         Parameters
         ----------
-        system : System object
+        state : System object
             System object with attribute alt_geop (geopotential
             altitude.
 
@@ -68,7 +68,7 @@ class Atmosphere(object):
 
         """
          # Geopotential altitude
-        self.geopotential_alt = geometric2geopotential(system.height)
+        self.geopotential_alt = geometric2geopotential(state.position.height)
         self.T, self.p, self.rho, self.a = self.__call__(self.geopotential_alt)
 
     @abstractmethod

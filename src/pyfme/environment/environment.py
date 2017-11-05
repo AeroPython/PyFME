@@ -57,7 +57,7 @@ class Environment(object):
     def horizon_wind(self):
         return self.wind.horizon
 
-    def update(self, system):
-        self.atmosphere.update(system)
-        self.gravity.update(system)
-        self.wind.update(system)
+    def update(self, state):
+        self.atmosphere.update(state)
+        self.gravity.update(state)
+        self.wind.update(state)

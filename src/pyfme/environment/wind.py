@@ -18,5 +18,5 @@ class NoWind(object):
         self.horizon = np.zeros([3], dtype=float)
         self.body = np.zeros([3], dtype=float)
 
-    def update(self, system):
+    def update(self, state):
         pass

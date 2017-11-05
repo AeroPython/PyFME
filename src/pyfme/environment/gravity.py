@@ -48,11 +48,11 @@ class VerticalConstant(Gravity):
         self._magnitude = GRAVITY
         self._z_horizon = np.array([0, 0, 1], dtype=float)
 
-    def update(self, system):
+    def update(self, state):
         self._versor = hor2body(self._z_horizon,
-                                theta=system.theta,
-                                phi=system.phi,
-                                psi=system.psi
+                                theta=state.attitude.theta,
+                                phi=state.attitude.phi,
+                                psi=state.attitude.psi
                                 )
 
         self._vector = self.magnitude * self.versor
@@ -66,13 +66,14 @@ class VerticalNewton(Gravity):
     def __init__(self):
         self._z_horizon = np.array([0, 0, 1], dtype=float)
 
-    def update(self, system):
-        r_squared = system.coord_geocentric @ system.coord_geocentric
+    def update(self, state):
+        r_squared = (state.position.coord_geocentric @
+                     state.position.coord_geocentric)
         self._magnitude = STD_GRAVITATIONAL_PARAMETER / r_squared
         self._versor = hor2body(self._z_horizon,
-                                theta=system.theta,
-                                phi=system.phi,
-                                psi=system.psi
+                                theta=state.attittude.theta,
+                                phi=state.attittude.phi,
+                                psi=state.attitude.psi
                                 )
         self._vector = self.magnitude * self._vector
 
