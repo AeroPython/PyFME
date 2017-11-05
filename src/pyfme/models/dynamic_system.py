@@ -131,6 +131,37 @@ class DynamicSystem:
 
         return sol.t, sol.y, sol
 
+    def time_step(self, dt):
+        """Integrate the system from current time to t_end.
+
+        Parameters
+        ----------
+        dt : float
+            Time step.
+
+        Returns
+        -------
+        y : ndarray, shape (n)
+            Solution values at t_end.
+        """
+
+        x0 = self.state_vector
+        t_ini = self.time
+
+        t_span = (t_ini, t_ini + dt)
+        method = self._method
+
+        # TODO: prepare to use jacobian in case it is defined
+        sol = solve_ivp(self.fun, t_span, x0, method=method, **self._options)
+
+        if sol.status == -1:
+            raise RuntimeError(f"Integration did not converge at t={t_ini}")
+
+        self._time = sol.t[-1]
+        self._state_vector = sol.y[:, -1]
+
+        return self._state_vector
+
     @abstractmethod
     def fun(self, t, x):
         """ Right-hand side of the system (dy / dt = f(t, y)). The calling
