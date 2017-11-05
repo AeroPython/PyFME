@@ -19,6 +19,7 @@ This module provides class to represent:
   * angular acceleration
 
 """
+from abc import abstractmethod
 
 import numpy as np
 
@@ -47,20 +48,9 @@ class Velocity:
         # Local horizon (NED)
         self._vel_NED = np.zeros(3)  # m/s
 
-    def set_velocity(self, attitude, vel_body=None, vel_NED=None):
-        if vel_body is not None and vel_NED is not None:
-            raise ValueError("Only values for vel_NED or vel_body can be "
-                             "given")
-        elif vel_NED is None:
-            self._vel_body[:] = vel_body
-            # TODO: transform body vel to horizon vel using attitude
-            self._vel_NED = np.zeros(3)  # m/s
-        elif vel_body is None:
-            self._vel_NED[:] = vel_NED
-            # TODO: transform horizon vel to body vel using attitude
-            self._vel_body = np.zeros(3)  # m/s
-        else:
-            raise ValueError("vel_NED or vel_body must be given")
+    @abstractmethod
+    def set_velocity(self, coords, attitude):
+        raise NotImplementedError
 
     @property
     def vel_body(self):
@@ -93,6 +83,31 @@ class Velocity:
     @property
     def v_down(self):
         return self._vel_NED[2]
+
+
+class BodyVelocity(Velocity):
+
+    def __init__(self, u, v, w, attitude):
+        # TODO: docstring
+        super().__init__()
+        self.set_velocity(np.array([u, v, w]), attitude)
+
+    def set_velocity(self, value, attitude):
+        self._vel_body[:] = value
+        # TODO: transform body vel to horizon vel using attitude
+        self._vel_NED = np.zeros(3)  # m/s
+
+
+class NEDVelocity(Velocity):
+    def __init__(self, vn, ve, vd, attitude):
+        # TODO: docstring
+        super().__init__()
+        self.set_velocity(np.array([vn, ve, vd]), attitude)
+
+    def set_velocity(self, value, attitude):
+        self._vel_NED[:] = value
+        # TODO: transform horizon vel to body vel using attitude
+        self._vel_body = np.zeros(3)  # m/s
 
 
 class AngularVelocity:
