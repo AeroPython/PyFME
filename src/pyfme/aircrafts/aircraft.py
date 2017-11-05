@@ -104,10 +104,10 @@ class Aircraft(object):
                                    limits[0]))
                 raise ValueError(msg)
 
-    def _calculate_aerodynamics(self, system, environment):
+    def _calculate_aerodynamics(self, state, environment):
 
         # Velocity relative to air: aerodynamic velocity.
-        aero_vel = system.vel_body - environment.body_wind
+        aero_vel = state.velocity.vel_body - environment.body_wind
 
         self.alpha, self.beta, self.TAS = calculate_alpha_beta_TAS(
             u=aero_vel[0], v=aero_vel[1], w=aero_vel[2]
@@ -130,7 +130,7 @@ class Aircraft(object):
         self.q_inf = 0.5 * environment.rho * self.TAS ** 2
 
     @abstractmethod
-    def calculate_forces_and_moments(self, system, environment, controls):
+    def calculate_forces_and_moments(self, state, environment, controls):
 
         self._set_current_controls(controls)
-        self._calculate_aerodynamics(system, environment)
+        self._calculate_aerodynamics(state, environment)
