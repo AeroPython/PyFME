@@ -19,6 +19,7 @@ This module provides class to represent:
   * angular acceleration
 
 """
+from abc import abstractmethod
 
 import numpy as np
 
@@ -44,24 +45,9 @@ class AngularVelocity:
         # EULER ANGLE RATES (theta_dot, phi_dot, psi_dot)
         self._euler_ang_rate = np.zeros(3)  # rad/s
 
-    def set_angular_velocity(self, attitude, vel_ang_body=None,
-                             euler_ang_rates=None):
-
-        if vel_ang_body is not None and euler_ang_rates is not None:
-            raise ValueError("Only values for vel_ang_body or euler_ang_rates"
-                             " can be given")
-        elif vel_ang_body is not None:
-            self._vel_ang_body[:] = vel_ang_body
-            # TODO: transform angular velocity in body axis to euler angles
-            # rates
-            self._euler_ang_rate = np.zeros(3)  # rad/s
-        elif euler_ang_rates is not None:
-            self._euler_ang_rate[:] = euler_ang_rates
-            # TODO: transform euler angles rates to angular velocity in body
-            #  axis
-            self._vel_ang_body[:] = np.zeros(3)  # rad/s
-        else:
-            raise ValueError("vel_ang_body or euler_angles must be given")
+    @abstractmethod
+    def set_angular_velocity(self, coords, attitude):
+        raise NotImplementedError
 
     @property
     def vel_ang_body(self):
@@ -94,6 +80,35 @@ class AngularVelocity:
     @property
     def psi_dot(self):
         return self._euler_ang_rate[2]
+
+
+class BodyAngularVelocity(AngularVelocity):
+
+    def __init__(self, p, q, r, attitude):
+        # TODO: docstring
+        super().__init__()
+        self.set_angular_velocity(np.array([p, q, r]), attitude)
+
+    def set_angular_velocity(self, coords, attitude):
+        self._vel_ang_body[:] = coords
+        # TODO: transform angular velocity in body axis to euler angles
+        # rates
+        self._euler_ang_rate = np.zeros(3)  # rad/s
+
+
+class EulerAngularRates(AngularVelocity):
+
+    def __init__(self, theta_dot, phi_dot, psi_dot, attitude):
+        # TODO: docstring
+        super().__init__()
+        self.set_angular_velocity(np.array([theta_dot, phi_dot, psi_dot]),
+                                  attitude)
+
+    def set_angular_velocity(self, coords, attitude):
+        self._euler_ang_rate[:] = coords
+        # TODO: transform euler angles rates to angular velocity in body
+        #  axis
+        self._vel_ang_body[:] = np.zeros(3)  # rad/s
 
 
 class Acceleration:
