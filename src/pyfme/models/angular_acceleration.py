@@ -37,22 +37,7 @@ class AngularAcceleration:
 
     @abstractmethod
     def set_angular_accel(self, coords, attitude):
-
-        if acc_ang_body is not None and euler_ang_acc is not None:
-            raise ValueError("Only values for acc_ang_body or euler_ang_acc"
-                             " can be given")
-        elif acc_ang_body is not None:
-            self._acc_ang_body[:] = acc_ang_body
-            # TODO: transform angular acc in body axis to euler angles
-            # acc
-            self._euler_ang_acc = np.zeros(3)  # rad/s
-        elif euler_ang_acc is not None:
-            self._euler_ang_acc[:] = euler_ang_acc
-            # TODO: transform euler angles acc to angular acceleration in body
-            #  axis
-            self._acc_ang_body[:] = np.zeros(3)  # rad/s
-        else:
-            raise ValueError("acc_ang_body or euler_angles must be given")
+        raise ValueError
 
     @property
     def acc_ang_body(self):
