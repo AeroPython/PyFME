@@ -219,6 +219,10 @@ class AircraftDynamicSystem(DynamicSystem):
     def _get_state_vector_from_full_state(self, full_state):
         raise NotImplementedError
 
+    @abstractmethod
+    def trim_fun(self, full_state, environment, aircraft, controls):
+        raise NotImplementedError
+
     def time_step(self, dt):
         super().time_step(dt)
         # Now self.state_vector and state_vector_dot are updated

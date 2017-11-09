@@ -41,6 +41,22 @@ class EulerFlatEarth(AircraftDynamicSystem):
 
         return rv
 
+    def trim_fun(self, full_state, environment, aircraft, controls):
+
+        environment.update(full_state)
+        aircraft.calculate_forces_and_moments(full_state, environment, controls)
+
+        mass = aircraft.mass
+        inertia = aircraft.inertia
+        forces = aircraft.forces
+        moments = aircraft.moments
+
+        t0 = 0
+        x0 = self._get_state_vector_from_full_state(full_state)
+
+        rv = _system_equations(t0, x0, mass, inertia, forces, moments)
+        return rv[:6]
+
     def _update_full_system_state_from_state(self, state, state_dot):
 
         self.full_state.velocity.update(state[0:3])
