@@ -134,6 +134,13 @@ def trim(aircraft, environment, pos0, psi, TAS, gamma, turn_rate, controls,
                             verbose=verbose,
                             bounds=bounds)
 
+    # Residuals: last trim_function evaluation
+    u_dot, v_dot, w_dot, p_dot, q_dot, r_dot = results.fun
+
+    att = system.full_state.attitude
+    system.full_state.acceleration.update([u_dot, v_dot, w_dot], att)
+    system.full_state.angular_accel.update([p_dot, q_dot, r_dot], att)
+
     trimmed_controls = controls
     for key, val in zip(controls_to_trim, results.x[2:]):
         trimmed_controls[key] = val
