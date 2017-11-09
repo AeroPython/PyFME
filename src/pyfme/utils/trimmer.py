@@ -17,9 +17,125 @@ until some solution criterion is met.
 from math import sqrt, sin, cos, tan, atan
 
 import numpy as np
+from scipy.optimize import least_squares
 
+from pyfme.models import EulerFlatEarth
+from pyfme.models.attitude import EulerAttitude
+from pyfme.models.dynamic_system import AircraftState
+from pyfme.models.velocity import BodyVelocity
 from pyfme.utils.coordinates import wind2body
 from pyfme.models.constants import GRAVITY
+
+
+def trim(aircraft, environment, pos0, psi, TAS, gamma, turn_rate, controls,
+         exclude=None, verbose=0):
+    # TODO: docstring update
+    """Finds a combination of values of the state and control variables
+    that correspond to a steady-state flight condition.
+
+    Steady-state aircraft flight is defined as a condition in which all
+    of the motion variables are constant or zero. That is, the linear and
+    angular velocity components are constant (or zero), thus all
+     acceleration components are zero.
+
+    Parameters
+    ----------
+    geodetic_initial_pos : arraylike, shape(3)
+        (Latitude, longitude, height)
+    TAS : float
+        True Air Speed (m/s).
+    gamma : float, optional
+        Flight path angle (rad).
+    turn_rate : float, optional
+        Turn rate, d(psi)/dt (rad/s).
+    initial_controls : dict
+        Initial value guess for each control.
+    psi : float, opt
+        Initial yaw angle (rad).
+    exclude_controls : list, optional
+        List with controls not to be trimmed. If not given, every control
+        is considered in the trim process.
+    verbose : {0, 1, 2}, optional
+        Level of algorithm's verbosity:
+            * 0 (default) : work silently.
+            * 1 : display a termination report.
+            * 2 : display progress during iterations (not supported by 'lm'
+              method).
+
+    Notes
+    -----
+    See section 3.4 in [1] for the algorithm description.
+    See section 2.5 in [1] for the definition of steady-state flight
+    condition.
+
+    References
+    ----------
+    .. [1] Stevens, BL and Lewis, FL, "Aircraft Control and Simulation",
+        Wiley-lnterscience.
+    """
+
+    # Set initial state
+    att0 = EulerAttitude(theta=0, phi=0, psi=psi)
+    vel0 = BodyVelocity(u=TAS, v=0, w=0, attitude=att0)
+    # Full state
+    state0 = AircraftState(pos0, att0, vel0)
+
+    # Update environment for the current state
+    environment.update(state0)
+
+    # Create system: dynamic equations will be used to find the controls and
+    # state which generate no u_dot, v_dot, w_dot, p_dot. q_dot, r_dot
+    system = EulerFlatEarth(t0=0, full_state=state0)
+
+    # Initialize alpha and beta
+    # TODO: improve initialization method
+    alpha0 = 0.05
+    beta0 = 0.001 * np.sign(turn_rate)
+
+    # For the current alpha, beta, TAS and env, set the aerodynamics of
+    # the aircraft (q_inf, CAS, EAS...)
+    aircraft._calculate_aerodynamics_2(TAS, alpha0, beta0, environment)
+
+    # Initialize controls
+    for control in aircraft.controls:
+        if control not in controls:
+            raise ValueError(
+                "Control {} not given in initial_controls: {}".format(
+                    control, controls)
+            )
+        else:
+            aircraft.controls[control] = controls[control]
+
+    # Select the controls that will be trimmed
+    controls_to_trim = list(aircraft.controls.keys() - exclude)
+
+    # Set the variables for the optimization
+    initial_guess = [alpha0, beta0]
+    for control in controls_to_trim:
+        initial_guess.append(controls[control])
+
+    # Set bounds for each variable to be optimized
+    lower_bounds = [-0.5, -0.25]  # Alpha and beta upper bounds.
+    upper_bounds = [+0.5, +0.25]  # Alpha and beta lower bounds.
+    for ii in controls_to_trim:
+        lower_bounds.append(aircraft.control_limits[ii][0])
+        upper_bounds.append(aircraft.control_limits[ii][1])
+    bounds = (lower_bounds, upper_bounds)
+
+    args = (system, aircraft, environment, controls_to_trim, gamma, turn_rate)
+
+    # Trim
+    results = least_squares(trimming_cost_func,
+                            x0=initial_guess,
+                            args=args,
+                            verbose=verbose,
+                            bounds=bounds)
+
+    trimmed_controls = controls
+    for key, val in zip(controls_to_trim, results[2:]):
+        trimmed_controls[key] = val
+
+    return system.full_state, trimmed_controls
 
 
 def turn_coord_cons(turn_rate, alpha, beta, TAS, gamma=0):
@@ -69,8 +185,8 @@ def rate_of_climb_cons(gamma, alpha, beta, phi):
     return theta
 
 
-def trimming_cost_func(trimmed_params, system, ac, env, controls2trim,
-                       gamma, turn_rate):
+def trimming_cost_func(trimmed_params, system, aircraft, environment,
+                       controls2trim, gamma, turn_rate):
     """Function to optimize
     """
     alpha = trimmed_params[0]
@@ -84,7 +200,7 @@ def trimming_cost_func(trimmed_params, system, ac, env, controls2trim,
     if abs(turn_rate) < 1e-8:
         phi = 0
     else:
-        phi = turn_coord_cons(turn_rate, alpha, beta, ac.TAS, gamma)
+        phi = turn_coord_cons(turn_rate, alpha, beta, aircraft.TAS, gamma)
 
     # Rate of climb constrain
     theta = rate_of_climb_cons(gamma, alpha, beta, phi)
@@ -96,25 +212,18 @@ def trimming_cost_func(trimmed_params, system, ac, env, controls2trim,
     q = turn_rate * sin(phi) * cos(theta)
     r = turn_rate * cos(theta) * sin(phi)
 
-    u, v, w = wind2body((ac.TAS, 0, 0), alpha=alpha, beta=beta)
+    u, v, w = wind2body((aircraft.TAS, 0, 0), alpha=alpha, beta=beta)
 
-    state = system.model.trim_system_to_dynamic_system_state(
-        phi, theta, p, q, r, u, v, w)
+    psi = system.full_state.attitude.psi
+    system.full_state.attitude.update(theta, phi, psi)
+    attitude = system.full_state.attitude
 
-    system.model.set_initial_state(state)
-    system.set_full_system_state(ac.mass, ac.inertia, np.zeros(3), np.zeros(3))
+    system.full_state.attitude.update(theta, phi, psi)
+    system.full_state.velocity.update(u, v, w, attitude)
+    system.full_state.angular_vel.update(p, q, r, attitude)
+    system.full_state.accelertion.update([0, 0, 0], attitude)
+    system.full_state.angular_accel.update([0, 0, 0], attitude)
 
-    env.update(system)
-
-    forces, moments = ac.calculate_forces_and_moments(system, env, new_controls)
-
-    output = system.model._dynamic_system_equations(
-        time=0,
-        state_vector=state,
-        mass=ac.mass,
-        inertia=ac.inertia,
-        forces=forces,
-        moments=moments
-        )
-
-    return output[:6]
+    rv = system.trim_fun(system.full_state, environment, aircraft,
+                         controls2trim, system.full_state)
+    return rv
