@@ -39,7 +39,7 @@ class DynamicSystem:
         Dynamic system equations
     """
 
-    def __init__(self, t0, x0, method='Rk45', options=None):
+    def __init__(self, t0, x0, method='RK45', options=None):
         """ Dynamic system
 
         Parameters
@@ -198,7 +198,7 @@ class DynamicSystem:
 
 
 class AircraftDynamicSystem(DynamicSystem):
-    def __init__(self, t0, full_state, method='Rk45', options=None):
+    def __init__(self, t0, full_state, method='RK45', options=None):
         x0 = self._get_state_vector_from_full_state(full_state)
         self.full_state = self._adapt_full_state_to_dynamic_system(full_state)
 
