@@ -59,13 +59,14 @@ class EulerFlatEarth(AircraftDynamicSystem):
 
     def _update_full_system_state_from_state(self, state, state_dot):
 
-        self.full_state.velocity.update(state[0:3])
-        self.full_state.angular_vel.update(state[3:6])
-        self.full_state.attitude.update(state[6:9])
         self.full_state.position.update(state[9:12])
+        self.full_state.attitude.update(state[6:9])
+        att = self.full_state.attitude
+        self.full_state.velocity.update(state[0:3], att)
+        self.full_state.angular_vel.update(state[3:6], att)
 
-        self.full_state.acceleration.update(state_dot[0:3])
-        self.full_state.angular_accel.update(state_dot[3:6])
+        self.full_state.acceleration.update(state_dot[0:3], att)
+        self.full_state.angular_accel.update(state_dot[3:6], att)
 
     def _adapt_full_state_to_dynamic_system(self, full_state):
 
