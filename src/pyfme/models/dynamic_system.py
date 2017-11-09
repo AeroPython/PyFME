@@ -198,13 +198,13 @@ class DynamicSystem:
 
 
 class AircraftDynamicSystem(DynamicSystem):
-    def __init__(self, t0, full_state, update, method='Rk45', options=None):
+    def __init__(self, t0, full_state, method='Rk45', options=None):
         x0 = self._get_state_vector_from_full_state(full_state)
         self.full_state = self._adapt_full_state_to_dynamic_system(full_state)
 
         super().__init__(t0, x0, method=method, options=options)
 
-        self.update_simulation = update
+        self.update_simulation = None
 
     @abstractmethod
     def _adapt_full_state_to_dynamic_system(self, full_state):

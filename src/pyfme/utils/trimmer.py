@@ -85,7 +85,7 @@ def trim(aircraft, environment, pos0, psi, TAS, gamma, turn_rate, controls,
 
     # Create system: dynamic equations will be used to find the controls and
     # state which generate no u_dot, v_dot, w_dot, p_dot. q_dot, r_dot
-    system = EulerFlatEarth(t0=0, full_state=state0, update=None)
+    system = EulerFlatEarth(t0=0, full_state=state0)
 
     # Initialize alpha and beta
     # TODO: improve initialization method
