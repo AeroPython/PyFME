@@ -18,7 +18,7 @@ from scipy.optimize import least_squares
 from pyfme.utils.trimmer import trimming_cost_func
 
 
-class Simulation(object):
+class Simulation:
     """
     Simulation class stores the simulation configuration, aircraft, system and
     environment. It provides methods for simulation running and results
@@ -47,7 +47,7 @@ class Simulation(object):
         'pressure': 'environment.p',
         'rho': 'environment.rho',
         'a': 'environment.a',
-        'h': 'system.height',
+        'h': 'system.full_state.position.height',
         'Fx': 'aircraft.Fx',
         'Fy': 'aircraft.Fy',
         'Fz': 'aircraft.Fz',
@@ -63,25 +63,25 @@ class Simulation(object):
         'aileron': 'aircraft.delta_aileron',
         'elevator': 'aircraft.delta_elevator',
         'thrust': 'aircraft.delta_t',
-        'x_earth': 'system.x_earth',  # system
-        'y_earth': 'system.y_earth',
-        'z_earth': 'system.z_earth',
-        'height': 'system.height',
-        'psi': 'system.psi',
-        'theta': 'system.theta',
-        'phi': 'system.phi',
-        'u': 'system.u',
-        'v': 'system.v',
-        'w': 'system.w',
-        'v_north': 'system.v_north',
-        'v_east': 'system.v_east',
-        'v_down': 'system.v_down',
-        'p': 'system.p',
-        'q': 'system.q',
-        'r': 'system.r'
+        'x_earth': 'system.full_state.position.x_earth',  # system
+        'y_earth': 'system.full_state.position.y_earth',
+        'z_earth': 'system.full_state.position.z_earth',
+        'height': 'system.full_state.position.height',
+        'psi': 'system.full_state.attitude.psi',
+        'theta': 'system.full_state.attitude.theta',
+        'phi': 'system.full_state.attitude.phi',
+        'u': 'system.full_state.velocity.u',
+        'v': 'system.full_state.velocity.v',
+        'w': 'system.full_state.velocity.w',
+        'v_north': 'system.full_state.velocity.v_north',
+        'v_east': 'system.full_state.velocity.v_east',
+        'v_down': 'system.full_state.velocity.v_down',
+        'p': 'system.full_state.angular_vel.p',
+        'q': 'system.full_state.angular_vel.q',
+        'r': 'system.full_state.angular_vel.r'
     }
 
-    def __init__(self, aircraft, system, environment, save_vars=None):
+    def __init__(self, aircraft, system, environment, dt=0.01, save_vars=None):
         """
         Simulation object
 
@@ -99,24 +99,31 @@ class Simulation(object):
             ones set in `_defaul_save_vars` are used.
         """
         self.system = system
-
-        # This wrap is necessary in order the respect the arguments passed
-        # by the integration method: time, state (without self).
-        update_fun = lambda time, state: self._time_step(time, state)
-        self.system.model.set_forcing_terms(update_fun)
-
-        save_fun = lambda time, state: self._save_time_step()
-        self.system.model.set_solout(save_fun)
-
         self.aircraft = aircraft
         self.environment = environment
 
+        self.system.update_simulation = self.update
+
         self.controls = {}
+
+        self.dt = 0.01
 
         if not save_vars:
             self._save_vars = self._default_save_vars
         # Initialize results structure
         self.results = {name: [] for name in self._save_vars}
+
+    def update(self, time, state):
+        self.environment.update(state)
+
+        controls = self._get_current_controls(time)
+
+        self.aircraft.calculate_forces_and_moments(
+            state,
+            self.environment,
+            controls
+        )
+        return self
 
     def propagate(self, time):
         """Run the simulation by integrating the system until time t.
@@ -132,73 +139,21 @@ class Simulation(object):
         method, so that the number and length of the time steps is
         automatically chosen.
         """
+        dt = self.dt
 
-        self.environment.update(self.system)
+        while self.system.time <= time:
+            t = self.system.time
+            self.environment.update(self.system.full_state)
+            controls = self._get_current_controls(t)
+            self.aircraft.calculate_forces_and_moments(self.system.full_state,
+                                                       self.environment,
+                                                       controls)
+            self.system.time_step(dt)
+            self._save_time_step()
 
-        t0 = self.system.time
-
-        controls0 = self._get_current_controls(t0)
-        mass0, inertia0 = self.aircraft.mass, self.aircraft.inertia
-        forces, moments = self.aircraft.calculate_forces_and_moments(
-            self.system, self.environment, controls0)
-
-        self.system.model.propagate(time, mass0, inertia0, forces, moments)
-
-        # self.results is a dictionary of lists in order to append results
-        # of each time step. Due to dense output of the integrator,
-        # the number of time steps cannot be known in advance.
-        # Once the integration has finished it can be transformed into a
-        # DataFrame
         time = self.results.pop('time')
-        self.results = pd.DataFrame(self.results, index=time)
-        self.results.index.name = 'time'
 
-    def _time_step(self, time, state):
-        """Actions performed at each time step. This method is used as
-        callback in the integration process.
-
-        Parameters
-        ----------
-        time : float
-            Current time value
-        state : ndarray
-            System state at the given time step
-
-        Notes
-        -----
-        At each time step:
-        * the full system state is updated given the model state,
-        * the environment is updated given the current system,
-        * the aircraft controls for the current time step are set
-        * forces and moments for the current state, environment and controls
-        are calculated.
-        * the selected variables are saved.
-        """
-        self.system.model.time = time
-
-        forces = self.aircraft.total_forces
-        moments = self.aircraft.total_moments
-        mass = self.aircraft.mass
-        inertia = self.aircraft.inertia
-        self.system.model.state = state
-        self.system.set_full_system_state(mass, inertia, forces, moments)
-
-        self.environment.update(self.system)
-
-        # TODO: take into account that if the controls are not time
-        # functions (ie. control system or AP are activated) the function
-        # signature must be changed.
-        controls = self._get_current_controls(time)
-
-        forces, moments = self.aircraft.calculate_forces_and_moments(
-            self.system,
-            self.environment,
-            controls
-        )
-
-        # self._save_time_step()
-
-        return mass, inertia, forces, moments
+        return pd.DataFrame(self.results, index=time)
 
     def _save_time_step(self):
         """Saves the selected variables for the current system, environment
