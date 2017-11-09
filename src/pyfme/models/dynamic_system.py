@@ -190,7 +190,7 @@ class DynamicSystem:
         raise NotImplementedError
 
     def fun_wrapped(self, t, x):
-        # First way that comes to my mind in order to store the derivates
+        # First way that comes to my mind in order to store the derivatives
         # that are useful for full_state calculation
         state_dot = self.fun(t, x)
         self._state_vector_dot = state_dot
