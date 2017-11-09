@@ -198,7 +198,6 @@ class DynamicSystem:
 
 
 class AircraftDynamicSystem(DynamicSystem):
-
     def __init__(self, t0, full_state, update, method='Rk45', options=None):
         x0 = self._get_state_vector_from_full_state(full_state)
         self.full_state = self._adapt_full_state_to_dynamic_system(full_state)
@@ -233,7 +232,6 @@ class AircraftDynamicSystem(DynamicSystem):
 
 
 class AircraftState:
-
     def __init__(self, position, attitude, velocity, angular_vel=None,
                  acceleration=None, angular_accel=None):
 
@@ -251,3 +249,15 @@ class AircraftState:
         self.angular_vel = angular_vel
         self.acceleration = acceleration
         self.angular_accel = angular_accel
+
+    def __repr__(self):
+        rv = (
+            "Aircraft State \n"
+            f"{self.position} \n"
+            f"{self.attitude} \n"
+            f"{self.velocity} \n"
+            f"{self.angular_vel} \n"
+            f"{self.acceleration} \n"
+            f"{self.angular_accel} \n"
+        )
+        return rv

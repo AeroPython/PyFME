@@ -91,6 +91,11 @@ class EulerAttitude(Attitude):
         # TODO: transform quaternions to Euler angles
         self._quaternions = np.zeros(4)
 
+    def __repr__(self):
+        rv = (f"theta: {self.theta} rad, phi: {self.phi} rad, "
+              f"psi: {self.psi} rad")
+        return rv
+
 
 class QuaternionAttitude(Attitude):
     def __init__(self, q0, q1, q2, q3):

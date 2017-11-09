@@ -127,6 +127,11 @@ class EarthPosition(Position):
         # Update Earth coordinates with value
         self._earth_coordinates[:] = value
 
+    def __repr__(self):
+        rv = (f"x_e: {self.x_earth} m, y_e: {self.y_earth} m, "
+              f"z_e: {self.z_earth} m")
+        return rv
+
 
 class GeodeticPosition(Position):
 

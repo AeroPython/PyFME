@@ -90,6 +90,9 @@ class BodyVelocity(Velocity):
         # TODO: transform body vel to horizon vel using attitude
         self._vel_NED = np.zeros(3)  # m/s
 
+    def __repr__(self):
+        return f"u: {self.u} m/s, v: {self.v} m/s, w: {self.w} m/s"
+
 
 class NEDVelocity(Velocity):
     def __init__(self, vn, ve, vd, attitude):

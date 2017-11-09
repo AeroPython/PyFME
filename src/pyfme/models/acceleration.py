@@ -83,6 +83,11 @@ class BodyAcceleration(Acceleration):
         # TODO: transform body vel to horizon vel using attitude
         self._accel_NED = np.zeros(3)  # m/s
 
+    def __repr__(self):
+        rv = (f"u_dot: {self.u_dot} m/s², v_dot: {self.v_dot} m/s², "
+              f"w_dot: {self.u_dot} m/s²")
+        return rv
+
 
 class NEDAcceleration(Acceleration):
 
