@@ -119,7 +119,7 @@ class EarthPosition(Position):
         delta_lat = delta_x / EARTH_MEAN_RADIUS
         delta_lon = delta_y / EARTH_MEAN_RADIUS
         self._geodetic_coordinates = \
-            np.array([self.lat + delta_lat, self.lon + delta_lon, value[2]])
+            np.array([self.lat + delta_lat, self.lon + delta_lon, -value[2]])
 
         # TODO: make transformation from geodetic to geocentric:
         self._geocentric_coordinates = np.zeros(3)  # m
