@@ -156,6 +156,6 @@ class GeodeticPosition(Position):
         self._geodetic_coordinates[:] = value
 
 
-class GeocentricPosition(Position):
+# class GeocentricPosition(Position):
     # TODO:
-    raise NotImplementedError
+    # raise NotImplementedError

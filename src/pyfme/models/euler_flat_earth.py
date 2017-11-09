@@ -48,8 +48,8 @@ class EulerFlatEarth(AircraftDynamicSystem):
 
         mass = aircraft.mass
         inertia = aircraft.inertia
-        forces = aircraft.forces
-        moments = aircraft.moments
+        forces = aircraft.total_forces
+        moments = aircraft.total_moments
 
         t0 = 0
         x0 = self._get_state_vector_from_full_state(full_state)
@@ -117,7 +117,7 @@ class EulerFlatEarth(AircraftDynamicSystem):
                 full_state.attitude.psi,
                 full_state.position.x_earth,
                 full_state.position.y_earth,
-                full_state.position.z_eart
+                full_state.position.z_earth
             ]
         )
         return x0

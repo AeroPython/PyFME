@@ -85,7 +85,7 @@ def trim(aircraft, environment, pos0, psi, TAS, gamma, turn_rate, controls,
 
     # Create system: dynamic equations will be used to find the controls and
     # state which generate no u_dot, v_dot, w_dot, p_dot. q_dot, r_dot
-    system = EulerFlatEarth(t0=0, full_state=state0)
+    system = EulerFlatEarth(t0=0, full_state=state0, update=None)
 
     # Initialize alpha and beta
     # TODO: improve initialization method
@@ -105,6 +105,9 @@ def trim(aircraft, environment, pos0, psi, TAS, gamma, turn_rate, controls,
             )
         else:
             aircraft.controls[control] = controls[control]
+
+    if exclude is None:
+        exclude = []
 
     # Select the controls that will be trimmed
     controls_to_trim = list(aircraft.controls.keys() - exclude)
@@ -132,7 +135,7 @@ def trim(aircraft, environment, pos0, psi, TAS, gamma, turn_rate, controls,
                             bounds=bounds)
 
     trimmed_controls = controls
-    for key, val in zip(controls_to_trim, results[2:]):
+    for key, val in zip(controls_to_trim, results.x[2:]):
         trimmed_controls[key] = val
 
     return system.full_state, trimmed_controls
@@ -215,15 +218,14 @@ def trimming_cost_func(trimmed_params, system, aircraft, environment,
     u, v, w = wind2body((aircraft.TAS, 0, 0), alpha=alpha, beta=beta)
 
     psi = system.full_state.attitude.psi
-    system.full_state.attitude.update(theta, phi, psi)
+    system.full_state.attitude.update([theta, phi, psi])
     attitude = system.full_state.attitude
 
-    system.full_state.attitude.update(theta, phi, psi)
-    system.full_state.velocity.update(u, v, w, attitude)
-    system.full_state.angular_vel.update(p, q, r, attitude)
-    system.full_state.accelertion.update([0, 0, 0], attitude)
+    system.full_state.velocity.update([u, v, w], attitude)
+    system.full_state.angular_vel.update([p, q, r], attitude)
+    system.full_state.acceleration.update([0, 0, 0], attitude)
     system.full_state.angular_accel.update([0, 0, 0], attitude)
 
     rv = system.trim_fun(system.full_state, environment, aircraft,
-                         controls2trim, system.full_state)
+                         new_controls)
     return rv

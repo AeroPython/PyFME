@@ -255,7 +255,7 @@ class Cessna172(Aircraft):
         alpha_DEG = np.rad2deg(self.alpha)  # deg
         b = self.span
         V = self.TAS
-        p, q, r = state.angular_vel.p, state.angualr_vel.q, state.angular_vel.r
+        p, q, r = state.angular_vel.p, state.angular_vel.q, state.angular_vel.r
 
         CY_beta = np.interp(alpha_DEG, self.alpha_data, self.CY_beta_data)
         CY_p = np.interp(alpha_DEG, self.alpha_data, self.CY_p_data)
