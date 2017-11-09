@@ -34,8 +34,8 @@ class EulerFlatEarth(AircraftDynamicSystem):
 
         mass = updated_simulation.aircraft.mass
         inertia = updated_simulation.aircraft.inertia
-        forces = updated_simulation.aircraft.forces
-        moments = updated_simulation.aircraft.moments
+        forces = updated_simulation.aircraft.total_forces
+        moments = updated_simulation.aircraft.total_moments
 
         rv = _system_equations(t, x, mass, inertia, forces, moments)
 
