@@ -26,8 +26,8 @@ from pyfme.utils.coordinates import wind2body
 from pyfme.models.constants import GRAVITY
 
 
-def trim(aircraft, environment, pos, psi, TAS, controls, gamma=0, turn_rate=0,
-         exclude=None, verbose=0):
+def steady_state_trim(aircraft, environment, pos, psi, TAS, controls, gamma=0,
+                      turn_rate=0, exclude=None, verbose=0):
     """Finds a combination of values of the state and control variables
     that correspond to a steady-state flight condition.
 
@@ -49,13 +49,13 @@ def trim(aircraft, environment, pos, psi, TAS, controls, gamma=0, turn_rate=0,
         Initial yaw angle (rad).
     TAS : float
         True Air Speed (m/s).
+    controls : dict
+        Initial value guess for each control or fixed value if control is
+        included in exclude.
     gamma : float, optional
         Flight path angle (rad).
     turn_rate : float, optional
         Turn rate, d(psi)/dt (rad/s).
-    controls : dict
-        Initial value guess for each control or fixed value if control is
-        included in exclude.
     exclude : list, optional
         List with controls not to be trimmed. If not given, every control
         is considered in the trim process.
@@ -65,6 +65,13 @@ def trim(aircraft, environment, pos, psi, TAS, controls, gamma=0, turn_rate=0,
             * 1 : display a termination report.
             * 2 : display progress during iterations (not supported by 'lm'
               method).
+
+    Returns
+    -------
+    state : AircraftState
+        Trimmed aircraft state.
+    trimmed_controls : dict
+        Trimmed aircraft controls
 
     Notes
     -----
