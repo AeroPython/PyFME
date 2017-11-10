@@ -24,6 +24,12 @@ from pyfme.models.state import (
 
 
 class EulerFlatEarth(AircraftDynamicSystem):
+    """Euler Flat Earth Dynamic System.
+
+    Classical aircraft motion equations assuming no Earth rotation, no Earth
+    curvature and modelling attitude with Euler angles. Aircraft position is
+    performed on Earth axis.
+    """
 
     def fun(self, t, x):
 
@@ -39,10 +45,12 @@ class EulerFlatEarth(AircraftDynamicSystem):
 
         return rv
 
-    def trim_fun(self, full_state, environment, aircraft, controls):
+    def steady_state_trim_fun(self, full_state, environment, aircraft,
+                              controls):
 
         environment.update(full_state)
-        aircraft.calculate_forces_and_moments(full_state, environment, controls)
+        aircraft.calculate_forces_and_moments(full_state, environment,
+                                              controls)
 
         mass = aircraft.mass
         inertia = aircraft.inertia

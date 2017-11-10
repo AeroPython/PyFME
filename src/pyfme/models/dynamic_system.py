@@ -4,11 +4,14 @@ Python Flight Mechanics Engine (PyFME).
 Copyright (c) AeroPython Development Team.
 Distributed under the terms of the MIT License.
 
-Dynamic System
---------------
+Dynamic System & Aircraft Dynamic System
+----------------------------------------
 
 Dynamic system class to integrate initial value problems numerically serves
 as base for implementation of dynamic systems.
+
+The Aircraft Dynamic Systems extends the Dynamic System taking into account
+the Aircraft State.
 """
 from abc import abstractmethod
 
@@ -195,7 +198,36 @@ class DynamicSystem:
 
 
 class AircraftDynamicSystem(DynamicSystem):
+    """Aircraft's Dynamic System
+
+    Attributes
+    ----------
+    full_state : AircraftState
+        Current aircraft state.
+    update_simulation : fun
+        Function that updates environment and aircraft in order to get
+        proper forces, moments and mass properties for integration steps.
+
+    Methods
+    -------
+    steady_state_trim_fun
+    time_step
+    """
     def __init__(self, t0, full_state, method='RK45', options=None):
+        """Aircraft Dynamic system initialization.
+
+        Parameters
+        ----------
+        t0 : float
+            Initial time (s).
+        full_state : AircraftState
+            Initial aircraft's state.
+        method : str, opt
+            Integration method. Any method included in
+            scipy.integrate.solve_ivp can be used.
+        options : dict, opt
+            Options accepted by the integration method.
+        """
         x0 = self._get_state_vector_from_full_state(full_state)
         self.full_state = self._adapt_full_state_to_dynamic_system(full_state)
 
@@ -205,21 +237,91 @@ class AircraftDynamicSystem(DynamicSystem):
 
     @abstractmethod
     def _adapt_full_state_to_dynamic_system(self, full_state):
+        """Transforms the given state to the one used in the
+        AircraftDynamicSystem in order to initialize dynamic's system
+        initial state.
+        For example, the full state given may be using quaternions for
+        attitude representation, but the Aircraft dynamic system may
+        propagate Euler angles.
+
+        Parameters
+        ----------
+        full_state : AircraftState
+
+        """
         raise NotImplementedError
 
     @abstractmethod
     def _update_full_system_state_from_state(self, state, state_dot):
+        """Updates full system's state (AircraftState) based on the
+        implemented dynamic's system state vector and derivative of system's
+        state vector (output of system's equations dx/dt=f(x, t))
+
+        Parameters
+        ----------
+        state : array_like
+            State vector.
+        state_dot : array_like
+            Derivative of state vector.
+
+        """
         raise NotImplementedError
 
     @abstractmethod
     def _get_state_vector_from_full_state(self, full_state):
+        """Gets the state vector given the full state.
+
+        Parameters
+        ----------
+        full_state : AircraftState
+            Aircraft's full state
+
+        Returns
+        -------
+        state_vector : ndarray
+            State vector.
+        """
         raise NotImplementedError
 
     @abstractmethod
-    def trim_fun(self, full_state, environment, aircraft, controls):
+    def steady_state_trim_fun(self, full_state, environment, aircraft,
+                              controls):
+        """Output from linear and angular momentum conservation equations:
+        ax, ay, az, p, q, r, which must be zero after the steady state
+        trimming process
+
+        Parameters
+        ----------
+        full_state : AircraftState
+            Full aircraft state.
+        environment : Environment
+            Environment in which the aircraft is being trimmed.
+        aircraft : Aircraft
+            Aircraft being trimmed.
+        controls : dict
+            Controls of the aircraft being trimmed.
+
+        Returns
+        -------
+        rv : ndarray
+            Output from linear and angular momentum conservation equations:
+            ax, ay, az, p, q, r.
+        """
         raise NotImplementedError
 
     def time_step(self, dt):
+        """Perform an integration time step
+
+        Parameters
+        ----------
+        dt : float
+            Time step for integration
+
+        Returns
+        -------
+        full_state : AircraftState
+            Aircraft's state after integration time step
+        """
         super().time_step(dt)
         # Now self.state_vector and state_vector_dot are updated
         self._update_full_system_state_from_state(self.state_vector,

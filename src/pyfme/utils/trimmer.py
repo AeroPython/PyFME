@@ -242,6 +242,6 @@ def trimming_cost_func(trimmed_params, system, aircraft, environment,
     system.full_state.acceleration.update([0, 0, 0], attitude)
     system.full_state.angular_accel.update([0, 0, 0], attitude)
 
-    rv = system.trim_fun(system.full_state, environment, aircraft,
-                         new_controls)
+    rv = system.steady_state_trim_fun(system.full_state, environment, aircraft,
+                                      new_controls)
     return rv
