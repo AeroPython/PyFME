@@ -17,6 +17,9 @@ import numpy as np
 # velocity, accelerations...
 # If also changes from attitude of elements in the body (such as sensors) to
 # body and horizon coordinates are implemented it would be useful!
+from pyfme.utils.coordinates import body2hor, hor2body
+
+
 class Velocity:
     """Velocity
 
@@ -87,8 +90,10 @@ class BodyVelocity(Velocity):
 
     def update(self, value, attitude):
         self._vel_body[:] = value
-        # TODO: transform body vel to horizon vel using attitude
-        self._vel_NED = np.zeros(3)  # m/s
+        self._vel_NED = body2hor(value,
+                                 attitude.theta,
+                                 attitude.phi,
+                                 attitude.psi)  # m/s
 
     def __repr__(self):
         return f"u: {self.u} m/s, v: {self.v} m/s, w: {self.w} m/s"
@@ -102,5 +107,12 @@ class NEDVelocity(Velocity):
 
     def update(self, value, attitude):
         self._vel_NED[:] = value
-        # TODO: transform horizon vel to body vel using attitude
-        self._vel_body = np.zeros(3)  # m/s
+        self._vel_body = hor2body(value,
+                                  attitude.theta,
+                                  attitude.phi,
+                                  attitude.psi)  # m/s
+
+    def __repr__(self):
+        return (f"V_north: {self.v_north} m/s,"
+                f"V_east: {self.v_east} m/s, "
+                f"V_down: {self.v_down} m/s")
