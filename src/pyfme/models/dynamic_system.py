@@ -121,7 +121,8 @@ class DynamicSystem:
             True if the solver reached the interval end or a termination event
              occurred (status >= 0).
         """
-        # TODO: intended to return the whole integration history
+        # TODO: this mehtod is intended to return the whole integration history
+        # meanwhile, only time_step is called
         # How dos it update the full system?
         x0 = self.state_vector
         t_ini = self.time
