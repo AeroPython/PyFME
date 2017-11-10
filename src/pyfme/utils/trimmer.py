@@ -14,6 +14,7 @@ a numerical algorithm which iteratively adjusts the independent variables
 until some solution criterion is met.
 """
 
+import copy
 from math import sqrt, sin, cos, tan, atan
 
 import numpy as np
@@ -27,7 +28,6 @@ from pyfme.models.constants import GRAVITY
 
 def trim(aircraft, environment, pos0, psi, TAS, gamma, turn_rate, controls,
          exclude=None, verbose=0):
-    # TODO: docstring update
     """Finds a combination of values of the state and control variables
     that correspond to a steady-state flight condition.
 
@@ -77,6 +77,11 @@ def trim(aircraft, environment, pos0, psi, TAS, gamma, turn_rate, controls,
     vel0 = BodyVelocity(u=TAS, v=0, w=0, attitude=att0)
     # Full state
     state0 = AircraftState(pos0, att0, vel0)
+
+    # Environment and aircraft are modified in order not to alter their
+    # state during trimming process
+    environment = copy.deepcopy(environment)
+    aircraft = copy.deepcopy(aircraft)
 
     # Update environment for the current state
     environment.update(state0)
