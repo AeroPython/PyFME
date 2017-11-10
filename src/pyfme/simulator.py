@@ -43,45 +43,57 @@ class Simulation:
 
     _default_save_vars = {
         'time': 'system.time',
-        'T': 'environment.T',  # env
+        # environment
+        'temperature': 'environment.T',
         'pressure': 'environment.p',
         'rho': 'environment.rho',
         'a': 'environment.a',
-        'h': 'system.full_state.position.height',
+        # aircraft
         'Fx': 'aircraft.Fx',
         'Fy': 'aircraft.Fy',
         'Fz': 'aircraft.Fz',
+
         'Mx': 'aircraft.Mx',
         'My': 'aircraft.My',
         'Mz': 'aircraft.Mz',
-        'TAS': 'aircraft.TAS',  # aircraft
+
+        'TAS': 'aircraft.TAS',
         'Mach': 'aircraft.Mach',
         'q_inf': 'aircraft.q_inf',
+
         'alpha': 'aircraft.alpha',
         'beta': 'aircraft.beta',
+
         'rudder': 'aircraft.delta_rudder',
         'aileron': 'aircraft.delta_aileron',
         'elevator': 'aircraft.delta_elevator',
         'thrust': 'aircraft.delta_t',
-        'x_earth': 'system.full_state.position.x_earth',  # system
+        # system
+        'x_earth': 'system.full_state.position.x_earth',
         'y_earth': 'system.full_state.position.y_earth',
         'z_earth': 'system.full_state.position.z_earth',
+
         'height': 'system.full_state.position.height',
+
         'psi': 'system.full_state.attitude.psi',
         'theta': 'system.full_state.attitude.theta',
         'phi': 'system.full_state.attitude.phi',
+
         'u': 'system.full_state.velocity.u',
         'v': 'system.full_state.velocity.v',
         'w': 'system.full_state.velocity.w',
+
         'v_north': 'system.full_state.velocity.v_north',
         'v_east': 'system.full_state.velocity.v_east',
         'v_down': 'system.full_state.velocity.v_down',
+
         'p': 'system.full_state.angular_vel.p',
         'q': 'system.full_state.angular_vel.q',
         'r': 'system.full_state.angular_vel.r'
     }
 
-    def __init__(self, aircraft, system, environment, dt=0.01, save_vars=None):
+    def __init__(self, aircraft, system, environment, controls, dt=0.01,
+                 save_vars=None):
         """
         Simulation object
 
@@ -104,7 +116,7 @@ class Simulation:
 
         self.system.update_simulation = self.update
 
-        self.controls = {}
+        self.controls = controls
 
         self.dt = 0.01
 
@@ -141,7 +153,7 @@ class Simulation:
         """
         dt = self.dt
 
-        while self.system.time <= time:
+        while self.system.time + dt <= time:
             t = self.system.time
             self.environment.update(self.system.full_state)
             controls = self._get_current_controls(t)
@@ -152,8 +164,9 @@ class Simulation:
             self._save_time_step()
 
         time = self.results.pop('time')
+        results = pd.DataFrame(self.results, index=time)
 
-        return pd.DataFrame(self.results, index=time)
+        return results
 
     def _save_time_step(self):
         """Saves the selected variables for the current system, environment
