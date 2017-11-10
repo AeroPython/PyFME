@@ -11,6 +11,8 @@ from abc import abstractmethod
 
 import numpy as np
 
+from pyfme.utils.coordinates import body2hor, hor2body
+
 
 class Acceleration:
     """Acceleration
@@ -80,8 +82,10 @@ class BodyAcceleration(Acceleration):
 
     def update(self, coords, attitude):
         self._accel_body[:] = coords
-        # TODO: transform body vel to horizon vel using attitude
-        self._accel_NED = np.zeros(3)  # m/s
+        self._accel_NED = body2hor(coords,
+                                   attitude.theta,
+                                   attitude.phi,
+                                   attitude.psi)
 
     def __repr__(self):
         rv = (f"u_dot: {self.u_dot} m/s², v_dot: {self.v_dot} m/s², "
@@ -97,5 +101,13 @@ class NEDAcceleration(Acceleration):
 
     def update(self, coords, attitude):
         self._accel_NED[:] = coords
-        # TODO: transform horizon vel to body vel using attitude
-        self._accel_body = np.zeros(3)  # m/s
+        self._accel_body = hor2body(coords,
+                                    attitude.theta,
+                                    attitude.phi,
+                                    attitude.psi)
+
+    def __repr__(self):
+        rv = (f"V_north_dot: {self.v_north_dot} m/s², "
+              f"V_east_dot: {self.v_east_dot} m/s², "
+              f"V_down_dot: {self.v_down_dot} m/s²")
+        return rv
