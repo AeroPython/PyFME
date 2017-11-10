@@ -9,13 +9,10 @@ Select the simulation configuration based on a system (and its dynamic
 model), environment and aircraft.
 
 """
+import copy
 import operator
 
-import numpy as np
 import pandas as pd
-from scipy.optimize import least_squares
-
-from pyfme.utils.trimmer import trimming_cost_func
 
 
 class Simulation:
@@ -110,9 +107,9 @@ class Simulation:
             the object and attribute where it is calculated. If not given, the
             ones set in `_defaul_save_vars` are used.
         """
-        self.system = system
-        self.aircraft = aircraft
-        self.environment = environment
+        self.system = copy.deepcopy(system)
+        self.aircraft = copy.deepcopy(aircraft)
+        self.environment = copy.deepcopy(environment)
 
         self.system.update_simulation = self.update
 
