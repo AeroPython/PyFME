@@ -15,10 +15,6 @@ from abc import abstractmethod
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from pyfme.models.acceleration import BodyAcceleration
-from pyfme.models.angular_acceleration import BodyAngularAcceleration
-from pyfme.models.angular_velocity import BodyAngularVelocity
-
 
 class DynamicSystem:
     """Dynamic system class to integrate initial value problems numerically.
@@ -229,35 +225,3 @@ class AircraftDynamicSystem(DynamicSystem):
                                                   self.state_vector_dot)
 
         return self.full_state
-
-
-class AircraftState:
-    def __init__(self, position, attitude, velocity, angular_vel=None,
-                 acceleration=None, angular_accel=None):
-
-        self.position = position
-        self.attitude = attitude
-        self.velocity = velocity
-
-        if angular_vel is None:
-            angular_vel = BodyAngularVelocity(0, 0, 0, attitude)
-        if acceleration is None:
-            acceleration = BodyAcceleration(0, 0, 0, attitude)
-        if angular_accel is None:
-            angular_accel = BodyAngularAcceleration(0, 0, 0, attitude)
-
-        self.angular_vel = angular_vel
-        self.acceleration = acceleration
-        self.angular_accel = angular_accel
-
-    def __repr__(self):
-        rv = (
-            "Aircraft State \n"
-            f"{self.position} \n"
-            f"{self.attitude} \n"
-            f"{self.velocity} \n"
-            f"{self.angular_vel} \n"
-            f"{self.acceleration} \n"
-            f"{self.angular_accel} \n"
-        )
-        return rv

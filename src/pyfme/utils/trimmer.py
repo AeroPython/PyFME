@@ -20,9 +20,7 @@ import numpy as np
 from scipy.optimize import least_squares
 
 from pyfme.models import EulerFlatEarth
-from pyfme.models.attitude import EulerAttitude
-from pyfme.models.dynamic_system import AircraftState
-from pyfme.models.velocity import BodyVelocity
+from pyfme.models.state import AircraftState, EulerAttitude, BodyVelocity
 from pyfme.utils.coordinates import wind2body
 from pyfme.models.constants import GRAVITY
 

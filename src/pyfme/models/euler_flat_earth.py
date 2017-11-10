@@ -16,13 +16,11 @@ Earth).
 import numpy as np
 from numpy import sin, cos
 
-from pyfme.models.acceleration import BodyAcceleration
-from pyfme.models.angular_acceleration import BodyAngularAcceleration
-from pyfme.models.angular_velocity import BodyAngularVelocity
-from pyfme.models.attitude import EulerAttitude
-from pyfme.models.dynamic_system import AircraftDynamicSystem, AircraftState
-from pyfme.models.position import EarthPosition
-from pyfme.models.velocity import BodyVelocity
+from pyfme.models.dynamic_system import AircraftDynamicSystem
+from pyfme.models.state import (
+    AircraftState, EarthPosition, EulerAttitude, BodyVelocity,
+    BodyAngularVelocity, BodyAcceleration, BodyAngularAcceleration
+)
 
 
 class EulerFlatEarth(AircraftDynamicSystem):
