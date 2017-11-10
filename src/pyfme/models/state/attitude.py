@@ -92,8 +92,8 @@ class EulerAttitude(Attitude):
         self._quaternions = np.zeros(4)
 
     def __repr__(self):
-        rv = (f"theta: {self.theta} rad, phi: {self.phi} rad, "
-              f"psi: {self.psi} rad")
+        rv = (f"theta: {self.theta:.3f} rad, phi: {self.phi:.3f} rad, "
+              f"psi: {self.psi:.3f} rad")
         return rv
 
 

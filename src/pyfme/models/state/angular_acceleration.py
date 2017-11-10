@@ -85,8 +85,9 @@ class BodyAngularAcceleration(AngularAcceleration):
         self._euler_ang_acc = np.zeros(3)  # rad/s
 
     def __repr__(self):
-        rv = (f"P_dot: {self.p_dot} rad/s², Q_dot: {self.q_dot} rad/s², "
-              f"R_dot: {self.r_dot} rad/s²")
+        rv = (f"P_dot: {self.p_dot:.2f} rad/s², "
+              f"Q_dot: {self.q_dot:.2f} rad/s², "
+              f"R_dot: {self.r_dot:.2f} rad/s²")
         return rv
 
 
