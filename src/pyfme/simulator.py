@@ -13,6 +13,7 @@ import copy
 import operator
 
 import pandas as pd
+import tqdm
 
 
 class Simulation:
@@ -150,6 +151,8 @@ class Simulation:
         """
         dt = self.dt
 
+        bar = tqdm.tqdm(total=time, desc='time', initial=self.system.time)
+
         while self.system.time + dt <= time:
             t = self.system.time
             self.environment.update(self.system.full_state)
@@ -159,9 +162,12 @@ class Simulation:
                                                        controls)
             self.system.time_step(dt)
             self._save_time_step()
+            bar.update(dt)
 
-        time = self.results.pop('time')
-        results = pd.DataFrame(self.results, index=time)
+        bar.close()
+
+        results = pd.DataFrame(self.results)
+        results.set_index('time', inplace=True)
 
         return results
 
