@@ -73,6 +73,11 @@ class Acceleration:
     def v_down_dot(self):
         return self._accel_NED[2]
 
+    @property
+    def _value(self):
+        """Only for testing purposes"""
+        return np.hstack((self.accel_body, self.accel_NED))
+
 
 class BodyAcceleration(Acceleration):
 

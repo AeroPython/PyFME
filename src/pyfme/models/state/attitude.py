@@ -78,6 +78,11 @@ class Attitude:
     def q3(self):
         return self._quaternions[3]
 
+    @property
+    def _value(self):
+        """Only for testing purposes"""
+        return np.hstack((self.euler_angles, self.quaternions))
+
 
 class EulerAttitude(Attitude):
 

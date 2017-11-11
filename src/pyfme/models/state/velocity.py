@@ -80,6 +80,11 @@ class Velocity:
     def v_down(self):
         return self._vel_NED[2]
 
+    @property
+    def _value(self):
+        """Only for testing purposes"""
+        return np.hstack((self.vel_body, self.vel_NED))
+
 
 class BodyVelocity(Velocity):
 

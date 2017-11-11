@@ -9,6 +9,8 @@ Aircraft State
 
 """
 
+import numpy as np
+
 from .angular_velocity import BodyAngularVelocity
 from .acceleration import BodyAcceleration
 from .angular_acceleration import BodyAngularAcceleration
@@ -32,6 +34,13 @@ class AircraftState:
         self.angular_vel = angular_vel
         self.acceleration = acceleration
         self.angular_accel = angular_accel
+
+    @property
+    def _value(self):
+        """Only for testing purposes"""
+        return np.hstack((self.position._value, self.attitude._value,
+                          self.velocity._value, self.angular_vel._value,
+                          self.acceleration._value, self.angular_accel._value))
 
     def __repr__(self):
         rv = (

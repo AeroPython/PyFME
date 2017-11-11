@@ -69,6 +69,11 @@ class AngularVelocity:
     def psi_dot(self):
         return self._euler_ang_rate[2]
 
+    @property
+    def _value(self):
+        """Only for testing purposes"""
+        return np.hstack((self.vel_ang_body, self.euler_ang_rate))
+
 
 class BodyAngularVelocity(AngularVelocity):
 

@@ -99,6 +99,12 @@ class Position:
     def z_earth(self):
         return self._earth_coordinates[2]
 
+    @property
+    def _value(self):
+        """Only for testing purposes"""
+        return np.hstack((self.earth_coordinates, self.geodetic_coordinates,
+                          self.geodetic_coordinates))
+
 
 class EarthPosition(Position):
 
