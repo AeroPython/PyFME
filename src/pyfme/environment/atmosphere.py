@@ -67,7 +67,7 @@ class Atmosphere(object):
         .. [2] https://en.wikipedia.org/wiki/U.S._Standard_Atmosphere
 
         """
-         # Geopotential altitude
+        # Geopotential altitude
         self.geopotential_alt = geometric2geopotential(state.position.height)
         self.T, self.p, self.rho, self.a = self.__call__(self.geopotential_alt)
 

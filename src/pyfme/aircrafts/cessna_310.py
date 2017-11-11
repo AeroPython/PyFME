@@ -50,7 +50,6 @@ import numpy as np
 
 from pyfme.aircrafts.aircraft import Aircraft
 from pyfme.models.constants import ft2m, slugft2_2_kgm2, lbs2kg
-from pyfme.utils.coordinates import wind2body
 
 
 class Cessna310(Aircraft):

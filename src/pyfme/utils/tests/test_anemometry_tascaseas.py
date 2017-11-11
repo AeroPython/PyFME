@@ -12,11 +12,12 @@ from numpy.testing import (assert_almost_equal)
 
 from pyfme.utils.anemometry import (tas2eas, eas2tas, cas2eas, eas2cas,
                                     tas2cas, cas2tas)
-from pyfme.models.constants import RHO_0, P_0, SOUND_VEL_0, GAMMA_AIR
+from pyfme.models.constants import RHO_0, P_0
 from pyfme.environment.atmosphere import ISA1976
 
 
 atmosphere = ISA1976()
+
 
 def test_tas2eas():
 

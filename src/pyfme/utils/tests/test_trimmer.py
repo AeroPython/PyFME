@@ -5,10 +5,11 @@ Copyright (c) AeroPython Development Team.
 Distributed under the terms of the MIT License.
 
 Test functions for trimmer
-
-These values are hardcoded from the function results with the current costants.
-
 --------------------------
+
+These values are hardcoded from the function results with the current
+constants.
+
 """
 from itertools import product
 
@@ -98,6 +99,7 @@ trim_test_data = product(
     [0, 0.005, -0.005],
     [0, 0.01, -0.01, 0.05, -0.05]
 )
+
 
 @pytest.mark.parametrize('TAS, h0, turn_rate, gamma', trim_test_data)
 def test_stationary_condition_trimming_Cessna172_ISA1972_NoWind_VerticalConstant(

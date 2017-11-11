@@ -6,7 +6,7 @@ Distributed under the terms of the MIT License.
 """
 
 import numpy as np
-from numpy.testing import (assert_array_almost_equal, assert_almost_equal)
+from numpy.testing import assert_array_almost_equal
 
 from pyfme.aircrafts.cessna_172 import Cessna172
 

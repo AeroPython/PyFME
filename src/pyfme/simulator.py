@@ -106,7 +106,7 @@ class Simulation:
         save_vars : dict, opt
             Dictionary containing the names of the variables to be saved and
             the object and attribute where it is calculated. If not given, the
-            ones set in `_defaul_save_vars` are used.
+            ones set in `_default_save_vars` are used.
         """
         self.system = copy.deepcopy(system)
         self.aircraft = copy.deepcopy(aircraft)
@@ -116,7 +116,7 @@ class Simulation:
 
         self.controls = controls
 
-        self.dt = 0.01
+        self.dt = dt
 
         if not save_vars:
             self._save_vars = self._default_save_vars

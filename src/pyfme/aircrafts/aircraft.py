@@ -99,9 +99,10 @@ class Aircraft(object):
                 self.controls[control_name] = control_value
             else:
                 # TODO: maybe raise a warning and assign max deflection
-                msg = ("Control {} out of range ({} when max={} and min={"
-                       "})".format(control_name, control_value, limits[1],
-                                   limits[0]))
+                msg = (
+                    f"Control {control_name} out of range ({control_value} "
+                    f"when min={limits[0]} and max={limits[1]})"
+                )
                 raise ValueError(msg)
 
     def _calculate_aerodynamics(self, state, environment):

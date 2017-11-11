@@ -51,7 +51,7 @@ def calculate_alpha_beta_TAS(u, v, w):
     -------
     alpha : float
         Angle of attack (rad).
-    betha : float
+    beta : float
         Angle of sideslip (rad).
     TAS : float
         True Air Speed. (m/s)
@@ -122,7 +122,7 @@ def calculate_viscosity_Sutherland(T):
 
     Notes
     -----------
-    Acoording to [1] the limis for this function are:
+    AcCording to [1] the limits for this function are:
 
     p < p_c =36 Atm (3.65 MPa)
     T < 2000 K
@@ -136,7 +136,7 @@ def calculate_viscosity_Sutherland(T):
 
     visc_0 = 1.176*1e-5  # kg(m s)
     T_0 = 273.1  # K
-    b = 0.4042  # nondimensional
+    b = 0.4042  # non-dimensional
 
     return visc_0 * (T / T_0)**(3 / 2) * ((1 + b)/((T / T_0) + b))
 

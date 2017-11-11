@@ -9,11 +9,11 @@ Inputs Generator Tests
 Test functions for input generator module.
 
 """
-import pytest
 import numpy as np
 from numpy.testing import assert_almost_equal
 from pyfme.utils.input_generator import (Step, Doublet, Ramp, Harmonic,
                                          Constant)
+
 
 def test_input_scalar_output_scalar():
     control = Constant(1.5)
@@ -264,7 +264,6 @@ def test_add_controls_02():
     assert_almost_equal(real_input, expected_input)
 
 
-
 def test_subtract_controls_01():
 
     time = np.linspace(0, 10, 11)
@@ -291,7 +290,7 @@ def test_subtract_controls_01():
 
     ramp_input = Ramp(t_init, T, A, offset=0)
 
-    # Sutract both
+    # Subtract both
     composed_input = ramp_input - harmonic_input
     real_input = composed_input(time)
 

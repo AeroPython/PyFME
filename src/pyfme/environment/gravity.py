@@ -82,4 +82,8 @@ class LatitudeModel(Gravity):
     # TODO: https://en.wikipedia.org/wiki/Gravity_of_Earth#Latitude_model
 
     def __init__(self):
+        super().__init__()
+        raise NotImplementedError
+
+    def update(self, system):
         raise NotImplementedError

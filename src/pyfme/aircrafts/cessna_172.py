@@ -77,7 +77,7 @@ import numpy as np
 from scipy.interpolate import RectBivariateSpline
 
 from pyfme.aircrafts.aircraft import Aircraft
-from pyfme.models.constants import ft2m, slugft2_2_kgm2, lbs2kg
+from pyfme.models.constants import slugft2_2_kgm2, lbs2kg
 from pyfme.utils.coordinates import wind2body
 
 
@@ -215,8 +215,8 @@ class Cessna172(Aircraft):
         alpha_DEG = np.rad2deg(self.alpha)  # deg
         c = self.chord  # m
         V = self.TAS  # m/s
-        p, q, r = state.angular_vel.p, state.angular_vel.q, \
-                  state.angular_vel.r  # rad/s
+        p, q, r = (state.angular_vel.p, state.angular_vel.q,
+                   state.angular_vel.r)  # rad/s
         alpha_dot = self.alpha_dot
 
         CD_alpha_interp = np.interp(alpha_DEG, self.alpha_data, self.CD_data)

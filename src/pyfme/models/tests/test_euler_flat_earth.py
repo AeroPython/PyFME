@@ -63,7 +63,6 @@ def test_update_full_system_state_from_state():
     x = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], dtype=float)
     x_dot = np.array([13, 14, 15, 16, 17, 18])
 
-
     # Lat and lon after update in EarthFlatEarth are calculated from
     # delta_x, and delta_y with Earth mean radius, so depends on the
     # previous state.
