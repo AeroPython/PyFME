@@ -14,18 +14,24 @@ from numpy import vectorize, float64
 from numpy import sin, pi
 
 
+def vectorize_float(method):
+    vect_method = vectorize(method, otypes=[float64])
+
+    def wrapper(self, *args, **kwargs):
+        return vect_method(self, *args, **kwargs)
+
+    return wrapper
+
+
 # TODO: documentation
 class Control(object):
-
-    def __init__(self):
-        self._vec_fun = vectorize(self._fun, otypes=[float64])
 
     @abstractmethod
     def _fun(self, t):
         raise NotImplementedError
 
     def __call__(self, t):
-        r = self._vec_fun(t)
+        r = self._fun(t)
         # NumPy vecotrize returns an numpy.ndarray object with size 1 and no
         # shape if the input is scalar, however in this case, a float is
         # expected.
@@ -59,9 +65,9 @@ class Control(object):
 class Constant(Control):
 
     def __init__(self, offset=0):
-        super().__init__()
         self.offset = offset
 
+    @vectorize_float
     def _fun(self, t):
         return self.offset
 
@@ -69,7 +75,6 @@ class Constant(Control):
 class Step(Control):
 
     def __init__(self, t_init, T, A, offset=0):
-        super().__init__()
         self.t_init = t_init
         self.T = T
         self.A = A
@@ -77,6 +82,7 @@ class Step(Control):
 
         self.t_fin = self.t_init + self.T
 
+    @vectorize_float
     def _fun(self, t):
         value = self.offset
         if self.t_init <= t <= self.t_fin:
@@ -87,7 +93,6 @@ class Step(Control):
 class Doublet(Control):
 
     def __init__(self, t_init, T, A, offset=0):
-        super().__init__()
         self.t_init = t_init
         self.T = T
         self.A = A
@@ -96,6 +101,7 @@ class Doublet(Control):
         self.t_fin1 = self.t_init + self.T / 2
         self.t_fin2 = self.t_init + self.T
 
+    @vectorize_float
     def _fun(self, t):
         value = self.offset
 
@@ -109,7 +115,6 @@ class Doublet(Control):
 class Ramp(Control):
 
     def __init__(self, t_init, T, A, offset=0):
-        super().__init__()
         self.t_init = t_init
         self.T = T
         self.A = A
@@ -118,6 +123,7 @@ class Ramp(Control):
         self.slope = self.A / self.T
         self.t_fin = self.t_init + self.T
 
+    @vectorize_float
     def _fun(self, t):
         value = self.offset
         if self.t_init <= t <= self.t_fin:
@@ -137,6 +143,7 @@ class Harmonic(Control):
         self.phase = phase
         self.offset = offset
 
+    @vectorize_float
     def _fun(self, t):
         value = self.offset
 
