@@ -100,7 +100,7 @@ class Position:
         return self._earth_coordinates[2]
 
     @property
-    def _value(self):
+    def value(self):
         """Only for testing purposes"""
         return np.hstack((self.earth_coordinates, self.geodetic_coordinates,
                           self.geodetic_coordinates))

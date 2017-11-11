@@ -72,7 +72,7 @@ class AngularAcceleration:
         return self._euler_ang_acc[2]
 
     @property
-    def _value(self):
+    def value(self):
         """Only for testing purposes"""
         return np.hstack((self.acc_ang_body, self.euler_ang_acc))
 

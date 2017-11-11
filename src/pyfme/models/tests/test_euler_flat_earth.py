@@ -85,10 +85,7 @@ def test_update_full_system_state_from_state():
     exp_full_state = AircraftState(exp_pos, exp_att, exp_vel, exp_ang_vel,
                                    exp_accel, exp_ang_accel)
 
-    for ii, jj in zip(system.full_state._value, exp_full_state._value):
-        print(ii, jj)
-
-    np.testing.assert_allclose(system.full_state._value, exp_full_state._value)
+    np.testing.assert_allclose(system.full_state.value, exp_full_state.value)
 
 
 def test_get_state_vector_from_full_state():

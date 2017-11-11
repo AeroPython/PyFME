@@ -36,11 +36,11 @@ class AircraftState:
         self.angular_accel = angular_accel
 
     @property
-    def _value(self):
+    def value(self):
         """Only for testing purposes"""
-        return np.hstack((self.position._value, self.attitude._value,
-                          self.velocity._value, self.angular_vel._value,
-                          self.acceleration._value, self.angular_accel._value))
+        return np.hstack((self.position.value, self.attitude.value,
+                          self.velocity.value, self.angular_vel.value,
+                          self.acceleration.value, self.angular_accel.value))
 
     def __repr__(self):
         rv = (

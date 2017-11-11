@@ -129,7 +129,7 @@ def test_stationary_condition_trimming_Cessna172_ISA1972_NoWind_VerticalConstant
                  'delta_aileron': 0.2 * np.sign(turn_rate),
                  'delta_rudder': 0.2 * np.sign(turn_rate),
                  'delta_t': 0.5,
-                 'hor_tail_incidence': 0.0}
+                 }
 
     trimmed_state, trimmed_controls = steady_state_trim(
         aircraft, environment, pos0, psi0, TAS, controls0, gamma, turn_rate,
@@ -137,13 +137,13 @@ def test_stationary_condition_trimming_Cessna172_ISA1972_NoWind_VerticalConstant
 
     # Acceleration
     np.testing.assert_almost_equal(
-        trimmed_state.acceleration._value,
-        np.zeros_like(trimmed_state.acceleration._value),
+        trimmed_state.acceleration.value,
+        np.zeros_like(trimmed_state.acceleration.value),
         decimal=2
     )
     # Angular acceleration
     np.testing.assert_almost_equal(
-        trimmed_state.angular_accel._value,
-        np.zeros_like(trimmed_state.angular_accel._value),
+        trimmed_state.angular_accel.value,
+        np.zeros_like(trimmed_state.angular_accel.value),
         decimal=2
     )

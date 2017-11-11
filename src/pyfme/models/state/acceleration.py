@@ -74,7 +74,7 @@ class Acceleration:
         return self._accel_NED[2]
 
     @property
-    def _value(self):
+    def value(self):
         """Only for testing purposes"""
         return np.hstack((self.accel_body, self.accel_NED))
 

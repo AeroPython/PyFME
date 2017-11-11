@@ -81,7 +81,7 @@ class Velocity:
         return self._vel_NED[2]
 
     @property
-    def _value(self):
+    def value(self):
         """Only for testing purposes"""
         return np.hstack((self.vel_body, self.vel_NED))
 

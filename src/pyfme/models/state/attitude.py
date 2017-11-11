@@ -79,7 +79,7 @@ class Attitude:
         return self._quaternions[3]
 
     @property
-    def _value(self):
+    def value(self):
         """Only for testing purposes"""
         return np.hstack((self.euler_angles, self.quaternions))
 
