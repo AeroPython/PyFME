@@ -150,10 +150,14 @@ class Simulation:
         automatically chosen.
         """
         dt = self.dt
+        half_dt = self.dt/2
 
         bar = tqdm.tqdm(total=time, desc='time', initial=self.system.time)
 
-        while self.system.time + dt <= time:
+        # To deal with floating point issues we cannot check equality to
+        # final time to finish propagation
+        time_plus_half_dt = time + half_dt
+        while self.system.time + dt < time_plus_half_dt:
             t = self.system.time
             self.environment.update(self.system.full_state)
             controls = self._get_current_controls(t)
