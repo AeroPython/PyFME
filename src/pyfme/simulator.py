@@ -123,6 +123,10 @@ class Simulation:
         # Initialize results structure
         self.results = {name: [] for name in self._save_vars}
 
+    @property
+    def time(self):
+        return self.system.time
+
     def update(self, time, state):
         self.environment.update(state)
 
