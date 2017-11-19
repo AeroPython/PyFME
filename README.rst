@@ -40,7 +40,7 @@ Gallery of examples
 
 `Visit the examples gallery!`_
 
-.. _`Visit the examples gallery!`: https://hub.mybinder.org/user/aeropython-pyfme-gkyaqxra/notebooks/examples/How%20it%20works.ipynb
+.. _`Visit the examples gallery!`: https://hub.mybinder.org/user/aeropython-pyfme-joirj9vu/notebooks/examples/How%20it%20works.ipynb
 
 How to install
 --------------
