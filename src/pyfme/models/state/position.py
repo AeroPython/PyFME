@@ -41,11 +41,11 @@ class Position:
 
     def __init__(self, geodetic, geocentric, earth):
         # Geodetic coordinates: (geodetic lat, lon, height above ellipsoid)
-        self._geodetic_coordinates = np.asarray(geodetic)  # rad
+        self._geodetic_coordinates = np.asarray(geodetic, dtype=float)  # rad
         # Geocentric coordinates (rotating with Earth): (x_geo, y_geo, z_geo)
-        self._geocentric_coordinates = np.asarray(geocentric)  # m
+        self._geocentric_coordinates = np.asarray(geocentric, dtype=float)  # m
         # Earth coordinates (x_earth, y_earth, z_earth)
-        self._earth_coordinates = np.asarray(earth)  # m
+        self._earth_coordinates = np.asarray(earth, dtype=float)  # m
 
     @abstractmethod
     def update(self, coords):
