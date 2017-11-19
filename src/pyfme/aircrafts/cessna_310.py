@@ -50,7 +50,6 @@ import numpy as np
 
 from pyfme.aircrafts.aircraft import Aircraft
 from pyfme.models.constants import ft2m, slugft2_2_kgm2, lbs2kg
-from pyfme.utils.coordinates import wind2body
 
 
 class Cessna310(Aircraft):
@@ -137,9 +136,22 @@ class Cessna310(Aircraft):
         # Angles
         self.alpha = 0  # Angle of attack (AOA).
         self.beta = 0  # Angle of sideslip (AOS).
-        # Not present in this model:
-        self.Dalpha_Dt = 0  # Rate of change of AOA.
-        self.Dbeta_Dt = 0  # Rate of change of AOS.
+
+    @property
+    def delta_elevator(self):
+        return self.controls['delta_elevator']
+
+    @property
+    def delta_rudder(self):
+        return self.controls['delta_rudder']
+
+    @property
+    def delta_aileron(self):
+        return self.controls['delta_aileron']
+
+    @property
+    def delta_t(self):
+        return self.controls['delta_t']
 
     def _calculate_aero_lon_forces_moments_coeffs(self):
 
@@ -178,12 +190,15 @@ class Cessna310(Aircraft):
         Ft = np.array([q * Sw * self.Ct, 0, 0])
         return Ft
 
+    def calculate_forces_and_moments(self, state, environment, controls):
 
-    def calculate_forces_and_moments(self):
+        # Update controls and aerodynamics
+        super().calculate_forces_and_moments(state, environment, controls)
 
         Ft = self._calculate_thrust_forces_moments()
         L, D, Y, l, m, n = self._calculate_aero_forces_moments()
-        Fg = self.gravity_force
+
+        Fg = environment.gravity_vector * self.mass
         # FIXME: is it necessary to use wind2body conversion?
         Fa = np.array([-D, Y, -L])
 

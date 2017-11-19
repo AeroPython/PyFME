@@ -21,6 +21,7 @@ from pyfme.environment.atmosphere import ISA1976
 
 atmosphere = ISA1976()
 
+
 def test_sea_level():
     h = 0.0  # m
     expected_T = 288.15  # K

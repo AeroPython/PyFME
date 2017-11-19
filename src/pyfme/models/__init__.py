@@ -1,1 +1,1 @@
-from .systems import EulerFlatEarth
+from .euler_flat_earth import EulerFlatEarth

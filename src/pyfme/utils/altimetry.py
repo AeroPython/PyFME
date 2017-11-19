@@ -14,8 +14,9 @@ from pyfme.models.constants import EARTH_MEAN_RADIUS
 
 Re = EARTH_MEAN_RADIUS
 
+
 def geopotential2geometric(h):
-    """Geometric altiude above MSL (mean sea level)
+    """Geometric altitude above MSL (mean sea level)
 
     This function transforms geopotential altitude into geometric altitude.
 
@@ -44,7 +45,7 @@ def geopotential2geometric(h):
 
 
 def geometric2geopotential(z):
-    """Geopotential altiude above MSL (mean sea level)
+    """Geopotential altitude above MSL (mean sea level)
 
     This function transforms geometric altitude into geopotential altitude.
 

@@ -11,8 +11,7 @@ Created on Sat Jan  9 23:56:51 2016
 @AeroPython
 """
 
-import numpy as np
-from numpy.testing import (assert_array_almost_equal, assert_almost_equal)
+from numpy.testing import assert_array_almost_equal
 
 from pyfme.aircrafts.cessna_310 import Cessna310
 

@@ -14,52 +14,53 @@ a numerical algorithm which iteratively adjusts the independent variables
 until some solution criterion is met.
 """
 
-from copy import deepcopy
-from warnings import warn
+import copy
 from math import sqrt, sin, cos, tan, atan
 
 import numpy as np
 from scipy.optimize import least_squares
 
+from pyfme.models import EulerFlatEarth
+from pyfme.models.state import AircraftState, EulerAttitude, BodyVelocity
 from pyfme.utils.coordinates import wind2body
 from pyfme.models.constants import GRAVITY
 
 
-def steady_state_flight_trimmer(aircraft, system, env,
-                                TAS,
-                                controls_0, controls2trim=None,
-                                gamma=0.0, turn_rate=0.0,
-                                verbose=0):
-    """Finds a combination of values of the state and control variables that
-    correspond to a steady-state flight condition. Steady-state aircraft flight
-    can be defined as a condition in which all of the motion variables are
-    constant or zero. That is, the linear and angular velocity components are
-    constant (or zero), thus all acceleration components are zero.
+def steady_state_trim(aircraft, environment, pos, psi, TAS, controls, gamma=0,
+                      turn_rate=0, exclude=None, verbose=0):
+    """Finds a combination of values of the state and control variables
+    that correspond to a steady-state flight condition.
+
+    Steady-state aircraft flight is defined as a condition in which all
+    of the motion variables are constant or zero. That is, the linear and
+    angular velocity components are constant (or zero), thus all
+     acceleration components are zero.
 
     Parameters
     ----------
     aircraft : Aircraft
-        Plane to be trimmed.
-    system : System
-        System for aircraft trimming.
-    env : Environment
-        Environment with the models for wind, atmosphere and gravity.
+        Aircraft to be trimmed.
+    environment : Environment
+        Environment where the aircraft is trimmed including atmosphere,
+        gravity and wind.
+    pos : Position
+        Initial position of the aircraft.
+    psi : float, opt
+        Initial yaw angle (rad).
     TAS : float
         True Air Speed (m/s).
-    controls_0 : dict
-        Initial value guess for each control. If the control is not in
-        `controls2trim` or `controls2trim` is `None` the control is
-        considered fixed to that value during the trimming process.
-    controls2trim : list, optional
-        List with controls to be trimmed. If not given, no control is
-        considered fixed.
+    controls : dict
+        Initial value guess for each control or fixed value if control is
+        included in exclude.
     gamma : float, optional
         Flight path angle (rad).
     turn_rate : float, optional
         Turn rate, d(psi)/dt (rad/s).
+    exclude : list, optional
+        List with controls not to be trimmed. If not given, every control
+        is considered in the trim process.
     verbose : {0, 1, 2}, optional
-        Level of algorithm's verbosity:
-
+        Level of least_squares verbosity:
             * 0 (default) : work silently.
             * 1 : display a termination report.
             * 2 : display progress during iterations (not supported by 'lm'
@@ -67,88 +68,100 @@ def steady_state_flight_trimmer(aircraft, system, env,
 
     Returns
     -------
-    aircraft : Aircraft
-        Trimmed plane.
-    system : System
-        Trimmed system.
-    env : Environment
-        Trimmed environment (gravity in body axis).
-    results : dict
-        Relevant parameters calculated during the aircraft trimming,
-        including least square results.
+    state : AircraftState
+        Trimmed aircraft state.
+    trimmed_controls : dict
+        Trimmed aircraft controls
 
     Notes
     -----
     See section 3.4 in [1] for the algorithm description.
-    See section 2.5 in [1] for the definition of steady-state flight condition.
+    See section 2.5 in [1] for the definition of steady-state flight
+    condition.
 
     References
     ----------
     .. [1] Stevens, BL and Lewis, FL, "Aircraft Control and Simulation",
         Wiley-lnterscience.
     """
-    # Creating a copy of these objects in order to not modify any attribute
-    # inside this funciton.
-    trimmed_ac = deepcopy(aircraft)
-    trimmed_sys = deepcopy(system)
-    trimmed_env = deepcopy(env)
 
-    trimmed_ac.TAS = TAS
-    trimmed_ac.Mach = aircraft.TAS / env.a
-    trimmed_ac.q_inf = 0.5 * trimmed_env.rho * aircraft.TAS ** 2
+    # Set initial state
+    att0 = EulerAttitude(theta=0, phi=0, psi=psi)
+    vel0 = BodyVelocity(u=TAS, v=0, w=0, attitude=att0)
+    # Full state
+    state0 = AircraftState(pos, att0, vel0)
 
-    # Update environment
-    trimmed_env.update(trimmed_sys)
+    # Environment and aircraft are modified in order not to alter their
+    # state during trimming process
+    environment = copy.deepcopy(environment)
+    aircraft = copy.deepcopy(aircraft)
 
-    # Check if every necessary control for the aircraft is given in controls_0.
-    for ac_control in trimmed_ac.controls:
-        if ac_control not in controls_0:
-            raise ValueError("Control {} not given in controls_0: {}".format(
-                ac_control, controls_0))
-    trimmed_ac.controls = controls_0
+    # Update environment for the current state
+    environment.update(state0)
 
-    # If controls2trim is not given, trim for every control.
-    if controls2trim is None:
-        controls2trim = list(controls_0.keys())
+    # Create system: dynamic equations will be used to find the controls and
+    # state which generate no u_dot, v_dot, w_dot, p_dot. q_dot, r_dot
+    system = EulerFlatEarth(t0=0, full_state=state0)
 
-    # TODO: try to look for a good initialization method for alpha & beta
-    initial_guess = [0.05 * np.sign(turn_rate),  # alpha
-                     0.001 * np.sign(turn_rate)]  # beta
+    # Initialize alpha and beta
+    # TODO: improve initialization method
+    alpha0 = 0.05
+    beta0 = 0.001 * np.sign(turn_rate)
 
-    for control in controls2trim:
-        initial_guess.append(controls_0[control])
+    # For the current alpha, beta, TAS and env, set the aerodynamics of
+    # the aircraft (q_inf, CAS, EAS...)
+    aircraft._calculate_aerodynamics_2(TAS, alpha0, beta0, environment)
 
-    args = (trimmed_sys, trimmed_ac, trimmed_env,
-            controls2trim, gamma, turn_rate)
+    # Initialize controls
+    for control in aircraft.controls:
+        if control not in controls:
+            raise ValueError(
+                "Control {} not given in initial_controls: {}".format(
+                    control, controls)
+            )
+        else:
+            aircraft.controls[control] = controls[control]
 
+    if exclude is None:
+        exclude = []
+
+    # Select the controls that will be trimmed
+    controls_to_trim = list(aircraft.controls.keys() - exclude)
+
+    # Set the variables for the optimization
+    initial_guess = [alpha0, beta0]
+    for control in controls_to_trim:
+        initial_guess.append(controls[control])
+
+    # Set bounds for each variable to be optimized
     lower_bounds = [-0.5, -0.25]  # Alpha and beta upper bounds.
     upper_bounds = [+0.5, +0.25]  # Alpha and beta lower bounds.
-    for ii in controls2trim:
+    for ii in controls_to_trim:
         lower_bounds.append(aircraft.control_limits[ii][0])
         upper_bounds.append(aircraft.control_limits[ii][1])
     bounds = (lower_bounds, upper_bounds)
 
-    results = least_squares(trimming_cost_func, x0=initial_guess, args=args,
-                            verbose=verbose, bounds=bounds)
+    args = (system, aircraft, environment, controls_to_trim, gamma, turn_rate)
 
-    fun = results['fun']
-    cost = results['cost']
+    # Trim
+    results = least_squares(trimming_cost_func,
+                            x0=initial_guess,
+                            args=args,
+                            verbose=verbose,
+                            bounds=bounds)
 
-    if cost > 1e-7 or any(abs(fun) > 1e-3):
-        warn("Trim process did not converge", RuntimeWarning)
+    # Residuals: last trim_function evaluation
+    u_dot, v_dot, w_dot, p_dot, q_dot, r_dot = results.fun
 
-    trimmed_sys.set_initial_state_vector()
+    att = system.full_state.attitude
+    system.full_state.acceleration.update([u_dot, v_dot, w_dot], att)
+    system.full_state.angular_accel.update([p_dot, q_dot, r_dot], att)
 
-    results = {'alpha': trimmed_ac.alpha, 'beta': trimmed_ac.beta,
-               'u': trimmed_sys.u, 'v': trimmed_sys.v, 'w': trimmed_sys.w,
-               'p': trimmed_sys.p, 'q': trimmed_sys.q, 'r': trimmed_sys.r,
-               'theta': trimmed_sys.theta, 'phi': trimmed_sys.phi,
-               'ls_opt': results}
+    trimmed_controls = controls
+    for key, val in zip(controls_to_trim, results.x[2:]):
+        trimmed_controls[key] = val
 
-    for control in controls2trim:
-        results[control] = trimmed_ac.controls[control]
-
-    return trimmed_ac, trimmed_sys, trimmed_env, results
+    return system.full_state, trimmed_controls
 
 
 def turn_coord_cons(turn_rate, alpha, beta, TAS, gamma=0):
@@ -198,8 +211,8 @@ def rate_of_climb_cons(gamma, alpha, beta, phi):
     return theta
 
 
-def trimming_cost_func(trimmed_params, system, ac, env, controls2trim,
-                       gamma, turn_rate):
+def trimming_cost_func(trimmed_params, system, aircraft, environment,
+                       controls2trim, gamma, turn_rate):
     """Function to optimize
     """
     alpha = trimmed_params[0]
@@ -213,13 +226,10 @@ def trimming_cost_func(trimmed_params, system, ac, env, controls2trim,
     if abs(turn_rate) < 1e-8:
         phi = 0
     else:
-        phi = turn_coord_cons(turn_rate, alpha, beta, ac.TAS, gamma)
-
-    system.euler_angles[2] = phi
+        phi = turn_coord_cons(turn_rate, alpha, beta, aircraft.TAS, gamma)
 
     # Rate of climb constrain
     theta = rate_of_climb_cons(gamma, alpha, beta, phi)
-    system.euler_angles[1] = theta
 
     # w = turn_rate * k_h
     # k_h = sin(theta) i_b + sin(phi) * cos(theta) j_b + cos(theta) * sin(phi)
@@ -227,13 +237,18 @@ def trimming_cost_func(trimmed_params, system, ac, env, controls2trim,
     p = - turn_rate * sin(theta)
     q = turn_rate * sin(phi) * cos(theta)
     r = turn_rate * cos(theta) * sin(phi)
-    system.vel_ang = np.array([p, q, r])
-    system.vel_body = wind2body((ac.TAS, 0, 0), alpha=alpha, beta=beta)
 
-    env.update(system)
-    ac.update(new_controls, system, env)
+    u, v, w = wind2body((aircraft.TAS, 0, 0), alpha=alpha, beta=beta)
 
-    forces, moments = ac.calculate_forces_and_moments()
-    vel = np.concatenate((system.vel_body[:], system.vel_ang[:]))
-    output = system.lamceq(0, vel, ac.mass, ac.inertia, forces, moments)
-    return output
+    psi = system.full_state.attitude.psi
+    system.full_state.attitude.update([theta, phi, psi])
+    attitude = system.full_state.attitude
+
+    system.full_state.velocity.update([u, v, w], attitude)
+    system.full_state.angular_vel.update([p, q, r], attitude)
+    system.full_state.acceleration.update([0, 0, 0], attitude)
+    system.full_state.angular_accel.update([0, 0, 0], attitude)
+
+    rv = system.steady_state_trim_fun(system.full_state, environment, aircraft,
+                                      new_controls)
+    return rv

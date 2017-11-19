@@ -19,24 +19,20 @@ from pyfme.utils.altimetry import geometric2geopotential
 class Atmosphere(object):
 
     def __init__(self):
-        # TODO: doc
-        self._gamma = None  # Adiabatic index or ratio of specific heats
-        self._R_g = None  # Gas constant  J/(Kg·K)
-        self._g0 = None  # Gravity  m/s^2
 
-        self.geopotential_alt = None  # Current geopotential height (m).
-        self.pressure_altitude = None  # Current pressure altitude (m).
-        self.T = None  # Temperature (K).
-        self.p = None  # Pressure (atm).
-        self.rho = None  # Density (kg/m³).
-        self.a = None  # Speed of sound (m/s).
+        self._geopotential_alt = None  # Current geopotential height (m).
+        self._pressure_altitude = None  # Current pressure altitude (m).
+        self._T = None  # Temperature (K).
+        self._p = None  # Pressure (atm).
+        self._rho = None  # Density (kg/m³).
+        self._a = None  # Speed of sound (m/s).
 
-    def update(self, system):
+    def update(self, state):
         """Update atmosphere state for the given system state.
 
         Parameters
         ----------
-        system : System object
+        state : System object
             System object with attribute alt_geop (geopotential
             altitude.
 
@@ -67,9 +63,31 @@ class Atmosphere(object):
         .. [2] https://en.wikipedia.org/wiki/U.S._Standard_Atmosphere
 
         """
-         # Geopotential altitude
-        self.geopotential_alt = geometric2geopotential(system.height)
-        self.T, self.p, self.rho, self.a = self.__call__(self.geopotential_alt)
+        # Geopotential altitude
+        self._geopotential_alt = geometric2geopotential(state.position.height)
+
+        T, p, rho, a = self.__call__(self._geopotential_alt)
+
+        self._T = T
+        self._p = p
+        self._rho = rho
+        self._a = a
+
+    @property
+    def T(self):
+        return self._T
+
+    @property
+    def p(self):
+        return self._p
+
+    @property
+    def rho(self):
+        return self._rho
+
+    @property
+    def a(self):
+        return self._a
 
     @abstractmethod
     def __call__(self, h):
@@ -118,10 +136,10 @@ class ISA1976(Atmosphere):
 
         # Initialize at h=0
         self.h = 0  # Current height (m).
-        self.T = self._T0_layers[0]  # Temperature (K).
-        self.p = self._p0_layers[0]  # Pressure (atm).
-        self.rho = self.p / (self._R_g * self.T)
-        self.a = sqrt(self._gamma * self._R_g * self.T)
+        self._T = self._T0_layers[0]  # Temperature (K).
+        self._p = self._p0_layers[0]  # Pressure (atm).
+        self._rho = self.p / (self._R_g * self.T)
+        self._a = sqrt(self._gamma * self._R_g * self.T)
 
     def __call__(self, h):
         """ISA 1976 Standard atmosphere temperature, pressure and density.
@@ -235,6 +253,8 @@ class ISA1976(Atmosphere):
         else:
             raise ValueError(
                 "Altitude cannot be greater than {} m.".format(self._h0[7]))
+
         rho = p / (R_a * T)
         a = sqrt(gamma * R_a * T)
+
         return T, p, rho, a
