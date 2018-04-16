@@ -21,8 +21,11 @@ PyFME
 
 .. |mailing| image:: https://img.shields.io/badge/mailing%20list-groups.io-8cbcd1.svg?style=flat-square
    :target: https://groups.io/g/aeropython
+   
+.. |mybinder| image:: https://mybinder.org/badge.svg
+   :target: https://mybinder.org/v2/gh/AeroPython/PyFME/master?urlpath=notebooks%2Fexamples%2FHow%2520it%2520works.ipynb
 
-|travisci| |codecov| |docs| |license| |mailing|
+|travisci| |codecov| |mybinder| |docs| |license| |mailing| 
 
 .. image:: http://pyfme.readthedocs.io/en/latest/_images/logo_300.png
    :target: https://github.com/AeroPython/PyFME
@@ -35,12 +38,11 @@ please visit our** `wiki`_
 
 .. _`wiki`: https://github.com/AeroPython/PyFME/wiki
 
-Gallery of examples
--------------------
+Example Notebook
+----------------
 
-`Visit the examples gallery!`_
-
-.. _`Visit the examples gallery!`: https://hub.mybinder.org/user/aeropython-pyfme-joirj9vu/notebooks/examples/How%20it%20works.ipynb
+See how it works: visit the our example Notebook!: 
+https://mybinder.org/v2/gh/AeroPython/PyFME/master?urlpath=notebooks%2Fexamples%2FHow%2520it%2520works.ipynb
 
 How to install
 --------------
