@@ -134,8 +134,8 @@ def steady_state_trim(aircraft, environment, pos, psi, TAS, controls, gamma=0,
         initial_guess.append(controls[control])
 
     # Set bounds for each variable to be optimized
-    lower_bounds = [-0.5, -0.25]  # Alpha and beta upper bounds.
-    upper_bounds = [+0.5, +0.25]  # Alpha and beta lower bounds.
+    lower_bounds = [-0.5, -0.25]  # Alpha and beta lower bounds.
+    upper_bounds = [+0.5, +0.25]  # Alpha and beta upper bounds.
     for ii in controls_to_trim:
         lower_bounds.append(aircraft.control_limits[ii][0])
         upper_bounds.append(aircraft.control_limits[ii][1])
