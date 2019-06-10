@@ -236,7 +236,7 @@ def trimming_cost_func(trimmed_params, system, aircraft, environment,
     # w = p * i_b + q * j_b + r * k_b
     p = - turn_rate * sin(theta)
     q = turn_rate * sin(phi) * cos(theta)
-    r = turn_rate * cos(theta) * sin(phi)
+    r = turn_rate * cos(theta) * cos(phi)
 
     u, v, w = wind2body((aircraft.TAS, 0, 0), alpha=alpha, beta=beta)
 
