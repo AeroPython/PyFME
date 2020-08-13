@@ -1,6 +1,17 @@
 PyFME
 =====
 
+.. image:: http://unmaintained.tech/badge.svg
+  :target: http://unmaintained.tech
+  :alt: No Maintenance Intended
+
+*This project is not maintaned anymore by its original authors.
+If you want to maintain it, feel free to fork this repository and continue pushing there.
+If there is one fork that is sufficiently maintained, we might consider
+transferring this project to a different GitHub organization and giving write access to others.
+Also, take a look at* `FlightMechanics.jl <https://github.com/AlexS12/FlightMechanics.jl>`_
+*for a new alternative implementation in Julia.*
+
 :Name: PyFME
 :Description: Python Flight Mechanics Engine
 :Website: https://github.com/AeroPython/PyFME
